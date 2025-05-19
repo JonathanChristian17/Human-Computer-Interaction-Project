@@ -19,6 +19,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'role',
     ];
 
     /**
@@ -35,4 +36,44 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is receptionist
+     */
+    public function isReceptionist()
+    {
+        return $this->role === 'receptionist';
+    }
+
+    /**
+     * Check if user is customer
+     */
+    public function isCustomer()
+    {
+        return $this->role === 'customer';
+    }
+
+    /**
+     * Get bookings managed by receptionist
+     */
+    public function managedBookings()
+    {
+        return $this->hasMany(Booking::class, 'managed_by');
+    }
+
+    /**
+     * Get all bookings made by the user
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 }

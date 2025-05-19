@@ -15,6 +15,12 @@ public function index()
     return view('landingpage', compact('rooms')); // Sesuaikan nama view dengan yang kamu pakai
 }
 
+public function list()
+{
+    $rooms = Room::paginate(9); // Ambil 12 kamar per halaman (3x4)
+    return view('kamar', compact('rooms')); // Mengarah ke resources/views/kamar.blade.php
+}
+
 
 
     /**
@@ -38,11 +44,32 @@ public function index()
             'guests' => 'required|integer|min:1',
         ]);
 
-        // Add user_id to the booking
-        $validated['user_id'] = auth()->id();
+        // Calculate number of nights
+        $checkIn = new \DateTime($validated['check_in']);
+        $checkOut = new \DateTime($validated['check_out']);
+        $nights = $checkIn->diff($checkOut)->days;
+
+        // Get the room
+        $room = Room::findOrFail($validated['room_id']);
+
+        // Calculate total price
+        $totalPrice = $room->price_per_night * $nights;
 
         // Create the booking
-        $booking = Booking::create($validated);
+        $booking = Booking::create([
+            'user_id' => auth()->id(),
+            'check_in_date' => $validated['check_in'],
+            'check_out_date' => $validated['check_out'],
+            'total_price' => $totalPrice,
+            'status' => 'pending'
+        ]);
+
+        // Attach the room with pivot data
+        $booking->rooms()->attach($room->id, [
+            'price_per_night' => $room->price_per_night,
+            'quantity' => 1,
+            'subtotal' => $totalPrice
+        ]);
 
         return redirect()->route('bookings.show', $booking)
                        ->with('success', 'Pemesanan berhasil dibuat!');
