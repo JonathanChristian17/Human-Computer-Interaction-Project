@@ -15,6 +15,20 @@ class CreateBookingsTable extends Migration
             $table->date('check_in');
             $table->date('check_out');
             $table->integer('guests');
+            
+            // Kolom tambahan
+            $table->string('full_name');
+            $table->string('email');
+            $table->string('phone');
+            $table->string('id_number');
+            $table->decimal('total_price', 10, 2);
+            $table->string('status')->default('pending');
+            $table->text('billing_address');
+            $table->string('billing_city');
+            $table->string('billing_province');
+            $table->string('billing_postal_code');
+            $table->text('special_requests')->nullable();
+            
             $table->timestamps();
         });
     }
