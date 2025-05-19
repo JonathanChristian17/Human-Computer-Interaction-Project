@@ -1,0 +1,63 @@
+<x-admin-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Reports') }}
+        </h2>
+    </x-slot>
+
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 text-gray-900">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Daily Report -->
+                <div class="bg-white p-6 rounded-lg border">
+                    <h3 class="text-lg font-semibold mb-4">Daily Report</h3>
+                    <form action="{{ route('admin.reports.daily') }}" method="GET" class="space-y-4">
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-700">Select Date</label>
+                            <input type="date" name="date" id="date" 
+                                value="{{ now()->format('Y-m-d') }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition">
+                            View Daily Report
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Monthly Report -->
+                <div class="bg-white p-6 rounded-lg border">
+                    <h3 class="text-lg font-semibold mb-4">Monthly Report</h3>
+                    <form action="{{ route('admin.reports.monthly') }}" method="GET" class="space-y-4">
+                        <div>
+                            <label for="month" class="block text-sm font-medium text-gray-700">Select Month</label>
+                            <input type="month" name="month" id="month" 
+                                value="{{ now()->format('Y-m') }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        </div>
+                        <button type="submit" class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition">
+                            View Monthly Report
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Yearly Report -->
+                <div class="bg-white p-6 rounded-lg border">
+                    <h3 class="text-lg font-semibold mb-4">Yearly Report</h3>
+                    <form action="{{ route('admin.reports.yearly') }}" method="GET" class="space-y-4">
+                        <div>
+                            <label for="year" class="block text-sm font-medium text-gray-700">Select Year</label>
+                            <select name="year" id="year" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                                    <option value="{{ $y }}" {{ $y == now()->year ? 'selected' : '' }}>{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 transition">
+                            View Yearly Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-admin-layout> 
