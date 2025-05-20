@@ -8,18 +8,26 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BookingController;
-use App\Models\Room;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ReceptionistController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\PromoController;
+use App\Http\Controllers\GaleriController;
+use App\Http\Controllers\ActivitiesController;
 
 /*
 |--------------------------------------------------------------------------
 | Landing Page (Root URL)
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    $rooms = Room::all(); // ambil data kamar untuk ditampilkan di landing page
-    return view('landingpage', compact('rooms'));
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/kamar', [RoomController::class, 'list'])->name('kamar.index');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/riwayat-pemesanan', [BookingController::class, 'riwayat'])->name('bookings.riwayat');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -46,9 +54,7 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -83,3 +89,65 @@ Route::resource('rooms', RoomController::class)->except(['index']);
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // User Management
+    Route::resource('users', App\Http\Controllers\Admin\UserController::class);
+    
+    // Room Management
+    Route::resource('rooms', App\Http\Controllers\Admin\RoomController::class);
+    
+    // Reports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
+        Route::get('/daily', [App\Http\Controllers\Admin\ReportController::class, 'daily'])->name('daily');
+        Route::get('/monthly', [App\Http\Controllers\Admin\ReportController::class, 'monthly'])->name('monthly');
+        Route::get('/yearly', [App\Http\Controllers\Admin\ReportController::class, 'yearly'])->name('yearly');
+        Route::get('/export/excel/{type}', [App\Http\Controllers\Admin\ReportController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/export/pdf/{type}', [App\Http\Controllers\Admin\ReportController::class, 'exportPdf'])->name('export.pdf');
+    });
+});
+
+// Receptionist Routes
+Route::middleware(['auth', 'receptionist'])->prefix('receptionist')->name('receptionist.')->group(function () {
+    Route::get('/dashboard', [ReceptionistController::class, 'dashboard'])->name('dashboard');
+    
+    // Booking Management
+    Route::get('/bookings', [App\Http\Controllers\Receptionist\BookingController::class, 'index'])->name('bookings');
+    Route::patch('/bookings/{booking}/status', [App\Http\Controllers\Receptionist\BookingController::class, 'updateStatus'])->name('bookings.status');
+    Route::patch('/bookings/{booking}/payment', [App\Http\Controllers\Receptionist\BookingController::class, 'updatePaymentStatus'])->name('bookings.payment');
+    Route::get('/bookings/{booking}/invoice', [App\Http\Controllers\Receptionist\BookingController::class, 'generateInvoice'])->name('bookings.invoice');
+    
+    // Check-in/Check-out Management
+    Route::get('/check-in', [App\Http\Controllers\Receptionist\CheckInOutController::class, 'checkInList'])->name('check-in');
+    Route::post('/check-in/{booking}', [App\Http\Controllers\Receptionist\CheckInOutController::class, 'checkIn'])->name('check-in.process');
+    Route::get('/check-out', [App\Http\Controllers\Receptionist\CheckInOutController::class, 'checkOutList'])->name('check-out');
+    Route::post('/check-out/{booking}', [App\Http\Controllers\Receptionist\CheckInOutController::class, 'checkOut'])->name('check-out.process');
+    
+    // Room Management
+    Route::get('/rooms', [ReceptionistController::class, 'rooms'])->name('rooms');
+    Route::patch('/rooms/{room}/status', [ReceptionistController::class, 'updateRoomStatus'])->name('rooms.status');
+    
+    // Guest Management
+    Route::get('/guests', [ReceptionistController::class, 'guests'])->name('guests');
+    
+    // Transaction Management
+    Route::get('/transactions', [App\Http\Controllers\Receptionist\TransactionController::class, 'index'])->name('transactions');
+    
+    // Reports
+    Route::get('/reports', [ReceptionistController::class, 'reports'])->name('reports');
+});
+
+Route::get('/get-booked-dates/{room_id}', [App\Http\Controllers\BookingController::class, 'getBookedDates'])->name('bookings.getBookedDates');
+
+// Hotel Features Routes
+Route::get('/activities', [ActivitiesController::class, 'index'])->name('activities');
+Route::get('/galeri', [GaleriController::class, 'index'])->name('galeri');

@@ -107,5 +107,19 @@
         </div>
     </div>
 
+
+    @if(session('welcome'))
+<div id="welcome-popup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white rounded-lg p-6 max-w-sm text-center shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">Selamat datang!</h2>
+        <p>{{ session('welcome') }}</p>
+        <button onclick="document.getElementById('welcome-popup').style.display='none'"
+                class="mt-4 px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600">
+            Tutup
+        </button>
+    </div>
+</div>
+@endif
+
 </body>
 </html>
