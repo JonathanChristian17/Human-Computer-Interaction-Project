@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Penginapan Cahaya' }}</title>
+    @auth
+    <meta name="user-id" content="{{ Auth::id() }}">
+    @endauth
     @vite('resources/css/app.css')
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @yield('head')
 </head>
 
 <body class="bg-gradient-to-r from-blue-900 via-teal-800 to-indigo-900 min-h-screen flex flex-col font-sans text-white">
@@ -19,28 +25,28 @@
                 <span class="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Cahaya</span>
             </a>
             
-            <ul class="hidden md:flex gap-8 font-medium text-lg">
+            <ul class="hidden md:flex gap-8 font-medium text-lg ml-5">
                 <li>
-                    <a href="#rooms" class="relative group text-gray-300 hover:text-white transition">
-                        Kamar
+                    <a href="{{ route('kamar.index') }}" class="relative group text-gray-300 hover:text-white transition">
+                        Kamar & Suite
                         <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
                     </a>
                 </li>
                 <li>
-                    <a href="#about" class="relative group text-gray-300 hover:text-white transition">
-                        Tentang
+                    <a href="{{ route('activities') }}" class="relative group text-gray-300 hover:text-white transition">
+                        Activities
                         <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
                     </a>
                 </li>
                 <li>
-                    <a href="#contact" class="relative group text-gray-300 hover:text-white transition">
-                        Kontak
+                    <a href="{{ route('galeri') }}" class="relative group text-gray-300 hover:text-white transition">
+                        What's in Samosir
                         <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
                     </a>
                 </li>
             </ul>
             
-           {{-- <a href="{{ route('rooms.create') }}" 
+           {{-- <a href="{{ route('kamar.index') }}" 
    class="bg-yellow-400/80 backdrop-blur-md text-indigo-900 font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-400 transition"
    role="button" aria-label="Pesan kamar sekarang">
    Pesan
@@ -49,24 +55,26 @@
 @auth
     <!-- User dropdown menu -->
     <div x-data="{ open: false }" class="relative">
-        <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
-            <span class="text-gray-300 hover:text-white">{{ Auth::user()->name }}</span>
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-        </button>
-        
-        <div x-show="open" @click.away="open = false" 
-             class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-700">
-            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Profil</a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
-                    Keluar
-                </button>
-            </form>
-        </div>
+    <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
+        <span class="text-gray-300 hover:text-white">{{ Auth::user()->name }}</span>
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </button>
+    
+    <div x-show="open" @click.away="open = false" 
+         class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-700">
+        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Profil</a>
+        <a href="{{ route('bookings.riwayat') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Riwayat Pemesanan</a>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                Keluar
+            </button>
+        </form>
     </div>
+</div>
+
 @else
     <div class="flex items-center gap-4">
         <a href="{{ route('login') }}" 
@@ -83,6 +91,20 @@
 @endauth
         </nav>
     </header>
+
+    <!-- Notification -->
+    @if(session('success'))
+    <div class="fixed top-20 right-4 z-50" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+        <div class="bg-green-500/10 border border-green-500/20 text-green-400 px-6 py-4 rounded-lg shadow-lg">
+            <div class="flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {{ session('success') }}
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Konten -->
     <main class="flex-grow">
@@ -130,7 +152,7 @@
     </footer>
 
     @vite('resources/js/app.js')
-    @yield('scripts')
+    @stack('scripts')
 
 </body>
 </html>

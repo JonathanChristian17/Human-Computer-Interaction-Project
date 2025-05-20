@@ -20,10 +20,10 @@
             </p>
             
             <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#rooms" 
+                <a href="{{ route('kamar.index') }}" 
                    class="px-8 py-3 bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900"
                    aria-label="Lihat Kamar Tersedia">
-                   Lihat Kamar
+                   Pesan Sekarang
                 </a>
                 <a href="#contact" 
                    class="px-8 py-3 border-2 border-amber-400 text-amber-400 font-medium rounded-full hover:bg-amber-400/10 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-gray-900"
@@ -71,14 +71,14 @@
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    @foreach($rooms as $room)
+                        @foreach($rooms->take(3) as $room)
                         <article 
                             class="group relative overflow-hidden rounded-xl bg-gray-800 shadow-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
                             aria-labelledby="room-{{ $room->id }}-name"
                         >
                             <div class="relative h-64 overflow-hidden">
                                 <img 
-                                    src="https://source.unsplash.com/random/600x400/?hotel-room,{{ $loop->index }}" 
+                                     src="{{ $room->image ? asset('storage/' . $room->image) : 'https://source.unsplash.com/random/600x400/?hotel-room,' . $loop->index }}" 
                                     alt="{{ $room->name }}" 
                                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     loading="lazy"
@@ -94,8 +94,8 @@
                                 <p class="text-gray-400 mb-4 line-clamp-2">{{ $room->description }}</p>
                                 
                                 <div class="flex items-center justify-between mt-6">
-                                    <span class="text-2xl font-bold text-amber-400">Rp{{ number_format($room->price, 0, ',', '.') }}</span>
-                                    <a href="{{ route('rooms.create') }}" class="text-sm font-medium text-white hover:text-amber-400 transition-colors flex items-center">
+                                    <span class="text-2xl font-bold text-amber-400">Rp{{ number_format($room->price_per_night, 0, ',', '.') }}</span>
+                                    <a href="{{ route('kamar.index') }}" class="text-sm font-medium text-white hover:text-amber-400 transition-colors flex items-center">
                                     Pesan Sekarang
                                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
