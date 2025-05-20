@@ -84,8 +84,8 @@
                                     class="w-full px-5 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-amber-400 focus:ring-2 focus:border-transparent transition shadow-sm">
                                 <option value="" disabled selected>-- Pilih Kamar --</option>
                                 @foreach($rooms as $room)
-                                    <option value="{{ $room->id }}" data-price="{{ $room->price }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
-                                        {{ $room->name }} - Rp{{ number_format($room->price, 0, ',', '.') }}/malam
+                                    <option value="{{ $room->id }}" data-price="{{ $room->price_per_night }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
+                                        {{ $room->name }} - Rp{{ number_format($room->price_per_night, 0, ',', '.') }}/malam
                                     </option>
                                 @endforeach
                             </select>
@@ -101,35 +101,36 @@
                                    placeholder="Jumlah tamu" value="{{ old('guests') }}">
                         </div>
 
-                        <div class="relative">
-                            <label for="check_in" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
-                                Tanggal Check-in
-                                <span class="text-red-500 ml-1">*</span>
-                            </label>
-                            <input id="check_in" name="check_in" type="date" required
-                                   class="w-full px-5 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-amber-400 focus:ring-2 focus:border-transparent transition shadow-sm appearance-none cursor-pointer"
-                                   placeholder="Pilih tanggal" value="{{ old('check_in') }}" autocomplete="off" onkeydown="return false">
-                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400 mt-6">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10m-5 4h.01M4 20h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                        </div>
+                        <div class="relative date-picker-wrapper cursor-pointer">
+    <label for="check_in" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+        Tanggal Check-in
+        <span class="text-red-500 ml-1">*</span>
+    </label>
+    <input id="check_in" name="check_in" type="date" required
+           class="w-full px-5 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-amber-400 focus:ring-2 focus:border-transparent transition shadow-sm appearance-none cursor-pointer"
+           placeholder="Pilih tanggal" value="{{ old('check_in') }}" autocomplete="off" onkeydown="return false">
+    <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400 mt-7 right-5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10m-5 4h.01M4 20h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z" />
+        </svg>
+    </div>
+</div>
 
-                        <div class="relative">
-                            <label for="check_out" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
-                                Tanggal Check-out
-                                <span class="text-red-500 ml-1">*</span>
-                            </label>
-                            <input id="check_out" name="check_out" type="date" required
-                                   class="w-full px-5 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-amber-400 focus:ring-2 focus:border-transparent transition shadow-sm appearance-none cursor-pointer"
-                                   placeholder="Pilih tanggal" value="{{ old('check_out') }}" autocomplete="off" onkeydown="return false">
-                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400 mt-6">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10m-5 4h.01M4 20h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                        </div>
+<div class="relative date-picker-wrapper cursor-pointer">
+    <label for="check_out" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+        Tanggal Check-out
+        <span class="text-red-500 ml-1">*</span>
+    </label>
+    <input id="check_out" name="check_out" type="date" required
+           class="w-full px-5 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-amber-400 focus:ring-2 focus:border-transparent transition shadow-sm appearance-none cursor-pointer"
+           placeholder="Pilih tanggal" value="{{ old('check_out') }}" autocomplete="off" onkeydown="return false">
+    <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400 mt-7 right-5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10m-5 4h.01M4 20h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z" />
+        </svg>
+    </div>
+</div>
+
                     </div>
                 </div>
 
@@ -297,5 +298,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inisialisasi ringkasan
     updateBookingSummary();
 });
+
+ document.querySelectorAll('.date-picker-wrapper').forEach(wrapper => {
+        wrapper.addEventListener('click', function (e) {
+            const input = this.querySelector('input[type="date"]');
+            if (input) {
+                input.showPicker(); // HTML5 method untuk membuka native datepicker
+                input.focus(); // fallback untuk browser yang tidak support showPicker()
+            }
+        });
+    });
 </script>
 @endsection
