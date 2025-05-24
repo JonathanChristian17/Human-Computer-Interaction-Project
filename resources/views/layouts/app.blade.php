@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Cahaya Resort')</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -21,34 +22,57 @@
             overflow-x: hidden;
             margin: 0;
             padding: 0;
+            font-family: 'Poppins', sans-serif;
         }
 
         .custom-curve {
             position: relative;
             background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
-            border-radius: 0 0 100px 100px;
+            padding: 20px 40px;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+            box-shadow: 0 8px 15px -3px rgba(0,0,0,0.4);
+            transition: all 0.5s ease;
+            width: auto;
+            display: inline-block;
+            animation: narrow 0.5s ease forwards;
+            font-family: 'Poppins', sans-serif;
         }
-        .custom-curve::before,
-        .custom-curve::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            width: 40px;
-            height: 40px;
-            background-color: transparent;
+        .custom-curve.scrolled {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+            background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
+            width: 100%;
+            padding: 20px 0;
+            animation: widen 0.5s ease forwards;
         }
-        .custom-curve::before {
-            left: -20px;
-            border-top-right-radius: 20px;
-            box-shadow: 10px 0 0 0 #ffffff;
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
         }
-        .custom-curve::after {
-            right: -20px;
-            border-top-left-radius: 20px;
-            box-shadow: -10px 0 0 0 #ffffff;
+        @keyframes widen {
+            from {
+                clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+                background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
+            }
+            to {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+                background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
+            }
+        }
+        @keyframes narrow {
+            from {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+                background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
+            }
+            to {
+                clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+                background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
+            }
         }
         .dropdown-menu {
             display: none;
+            font-family: 'Poppins', sans-serif;
         }
         .dropdown-menu.show {
             display: block;
@@ -58,6 +82,7 @@
             padding: 0.5rem 1rem;
             color: #374151;
             transition: all 0.2s ease;
+            font-family: 'Poppins', sans-serif;
         }
         .dropdown-item:hover {
             background-color: #F3F4F6;
@@ -80,6 +105,7 @@
         /* Main Content */
         .main-content {
             min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
         }
 
         /* Shared Panel Styles */
@@ -94,6 +120,7 @@
             background-color: rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 0.4s ease;
+            font-family: 'Poppins', sans-serif;
         }
 
         .slide-content {
@@ -110,10 +137,12 @@
             border-top-left-radius: 30px;
             border-top-right-radius: 30px;
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+            font-family: 'Poppins', sans-serif;
         }
 
         .slide-content-inner {
             padding: 2rem;
+            font-family: 'Poppins', sans-serif;
         }
 
         .slide-panel.show {
@@ -141,6 +170,7 @@
             background: white;
             border: 1px solid #E5E7EB;
             cursor: pointer;
+            font-family: 'Poppins', sans-serif;
         }
 
         .back-button:hover {
@@ -158,6 +188,7 @@
         .nav-item {
             position: relative;
             padding-bottom: 2px;
+            font-family: 'Poppins', sans-serif;
         }
 
         .nav-item::after {
@@ -191,6 +222,7 @@
             display: flex;
             justify-content: center;
             pointer-events: none;
+            font-family: 'Poppins', sans-serif;
         }
 
         .notification {
@@ -205,6 +237,7 @@
             opacity: 0;
             transition: all 0.3s ease-in-out;
             pointer-events: auto;
+            font-family: 'Poppins', sans-serif;
         }
 
         .notification.show {
@@ -228,6 +261,7 @@
 
         .notification-message {
             font-weight: 500;
+            font-family: 'Poppins', sans-serif;
         }
 
         /* Animation for notifications */
@@ -250,6 +284,7 @@
         .dropdown {
             position: relative;
             display: inline-block;
+            font-family: 'Poppins', sans-serif;
         }
 
         .dropdown-menu {
@@ -291,6 +326,7 @@
             cursor: pointer;
             width: 100%;
             text-align: left;
+            font-family: 'Poppins', sans-serif;
         }
 
         .dropdown-item:hover {
@@ -322,76 +358,195 @@
         .dropdown-button.active i {
             transform: rotate(180deg);
         }
+
+        .trapezoid-small {
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+            border-radius: 0 0 32px 32px;
+            transition: width 0.5s cubic-bezier(.4,0,.2,1), height 0.5s cubic-bezier(.4,0,.2,1), background 0.5s, clip-path 0.5s;
+        }
+        .trapezoid-scroll {
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+            border-radius: 0 0 32px 32px;
+            transition: width 0.5s cubic-bezier(.4,0,.2,1), height 0.5s cubic-bezier(.4,0,.2,1), background 0.5s, clip-path 0.5s;
+        }
+
+        /* Button styles */
+        .btn-signup {
+            color: #FFA040;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid #FFA040;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bolder;
+            background: transparent;
+            position: relative;
+            transition: all 1s;
+            overflow: hidden;
+            z-index: 1;
+            border-radius: 9999px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-signup:hover {
+            color: #fff;
+        }
+
+        .btn-signup::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            top: 0;
+            left: -40px;
+            transform: skewX(45deg);
+            background-color: #FFA040;
+            z-index: -1;
+            transition: all 1s;
+        }
+
+        .btn-signup:hover::before {
+            width: 160%;
+        }
+
+        .btn-login {
+            color: #FFA040;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid #FFA040;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bolder;
+            background: transparent;
+            position: relative;
+            transition: all 1s;
+            overflow: hidden;
+            z-index: 1;
+            border-radius: 9999px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-login:hover {
+            color: #fff;
+        }
+
+        .btn-login::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            top: 0;
+            left: -40px;
+            transform: skewX(45deg);
+            background-color: #FFA040;
+            z-index: -1;
+            transition: all 1s;
+        }
+
+        .btn-login:hover::before {
+            width: 160%;
+        }
+
+        @keyframes slide-in-right {
+            0% {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn-animate {
+            opacity: 0;
+            animation: slide-in-right 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .btn-login.btn-animate {
+            animation-delay: 1.5s;
+        }
+
+        .btn-signup.btn-animate {
+            animation-delay: 1.7s;
+        }
     </style>
     @stack('styles')
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="fixed w-full z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav x-data="{ scrolled: false }"
+     @scroll.window="scrolled = window.pageYOffset > 50"
+     class="fixed top-0 z-50 w-full bg-transparent">
+    <div class="relative flex items-center justify-between px-4 mx-auto h-14 max-w-7xl sm:px-6 lg:px-8">
+            <!-- Trapesium Background -->
+            <div
+            class="absolute top-0 transition-all duration-500 ease-in-out"
+            :style="scrolled
+                ? 'width: 100vw; height: 56px; background: linear-gradient(to right, #3D3D3D, #2E2E2E); clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%); left: 50%; transform: translateX(-50%);'
+                : 'width: 520px; height: 56px; background: #fff; clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%); left: calc(50% + -7px); transform: translateX(-50%);'"
+            style="z-index: 10;">
+        </div>
             <!-- Logo -->
-            <div class="flex items-center absolute left-20 top-6">
-                <button onclick="hidePanel()" class="text-white text-2xl font-semibold">
+            <div class="z-20 flex items-center">
+                <a href="/" 
+                class="text-2xl font-regular text-white font-poppins drop-shadow-md transition-all duration-300">
                     Cahaya Resort
-                </button>
+                </a>
             </div>
-
             <!-- Center Navigation -->
-            <div class="flex justify-center">
-                <div class="custom-curve px-32 py-5 shadow-[0_8px_15px_-3px_rgba(0,0,0,0.4)] bg-white">
-                    <div class="flex items-center space-x-16" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
-                        <button @click="activeTab = 'dashboard'; hidePanel(); localStorage.setItem('activeTab', 'dashboard')" 
-                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
-                           :class="{ 'active': activeTab === 'dashboard' }">
-                            Dashboard
-                        </button>
-                        <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')" 
-                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
-                           :class="{ 'active': activeTab === 'rooms' }">
-                            Rooms
-                        </button>
-                        <a href="{{ route('galeri') }}" 
-                           @click="activeTab = 'gallery'; localStorage.setItem('activeTab', 'gallery')"
-                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
-                           :class="{ 'active': activeTab === 'gallery' || '{{ request()->routeIs('galeri') }}' === '1' }">
-                            Gallery
-                        </a>
-                    </div>
+            <div class="z-20 flex justify-center flex-1">
+                <div class="flex items-center space-x-16" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
+                    <button @click="activeTab = 'dashboard'; hidePanel(); localStorage.setItem('activeTab', 'dashboard')"
+                       class="text-base font-medium transition-all duration-300 nav-item"
+                       :class="{ 'active': activeTab === 'dashboard', 'text-white': scrolled, 'text-gray-700': !scrolled }">
+                        Dashboard
+                    </button>
+                    <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')"
+                       class="text-base font-medium transition-all duration-300 nav-item"
+                       :class="{ 'active': activeTab === 'rooms', 'text-white': scrolled, 'text-gray-700': !scrolled }">
+                        Rooms
+                    </button>
+                    <a href="{{ route('galeri') }}"
+                       @click="activeTab = 'gallery'; localStorage.setItem('activeTab', 'gallery')"
+                       class="text-base font-medium transition-all duration-300 nav-item"
+                       :class="{ 'active': activeTab === 'gallery' || '{{ request()->routeIs('galeri') }}' === '1', 'text-white': scrolled, 'text-gray-700': !scrolled }">
+                        Gallery
+                    </a>
                 </div>
             </div>
-
             <!-- Auth Buttons -->
-            <div class="absolute right-8 top-6 flex items-center space-x-4">
-@auth
+            <div class="z-20 flex items-center space-x-4 navbar-auth">
+                @auth
                     <div class="dropdown">
                         <button type="button"
-                                class="dropdown-button text-white hover:text-gray-200 transition font-medium flex items-center">
+                                class="flex items-center font-medium text-gray-700 transition-all duration-300 dropdown-button hover:text-gray-900">
                             <span>{{ Auth::user()->name }}</span>
-                            <i class="fas fa-chevron-down text-sm"></i>
-    </button>
-    
+                            <i class="ml-1 text-sm fas fa-chevron-down"></i>
+                        </button>
                         <div class="dropdown-menu">
-                            <a href="{{ route('profile.edit') }}" 
-                               class="dropdown-item">
+                            <a href="{{ route('profile.edit') }}" class="dropdown-item">
                                 <i class="fas fa-user-circle"></i>
                                 <span>Profile</span>
                             </a>
                             <div class="dropdown-divider"></div>
                             <form id="logout-form" method="POST" action="{{ route('logout') }}">
-            @csrf
-                                <button type="button" 
-                                        onclick="confirmLogout()" 
-                                        class="dropdown-item text-red-600">
+                                @csrf
+                                <button type="button" onclick="confirmLogout()" class="text-red-600 dropdown-item">
                                     <i class="fas fa-sign-out-alt"></i>
                                     <span>Logout</span>
-            </button>
-        </form>
-    </div>
-</div>
-@else
-                    <a href="{{ route('login') }}" class="text-white hover:text-gray-200 transition">Login</a>
-                    <a href="{{ route('register') }}" class="text-white hover:text-gray-200 transition">Register</a>
-@endauth
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="btn-login btn-animate">Log In</a>
+                    <a href="{{ route('register') }}" class="btn-signup btn-animate">Sign Up</a>
+                @endauth
             </div>
         </div>
     </nav>
@@ -642,6 +797,33 @@
 
         // Initialize dropdown
         initializeDropdown();
+
+        const customCurve = document.querySelector('.custom-curve.scroll-trigger');
+        // Set initial state
+        let isScrolled = false;
+        window.addEventListener('scroll', function() {
+            const scrollThreshold = 100;
+            if (window.scrollY > scrollThreshold && !isScrolled) {
+                customCurve.classList.add('scrolled');
+                isScrolled = true;
+            } else if (window.scrollY <= scrollThreshold && isScrolled) {
+                customCurve.classList.remove('scrolled');
+                isScrolled = false;
+            }
+        });
+        function handleResize() {
+            if (window.innerWidth < 768) {
+                customCurve.classList.add('scrolled');
+            } else {
+                if (window.scrollY > 100) {
+                    customCurve.classList.add('scrolled');
+                } else {
+                    customCurve.classList.remove('scrolled');
+                }
+            }
+        }
+        handleResize();
+        window.addEventListener('resize', handleResize);
     });
     </script>
 </body>

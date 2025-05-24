@@ -10,7 +10,7 @@ class LandingPageController extends Controller
     public function index()
     {
         $rooms = Room::where('status', 'available')
-                    ->select('id', 'name', 'price_per_night', 'capacity', 'image', 'rating')
+                    ->select('id', 'name', 'price_per_night', 'capacity', 'image')
                     ->get()
                     ->map(function($room) {
                         // Jika image kosong atau null, gunakan default image

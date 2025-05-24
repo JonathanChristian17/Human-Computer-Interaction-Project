@@ -13,10 +13,12 @@ return new class extends Migration
         });
     }
 
+
     public function down()
     {
         Schema::table('rooms', function (Blueprint $table) {
             $table->decimal('price_per_night', 10, 2)->change();
-        });
-    }
+    });
+}
+
 }; 
