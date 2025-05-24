@@ -15,15 +15,16 @@ use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\GaleriController;
 use App\Http\Controllers\ActivitiesController;
+use App\Http\Controllers\LandingPageController;
 
 /*
 |--------------------------------------------------------------------------
 | Landing Page (Root URL)
 |--------------------------------------------------------------------------
 */
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
-Route::get('/kamar', [RoomController::class, 'list'])->name('kamar.index');
+Route::get('/kamar', [RoomController::class, 'index'])->name('kamar.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/riwayat-pemesanan', [BookingController::class, 'riwayat'])->name('bookings.riwayat');

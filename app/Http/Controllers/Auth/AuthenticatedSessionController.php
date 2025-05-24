@@ -40,7 +40,8 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('receptionist.dashboard'));
         }
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        return redirect()->intended(route('landing'))
+            ->with('login_success', true);
     }
 
     /**
@@ -54,6 +55,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')
+            ->with('logout_success', true);
     }
 } 

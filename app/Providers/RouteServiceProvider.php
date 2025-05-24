@@ -17,8 +17,9 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/';
-    public const ADMIN_HOME = '/dashboard';
+    public const HOME = '/';  // This will use the 'landing' route since it's mapped to '/'
+    public const ADMIN_HOME = '/admin/dashboard';
+    public const RECEPTIONIST_HOME = '/receptionist/dashboard';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.

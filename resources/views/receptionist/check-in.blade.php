@@ -44,14 +44,20 @@
                         <form method="GET" action="{{ route('receptionist.check-in') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label for="search" class="block text-sm font-medium text-gray-300">Cari</label>
-                                <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                    class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Nama, Email, atau No. Telp">
+                                <input type="text" 
+                                       name="search" 
+                                       id="search" 
+                                       value="{{ request('search') }}"
+                                       class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                       placeholder="Nama, Email, atau No. Telp">
                             </div>
                             <div>
                                 <label for="date" class="block text-sm font-medium text-gray-300">Tanggal Check-in</label>
-                                <input type="date" name="date" id="date" value="{{ request('date') }}"
-                                    class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="date" 
+                                       name="date" 
+                                       id="date" 
+                                       value="{{ request('date') }}"
+                                       class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
                                 <label for="status" class="block text-sm font-medium text-gray-300">Status</label>

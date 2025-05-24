@@ -10,10 +10,67 @@ use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    public function create()
+    public function create(Request $request)
     {
-        $rooms = Room::where('status', Room::STATUS_AVAILABLE)->get();
-        return view('bookings.create', compact('rooms'));
+        // Get selected room IDs from the request
+        $roomIds = $request->input('room_ids', []);
+        
+        // Fetch the selected rooms
+        $selectedRooms = Room::whereIn('id', $roomIds)->get();
+        
+        if ($selectedRooms->isEmpty()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'error' => 'Please select at least one room to proceed with booking.'
+                ], 400);
+            }
+            return redirect()->route('kamar.index')
+                ->with('error', 'Please select at least one room to proceed with booking.');
+        }
+        
+        // Get booked dates for the selected rooms
+        $unavailableDates = [];
+        foreach ($selectedRooms as $room) {
+            $bookedDates = DB::table('booking_room')
+                ->join('bookings', 'booking_room.booking_id', '=', 'bookings.id')
+                ->where('booking_room.room_id', $room->id)
+                ->where('bookings.status', '!=', 'cancelled')
+                ->where(function($query) {
+                    $query->where('bookings.check_out_date', '>=', now())
+                        ->orWhere('bookings.check_in_date', '>=', now());
+                })
+                ->select('bookings.check_in_date', 'bookings.check_out_date')
+                ->get();
+
+            foreach ($bookedDates as $booking) {
+                $period = new \DatePeriod(
+                    new \DateTime($booking->check_in_date),
+                    new \DateInterval('P1D'),
+                    (new \DateTime($booking->check_out_date))->modify('+1 day')
+                );
+
+                foreach ($period as $date) {
+                    $unavailableDates[] = $date->format('Y-m-d');
+                }
+            }
+        }
+        
+        // Remove duplicates and sort dates
+        $unavailableDates = array_values(array_unique($unavailableDates));
+        sort($unavailableDates);
+        
+        // Calculate initial totals
+        $subtotal = $selectedRooms->sum('price_per_night');
+        $tax = round($subtotal * 0.1);
+        $deposit = $selectedRooms->count() * 300000;
+        $total = $subtotal + $tax + $deposit;
+        
+        if ($request->ajax()) {
+            return view('bookings.create', compact('selectedRooms', 'subtotal', 'tax', 'deposit', 'total', 'unavailableDates'))
+                ->render();
+        }
+        
+        return view('bookings.create', compact('selectedRooms', 'subtotal', 'tax', 'deposit', 'total', 'unavailableDates'));
     }
 
     public function store(Request $request)

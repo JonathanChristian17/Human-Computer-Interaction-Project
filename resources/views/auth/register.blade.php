@@ -3,86 +3,74 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Daftar Akun Baru</title>
+    <title>Sign up - Cahaya</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html { height: 100%; }
+        .rounded-tl-3xl { border-top-left-radius: 2rem; }
+        .rounded-bl-3xl { border-bottom-left-radius: 2rem; }
+        .rounded-tr-3xl { border-top-right-radius: 2rem; }
+        .rounded-br-3xl { border-bottom-right-radius: 2rem; }
+    </style>
 </head>
-<body class="bg-gray-900">
-
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-2xl w-full space-y-8 bg-gray-800/70 backdrop-blur-sm p-10 rounded-xl shadow-xl border border-gray-700/50">
-            
-            <div class="mb-6 relative">
-                <a href="{{ route('home') }}" 
-                   class="absolute top-0 right-0 bottom-2 text-amber-400 hover:text-amber-300 transition font-semibold inline-flex items-center gap-2">
-                    <span>Kembali ke Home</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" 
-                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" 
-                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 
-                                 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+<body class="bg-white min-h-screen flex items-stretch">
+    <div class="flex w-full min-h-screen">
+        <!-- Left: Register Form -->
+        <div class="w-full md:w-1/2 flex flex-col justify-center items-center px-8 py-12 bg-white">
+            <div class="w-full max-w-sm space-y-6">
+                <div class="flex items-center mb-6">
+                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2">
+                        <circle cx="16" cy="16" r="10" stroke="#3B82F6" stroke-width="2" fill="#fff"/>
+                        <path d="M16 4V8" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M16 24V28" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M4 16H8" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M24 16H28" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M7.757 7.757L10.586 10.586" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M21.414 21.414L24.243 24.243" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M7.757 24.243L10.586 21.414" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M21.414 10.586L24.243 7.757" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
                     </svg>
-                </a>
-            </div>
-
-            <div class="text-center">
-                <h2 class="mt-6 text-3xl font-extrabold text-white">
-                    Daftar Akun Baru
-                </h2>
-                <p class="mt-2 text-sm text-gray-400">
-                    Sudah punya akun? 
-                    <a href="{{ route('login') }}" class="font-medium text-amber-400 hover:text-amber-300 transition">
-                        Masuk disini
-                    </a>
-                </p>
-            </div>
-            
-            <form class="mt-8 space-y-6" method="POST" action="{{ route('register') }}">
-                @csrf
-                
+                    <span class="text-xl font-bold text-gray-800">Cahaya</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-1">Sign up</h2>
+                <p class="text-xs text-gray-500 mb-4">Sign up to enjoy the feature of Revolutie</p>
                 @if($errors->any())
-                    <div class="bg-red-500/20 text-red-300 p-4 rounded-lg">
-                        <ul class="list-disc list-inside text-sm">
+                    <div class="bg-red-100 text-red-600 p-3 rounded-lg text-xs">
+                        <ul class="list-disc list-inside">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
                     </div>
                 @endif
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Nama Lengkap (full width) -->
-                    <div class="md:col-span-2">
-                        <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Nama Lengkap</label>
+                <form class="space-y-3" method="POST" action="{{ route('register') }}">
+                    @csrf
+                    <div>
+                        <label for="name" class="block text-xs font-medium text-gray-700 mb-1">Nama Lengkap</label>
                         <input id="name" name="name" type="text" autocomplete="name" required
-                               class="appearance-none relative block w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition"
+                               class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition"
                                placeholder="Nama Anda" value="{{ old('name') }}">
                     </div>
-                    
-                    <!-- Email -->
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Alamat Email</label>
+                        <label for="email" class="block text-xs font-medium text-gray-700 mb-1">Email</label>
                         <input id="email" name="email" type="email" autocomplete="email" required
-                               class="appearance-none relative block w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition"
+                               class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition"
                                placeholder="email@contoh.com" value="{{ old('email') }}">
                     </div>
-                    
-                    <!-- Telepon -->
                     <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-300 mb-1">Nomor Telepon</label>
+                        <label for="phone" class="block text-xs font-medium text-gray-700 mb-1">Nomor Telepon</label>
                         <input id="phone" name="phone" type="tel" autocomplete="tel" required
-                               class="appearance-none relative block w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition"
+                               class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition"
                                placeholder="08123456789" value="{{ old('phone') }}">
                     </div>
-                    
-                    <!-- Password -->
                     <div class="relative">
-                        <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <label for="password" class="block text-xs font-medium text-gray-700 mb-1">Password</label>
                         <input id="password" name="password" type="password" autocomplete="new-password" required
-                            class="appearance-none relative block w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition pr-12"
+                            class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition pr-10"
                             placeholder="Password">
                         <button type="button" onclick="togglePassword('password')" 
-                                class="absolute inset-y-0 right-3 top-6 flex items-center text-gray-400 hover:text-white focus:outline-none">
-                            <svg id="icon-password" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                class="absolute inset-y-0 right-2 top-5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <svg id="icon-password" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -91,16 +79,14 @@
                             </svg>
                         </button>
                     </div>
-                    
-                    <!-- Konfirmasi Password -->
                     <div class="relative">
-                        <label for="password-confirm" class="block text-sm font-medium text-gray-300 mb-1">Konfirmasi Password</label>
+                        <label for="password-confirm" class="block text-xs font-medium text-gray-700 mb-1">Konfirmasi Password</label>
                         <input id="password-confirm" name="password_confirmation" type="password" autocomplete="new-password" required
-                            class="appearance-none relative block w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition pr-12"
+                            class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition pr-10"
                             placeholder="Ulangi Password">
                         <button type="button" onclick="togglePassword('password-confirm')" 
-                                class="absolute inset-y-0 right-3 top-6 flex items-center text-gray-400 hover:text-white focus:outline-none">
-                            <svg id="icon-password-confirm" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                class="absolute inset-y-0 right-2 top-5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <svg id="icon-password-confirm" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -109,28 +95,35 @@
                             </svg>
                         </button>
                     </div>
-                </div>
-
-                <div class="pt-2">
                     <button type="submit"
-                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition">
-                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <svg class="h-5 w-5 text-amber-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                            </svg>
-                        </span>
-                        Daftar
+                            class="w-full flex justify-center py-2 px-4 border border-transparent text-xs font-medium rounded-md text-white bg-orange-400 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400 transition">
+                        Sign up
                     </button>
-                </div>
-            </form>
+                    <div class="flex items-center my-3">
+                        <div class="flex-grow border-t border-gray-200"></div>
+                        <span class="mx-2 text-gray-400 text-xs">or</span>
+                        <div class="flex-grow border-t border-gray-200"></div>
+                    </div>
+                    <button type="button" class="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 text-xs font-medium transition">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="h-4 w-4 mr-2">
+                        Continue with Google
+                    </button>
+                    <div class="text-center mt-3">
+                        <span class="text-gray-500 text-xs">Already have an account??</span>
+                        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500 transition ml-1 text-xs">Sign in</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Right: Image -->
+        <div class="hidden md:block md:w-1/2 h-screen relative">
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="Villa" class="object-cover w-full h-full rounded-l-3xl shadow-xl">
         </div>
     </div>
-
     <script>
         function togglePassword(fieldId) {
             const input = document.getElementById(fieldId);
             const icon = document.querySelector(`#icon-${fieldId}`);
-
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.innerHTML = `
@@ -152,6 +145,5 @@
             }
         }
     </script>
-
 </body>
 </html>
