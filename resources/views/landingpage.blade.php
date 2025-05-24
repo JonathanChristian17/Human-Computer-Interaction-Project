@@ -1,450 +1,456 @@
 @extends('layouts.app')
 
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
+@section('title', 'Welcome to Cahaya Resort Pangururan')
+
 @section('content')
-    <!-- Hero Section with Parallax Effect -->
-    <section class="relative h-screen flex items-center justify-center overflow-hidden">
-        <!-- Background with parallax effect -->
-        <div class="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/90 to-gray-900/95 backdrop-blur-sm">
-            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-30 transform scale-110 motion-safe:group-hover:scale-100 transition-transform duration-1000"></div>
-        </div>
-        
+    <!-- Hero Section -->
+    <section class="relative h-screen">
+        <!-- Hero Background Image -->
+        <div class="absolute inset-0">
+            <img src="{{ asset('storage/images/header.png') }}" alt="Resort View" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black/40"></div>
+  </div>
+
         <!-- Hero Content -->
-        <div class="relative z-10 text-center px-6 md:px-12 max-w-6xl">
-            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-300">Penginapan Cahaya</span><br>
-                <span class="text-xl md:text-2xl font-light text-gray-300">Ketemu di Samosir</span>
+        <div class="relative h-full flex items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="max-w-3xl -ml-20 -mt-40">
+                    <h1 class="tracking-wider text-5xl md:text-7xl font-semibold text-white mb-6 drop-shadow-lg">
+                        CAHAYA RESORT<br>
+                        PANGURUAN
             </h1>
-            
-            <p class="mt-6 max-w-2xl mx-auto text-gray-300 text-lg md:text-xl leading-relaxed">
-                Pengalaman menginap premium di tepian Danau Toba dengan sentuhan modern dan kearifan lokal.
-            </p>
-            
-            <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-                <a href="{{ route('kamar.index') }}" 
-                   class="px-8 py-3 bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                   aria-label="Lihat Kamar Tersedia">
-                   Pesan Sekarang
-                </a>
-                <a href="#contact" 
-                   class="px-8 py-3 border-2 border-amber-400 text-amber-400 font-medium rounded-full hover:bg-amber-400/10 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-gray-900"
-                   aria-label="Hubungi Kami">
-                   Hubungi Kami
-                </a>
+
+                    <!-- Description Box -->
+                    <div class="absolute bottom-32 right-0 max-w-lg">
+                        <div class="flex gap-4">
+                            <div class="w-1 bg-orange-500"></div>
+                            <div>
+                                <p class="text-white text-2xl font-semibold mb-2">
+                                    We provide a variety of the best lodging accommodations for those of you who need it.
+                                </p>
+                                <p class="text-white/80 text-sm">
+                                    Don't worry about the quality of the service.
+                                </p>
             </div>
         </div>
-         <!-- Wave SVG Bottom -->
-    <div class="absolute bottom-0 left-0 w-full overflow-hidden transform rotate-180">
-        <svg class="relative block w-full h-20" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" 
-                  opacity=".25" 
-                  class="fill-current text-gray-900"></path>
-            <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" 
-                  opacity=".5" 
-                  class="fill-current text-gray-900"></path>
-            <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" 
-                  class="fill-current text-gray-900"></path>
-        </svg>
-
-        <!-- Scroll indicator -->
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-            </svg>
-        </div>
-    </section>
-
-    <!-- Rooms Section -->
-    <section id="rooms" class="py-20 bg-gray-900">
-        <div class="container mx-auto px-6 lg:px-12">
-            <div class="text-center mb-16">
-                <span class="inline-block px-3 py-1 text-sm font-medium text-amber-400 bg-amber-400/10 rounded-full mb-4">Pilihan Kamar</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Pengalaman Menginap Eksklusif</h2>
-                <div class="w-20 h-1 bg-amber-400 mx-auto"></div>
             </div>
             
-            @if($rooms->isEmpty())
-                <div class="text-center py-12 bg-gray-800/50 rounded-xl backdrop-blur-sm">
-                    <svg class="w-12 h-12 mx-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                    </svg>
-                    <p class="mt-4 text-gray-400">Belum ada kamar yang tersedia saat ini.</p>
-                </div>
-            @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        @foreach($rooms->take(3) as $room)
-                        <article 
-                            class="group relative overflow-hidden rounded-xl bg-gray-800 shadow-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
-                            aria-labelledby="room-{{ $room->id }}-name"
-                        >
-                            <div class="relative h-64 overflow-hidden">
-                                <img 
-                                     src="{{ $room->image ? asset('storage/' . $room->image) : 'https://source.unsplash.com/random/600x400/?hotel-room,' . $loop->index }}" 
-                                    alt="{{ $room->name }}" 
-                                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    loading="lazy"
-                                >
-                                <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"></div>
-                                <span class="absolute top-4 right-4 px-3 py-1 text-xs font-semibold text-white bg-amber-500 rounded-full">
-                                    {{ $room->capacity }} orang
-                                </span>
+                    <!-- Booking Form -->
+                    <div class="mt-10 bg-black/40 backdrop-blur-md p-4 rounded-xl inline-flex items-center gap-4">
+                <!-- Check-in -->
+                <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
+                    <i class="fas fa-calendar text-white"></i>
+                    <input type="date" 
+                           id="landing_check_in"
+                           name="landing_check_in"
+                           class="bg-transparent text-white border-none focus:outline-none placeholder-white" 
+                           placeholder="Check in">
                             </div>
                             
-                            <div class="p-6">
-                                <h3 id="room-{{ $room->id }}-name" class="text-xl font-bold text-white mb-2">{{ $room->name }}</h3>
-                                <p class="text-gray-400 mb-4 line-clamp-2">{{ $room->description }}</p>
-                                
-                                <div class="flex items-center justify-between mt-6">
-                                    <span class="text-2xl font-bold text-amber-400">Rp{{ number_format($room->price_per_night, 0, ',', '.') }}</span>
-                                    <a href="{{ route('kamar.index') }}" class="text-sm font-medium text-white hover:text-amber-400 transition-colors flex items-center">
-                                    Pesan Sekarang
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                    </svg>
-                                    </a>
-
-                                </div>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-            @endif
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="py-20 bg-gray-800/50">
-        <div class="container mx-auto px-6 lg:px-12">
-            <div class="text-center mb-16">
-                <span class="inline-block px-3 py-1 text-sm font-medium text-amber-400 bg-amber-400/10 rounded-full mb-4">Fasilitas</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Apa Yang Kami Tawarkan</h2>
-                <div class="w-20 h-1 bg-amber-400 mx-auto"></div>
+                <!-- Check-out -->
+                <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
+                    <i class="fas fa-calendar text-white"></i>
+                    <input type="date" 
+                           id="landing_check_out"
+                           name="landing_check_out"
+                           class="bg-transparent text-white border-none focus:outline-none placeholder-white" 
+                           placeholder="Checkout">
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl hover:bg-gray-700/50 transition-all duration-300">
-                    <div class="w-12 h-12 bg-amber-400/10 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-3">Lokasi Strategis</h3>
-                    <p class="text-gray-400">Tepat di tepian Danau Toba dengan pemandangan langsung ke danau dan pegunungan.</p>
+                <!-- Room & Guests -->
+                <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
+                    <i class="fas fa-house text-white"></i>
+                    <select id="landing_room_guests"
+                            name="landing_room_guests"
+                            class="bg-transparent text-white focus:outline-none">
+                        <option value="1-2" class="text-black">1 Room, 2 guest</option>
+                        <option value="2-4" class="text-black">2 Rooms, 4 guests</option>
+                    </select>
                 </div>
                 
-                <div class="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl hover:bg-gray-700/50 transition-all duration-300">
-                    <div class="w-12 h-12 bg-amber-400/10 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-3">Fasilitas Lengkap</h3>
-                    <p class="text-gray-400">AC, WiFi gratis, kolam renang, restoran, dan layanan kamar 24 jam.</p>
+                <!-- Search Button -->
+                <button class="bg-orange-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-orange-600 transition-all">
+                    Search
+                </button>
                 </div>
                 
-                <div class="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl hover:bg-gray-700/50 transition-all duration-300">
-                    <div class="w-12 h-12 bg-amber-400/10 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-3">Harga Kompetitif</h3>
-                    <p class="text-gray-400">Kualitas bintang 4 dengan harga terjangkau dan promo menarik setiap bulan.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="py-20 bg-gradient-to-br from-gray-900 to-gray-800">
-        <div class="container mx-auto px-6 lg:px-12">
-            <div class="flex flex-col lg:flex-row items-center gap-12">
-                <div class="lg:w-1/2 relative">
-                    <div class="relative rounded-2xl overflow-hidden">
-                        <img 
-                            src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
-                            alt="Penginapan Cahaya" 
-                            class="w-full h-auto object-cover rounded-2xl shadow-2xl"
-                            loading="lazy"
-                        >
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-transparent rounded-2xl"></div>
-                    </div>
-                    <div class="absolute -bottom-6 -right-6 bg-amber-400/90 backdrop-blur-sm p-4 rounded-lg shadow-xl w-2/3">
-                        <h4 class="text-gray-900 font-bold mb-1">Pengalaman 10 Tahun</h4>
-                        <p class="text-gray-800 text-sm">Melayani ribuan tamu dengan kepuasan terbaik</p>
+    <!-- Room Choice Section -->
+    <section class="relative bg-white">
+        <style>
+            .custom-curve-top {
+                position: relative;
+                background: #ffffff;
+                border-radius: 100px 100px 0 0;
+            }
+            .custom-curve-top::before,
+            .custom-curve-top::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                width: 40px;
+                height: 40px;
+                background-color: transparent;
+            }
+            .custom-curve-top::before {
+                left: -20px;
+                border-bottom-right-radius: 20px;
+                box-shadow: 10px 0 0 0 #ffffff;
+            }
+            .custom-curve-top::after {
+                right: -20px;
+                border-bottom-left-radius: 20px;
+                box-shadow: -10px 0 0 0 #ffffff;
+            }
+        </style>
+
+        <!-- Curved Welcome Section -->
+        <div class="absolute -top-12 left-0 right-0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-center">
+                    <div class="custom-curve-top px-32 py-3 -mt-2">
+                        <h2 class="text-2xl font-bold text-gray-800 tracking-wider	">WELCOME TO CAHAYA RESORT</h2>
                     </div>
                 </div>
-                
-                <div class="lg:w-1/2">
-                    <span class="inline-block px-3 py-1 text-sm font-medium text-amber-400 bg-amber-400/10 rounded-full mb-4">Tentang Kami</span>
-                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Penginapan Cahaya Samosir</h2>
-                    <p class="text-gray-400 mb-6 leading-relaxed">
-                        Didirikan pada tahun 2013, Penginapan Cahaya telah menjadi pilihan utama wisatawan yang mengunjungi Danau Toba. Kami menggabungkan arsitektur tradisional Batak dengan fasilitas modern untuk memberikan pengalaman menginap yang unik dan nyaman.
+                            </div>
+                        </div>
+                        
+        <!-- Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-20  ">
+            <p class="text-black-600 text-center mb-12 font-bold text-2xl">Room Choice in Cahaya Resort</p>
+
+            <!-- Room Carousel -->
+            <div class="relative px-12">
+                <!-- Previous Button -->
+                <button class="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg z-10 flex items-center justify-center group carousel-prev">
+                    <i class="fas fa-chevron-left text-gray-400 group-hover:text-gray-600"></i>
+                </button>
+
+                <!-- Next Button -->
+                <button class="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg z-10 flex items-center justify-center group carousel-next">
+                    <i class="fas fa-chevron-right text-gray-400 group-hover:text-gray-600"></i>
+                </button>
+
+                <!-- Carousel Container -->
+                <div class="overflow-hidden">
+                    <div class="flex transition-transform duration-500" id="roomSlider">
+                        <!-- Original items -->
+                        @foreach($rooms as $index => $room)
+                        <div class="flex-none w-[300px] mx-3" data-index="{{ $index }}">
+                            <div class="bg-white rounded-xl overflow-hidden shadow-lg transform transition-all duration-500">
+                                <div class="relative">
+                                    <img src="{{ asset('storage/images/' . $room->image) }}" alt="{{ $room->name }}" class="w-full h-48 object-cover">
+                                </div>
+                                <div class="p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-semibold text-lg">{{ $room->name }}</h3>
+                                        <p class="text-orange-500 font-medium">Rp. {{ number_format($room->price_per_night, 0, ',', '.') }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>Pangururan</span>
+                                        <span class="text-gray-300">•</span>
+                                        <span>{{ $room->capacity }} Guest</span>
+                            </div>
+                        </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carousel Navigation Dots -->
+            <div class="flex justify-center gap-2 mt-8" id="carouselDots">
+                @foreach($rooms as $index => $room)
+                <button class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-index="{{ $index }}"></button>
+                @endforeach
+            </div>
+
+            <!-- Carousel Script -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const slider = document.getElementById('roomSlider');
+                    const cards = Array.from(slider.children);
+                    const dots = Array.from(document.querySelectorAll('#carouselDots button'));
+                    const totalCards = cards.length;
+                    let currentIndex = 0;
+                    const cardWidth = 300;
+                    const cardGap = 24;
+                    let autoSlideInterval;
+
+                    function updateSlider() {
+                        const containerWidth = slider.parentElement.offsetWidth;
+                        const centerPosition = (containerWidth - cardWidth) / 2;
+                        const offset = centerPosition - (currentIndex * (cardWidth + cardGap));
+                        
+                        slider.style.transform = `translateX(${offset}px)`;
+                        
+                        // Update cards appearance
+                        cards.forEach((card, index) => {
+                            const distance = Math.abs(index - currentIndex);
+                            const cardElement = card.querySelector('.bg-white');
+                            
+                            if (distance === 0) {
+                                cardElement.style.transform = 'scale(1.1) translateY(-20px)';
+                                card.style.opacity = '1';
+                                card.style.zIndex = '20';
+                            } else if (distance === 1) {
+                                const direction = index > currentIndex ? 1 : -1;
+                                cardElement.style.transform = `scale(0.9) translateX(${direction * 20}px)`;
+                                card.style.opacity = '0.7';
+                                card.style.zIndex = '10';
+                            } else {
+                                const direction = index > currentIndex ? 1 : -1;
+                                cardElement.style.transform = `scale(0.8) translateX(${direction * 40}px)`;
+                                card.style.opacity = '0.5';
+                                card.style.zIndex = '1';
+                            }
+                        });
+
+                        // Update dots
+                        dots.forEach((dot, index) => {
+                            if (index === currentIndex) {
+                                dot.classList.add('bg-gray-800', 'w-4');
+                                dot.classList.remove('bg-gray-300', 'w-2');
+                            } else {
+                                dot.classList.add('bg-gray-300', 'w-2');
+                                dot.classList.remove('bg-gray-800', 'w-4');
+                            }
+                        });
+                    }
+
+                    function nextSlide() {
+                        currentIndex = (currentIndex + 1) % totalCards;
+                        slider.style.transition = 'transform 500ms ease';
+                        updateSlider();
+                    }
+
+                    function prevSlide() {
+                        currentIndex = (currentIndex - 1 + totalCards) % totalCards;
+                        slider.style.transition = 'transform 500ms ease';
+                        updateSlider();
+                    }
+
+                    function startAutoSlide() {
+                        if (autoSlideInterval) clearInterval(autoSlideInterval);
+                        autoSlideInterval = setInterval(nextSlide, 2000);
+                    }
+
+                    function stopAutoSlide() {
+                        if (autoSlideInterval) {
+                            clearInterval(autoSlideInterval);
+                            autoSlideInterval = null;
+                        }
+                    }
+
+                    // Event Listeners
+                    document.querySelector('.carousel-prev').addEventListener('click', () => {
+                        stopAutoSlide();
+                        prevSlide();
+                        startAutoSlide();
+                    });
+
+                    document.querySelector('.carousel-next').addEventListener('click', () => {
+                        stopAutoSlide();
+                        nextSlide();
+                        startAutoSlide();
+                    });
+
+                    dots.forEach((dot, index) => {
+                        dot.addEventListener('click', () => {
+                            stopAutoSlide();
+                            currentIndex = index;
+                            slider.style.transition = 'transform 500ms ease';
+                            updateSlider();
+                            startAutoSlide();
+                        });
+                    });
+
+                    slider.addEventListener('mouseenter', stopAutoSlide);
+                    slider.addEventListener('mouseleave', startAutoSlide);
+                    window.addEventListener('resize', updateSlider);
+
+                    // Initialize
+                    slider.style.transition = 'transform 500ms ease';
+                    updateSlider();
+                    startAutoSlide();
+                });
+            </script>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="bg-gray-900 text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-12">Why Cahaya Resort?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                        <div>
+                    <h3 class="text-xl font-medium mb-4">Traditional</h3>
+                    <p class="text-gray-400">From local hotels to grand resorts, discover folklore of hotels all around the world.</p>
+                        </div>
+                        <div>
+                    <h3 class="text-xl font-medium mb-4">Modern</h3>
+                    <p class="text-gray-400">No need to search anywhere else. The biggest names in hotels are right here.</p>
+                        </div>
+                        <div>
+                    <h3 class="text-xl font-medium mb-4">Affordable</h3>
+                    <p class="text-gray-400">We've scored deals with the world's leading hotels and we share savings with you.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dream in Serene Luxury Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative">
+                <!-- Left Content -->
+                <div class="max-w-xl">
+                    <h2 class="text-3xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+                        Dream In <span class="text-gray-600">Serene Luxury</span>
+                    </h2>
+                    <p class="text-gray-600 leading-relaxed mb-8">
+                        Cahaya Pangururan Inn, comfortable with local nuances and natural panorama of Samosir. Wake up with cool air, calming lake views, and a calm atmosphere that refreshes the soul. Enjoy the hospitality of the host, complete facilities, and comfort like at home.
                     </p>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <svg class="w-5 h-5 text-amber-400 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <div>
-                                <h4 class="text-white font-medium mb-1">Lokasi Eksklusif</h4>
-                                <p class="text-gray-400 text-sm">Tepat di tepi Danau Toba dengan akses mudah ke semua objek wisata utama.</p>
+                </div>
+
+                <!-- Stay & Relax Text -->
+                <div class="absolute right-0 top-0">
+                    <h3 class="text-6xl font-bold text-gray-100">Stay & Relax</h3>
+                </div>
+
+                <!-- Facility Gallery -->
+                <div class="mt-16 relative">
+                    <!-- Gallery Container -->
+                    <div class="overflow-hidden">
+                        <div class="flex gap-6" id="facilitySlider">
+                            <!-- Facility Items -->
+                            <div class="flex gap-6">
+                                <!-- Rooms -->
+                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                    <img src="{{ asset('storage/images/facility-1.jpg') }}" alt="Rooms" 
+                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <div class="absolute bottom-6 left-6 text-white">
+                                        <p class="text-sm font-medium"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Parking Area -->
+                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                    <img src="{{ asset('storage/images/facility-2.jpg') }}" alt="Parking Area" 
+                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110 grayscale">
+                                    <div class="absolute bottom-6 left-6 text-white">
+                                        <p class="text-sm font-medium"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Mini Park -->
+                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                    <img src="{{ asset('storage/images/facility-3.jpg') }}" alt="Mini Park" 
+                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <div class="absolute bottom-6 left-6 text-white">
+                                        <p class="text-sm font-medium"></p>
                             </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <svg class="w-5 h-5 text-amber-400 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <div>
-                                <h4 class="text-white font-medium mb-1">Pelayanan Ramah</h4>
-                                <p class="text-gray-400 text-sm">Staf kami yang profesional dan ramah siap melayani kebutuhan Anda 24 jam.</p>
+                                </div>
+
+                                <!-- Loby -->
+                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                    <img src="{{ asset('storage/images/facility-4.jpg') }}" alt="Loby" 
+                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <div class="absolute bottom-6 left-6 text-white">
+                                        <p class="text-sm font-medium"></p>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <svg class="w-5 h-5 text-amber-400 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <div>
-                                <h4 class="text-white font-medium mb-1">Makanan Tradisional</h4>
-                                <p class="text-gray-400 text-sm">Nikmati kuliner khas Batak yang otentik dengan bahan-bahan lokal segar.</p>
+                            
+                                <!-- View -->
+                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                    <img src="{{ asset('storage/images/facility-5.jpg') }}" alt="View" 
+                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <div class="absolute bottom-6 left-6 text-white">
+                                        <p class="text-sm font-medium"></p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                
+                    <!-- Navigation Arrows -->
+                    <button class="absolute top-1/2 -left-4 transform -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center group focus:outline-none">
+                        <i class="fas fa-chevron-left text-gray-400 group-hover:text-gray-600"></i>
+                    </button>
+                    <button class="absolute top-1/2 -right-4 transform -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center group focus:outline-none">
+                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-gray-600"></i>
+                    </button>
+
+                    <!-- Navigation Dots -->
+                    <div class="flex justify-center mt-8 space-x-2">
+                        <div class="w-12 h-1 bg-gray-800 rounded"></div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section class="py-20 bg-gray-900/80 backdrop-blur-sm">
-        <div class="container mx-auto px-6 lg:px-12">
-            <div class="text-center mb-16">
-                <span class="inline-block px-3 py-1 text-sm font-medium text-amber-400 bg-amber-400/10 rounded-full mb-4">Testimoni</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Apa Kata Tamu Kami</h2>
-                <div class="w-20 h-1 bg-amber-400 mx-auto"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
-                            <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah" class="w-full h-full object-cover" loading="lazy">
-                        </div>
-                        <div>
-                            <h4 class="text-white font-medium">Sarah Wijaya</h4>
-                            <div class="flex mt-1">
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-400 italic">"Penginapan yang sangat nyaman dengan pemandangan danau yang menakjubkan. Pelayanan staff sangat ramah dan membantu. Pasti akan kembali lagi!"</p>
-                </div>
-                
-                <div class="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
-                            <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Budi" class="w-full h-full object-cover" loading="lazy">
-                        </div>
-                        <div>
-                            <h4 class="text-white font-medium">Budi Santoso</h4>
-                            <div class="flex mt-1">
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-400 italic">"Kamar bersih dan luas, sarapan enak dengan pilihan makanan lokal. Sangat cocok untuk keluarga. Fasilitas lengkap dan modern."</p>
-                </div>
-                
-                <div class="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
-                            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Dewi" class="w-full h-full object-cover" loading="lazy">
-                        </div>
-                        <div>
-                            <h4 class="text-white font-medium">Dewi Anggraeni</h4>
-                            <div class="flex mt-1">
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-400 italic">"Sempurna untuk bulan madu! Kamar suite dengan pemandangan danau yang romantis. Pelayanan sangat personal dan makanan di restoran luar biasa."</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-20 bg-gray-900">
-        <div class="container mx-auto px-6 lg:px-12">
-            <div class="flex flex-col lg:flex-row gap-12">
-                <div class="lg:w-1/2">
-                    <div class="text-center lg:text-left mb-12 lg:mb-0">
-                        <span class="inline-block px-3 py-1 text-sm font-medium text-amber-400 bg-amber-400/10 rounded-full mb-4">Hubungi Kami</span>
-                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Butuh Bantuan?</h2>
-                        <p class="text-gray-400 mb-8 max-w-lg">
-                            Tim kami siap membantu Anda dengan pertanyaan, reservasi, atau kebutuhan khusus selama menginap. Hubungi kami melalui formulir atau informasi kontak berikut.
-                        </p>
-                        
-                        <div class="space-y-6">
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 bg-amber-400/10 rounded-lg flex items-center justify-center mr-4 mt-1">
-                                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-medium mb-1">Telepon</h4>
-                                    <p class="text-gray-400">+62 812 3456 7890</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 bg-amber-400/10 rounded-lg flex items-center justify-center mr-4 mt-1">
-                                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-medium mb-1">Email</h4>
-                                    <p class="text-gray-400">info@penginapancahaya.com</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 bg-amber-400/10 rounded-lg flex items-center justify-center mr-4 mt-1">
-                                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-medium mb-1">Lokasi</h4>
-                                    <p class="text-gray-400">Jl. Danau Toba No. 123, Samosir, Sumatera Utara</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="lg:w-1/2">
-                    <form action="#" method="POST" class="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-xl">
-                        <div class="mb-6">
-                            <label for="name" class="block text-white font-medium mb-2">Nama Lengkap</label>
-                            <input 
-                                type="text" 
-                                id="name" 
-                                name="name" 
-                                placeholder="Nama Anda" 
-                                required
-                                class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition"
-                            >
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="email" class="block text-white font-medium mb-2">Alamat Email</label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                placeholder="email@contoh.com" 
-                                required
-                                class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition"
-                            >
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="subject" class="block text-white font-medium mb-2">Subjek</label>
-                            <input 
-                                type="text" 
-                                id="subject" 
-                                name="subject" 
-                                placeholder="Subjek pesan Anda" 
-                                required
-                                class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition"
-                            >
-                        </div>
-                        
-                        <div class="mb-8">
-                            <label for="message" class="block text-white font-medium mb-2">Pesan</label>
-                            <textarea 
-                                id="message" 
-                                name="message" 
-                                rows="5" 
-                                placeholder="Tulis pesan Anda di sini..." 
-                                required
-                                class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-white placeholder-gray-400 transition"
-                            ></textarea>
-                        </div>
-                        
-                        <button 
-                            type="submit"
-                            class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-semibold px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-gray-800"
-                        >
-                            Kirim Pesan
+    <!-- Stay in the know Section -->
+    <section class="bg-gray-900 text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-2xl font-bold mb-4">Stay in the know</h2>
+                    <p class="mb-6">Sign up to get marketing emails from Cahaya Resort, including promotions, rewards, and information about Cahaya Resort services.</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Your email" class="flex-1 bg-white/10 px-4 py-2 rounded-l focus:outline-none" required>
+                        <button class="bg-orange-500 text-white px-6 py-2 rounded-r hover:bg-orange-600 transition">
+                            Subscribe
                         </button>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Map Section -->
-    <div class="h-96 w-full bg-gray-900 relative overflow-hidden">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6">Location</h3>
+                    <div class="w-full h-[300px] rounded-lg overflow-hidden">
         <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d31885.645507602447!2d98.6645881!3d2.6017065!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3031c5db4e76ffd5%3A0x3f07d452aaab4f1e!2sHotel%20Cahaya!5e0!3m2!1sid!2sid!4v1747334081541!5m2!1sid!2sid" width="1600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                            src="https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d31885.646008294185!2d98.701418!3d2.6016867!3m2!1i1024!2i768!4f13.1!2m1!1spenginapan%20cahaya%20pangururan!5e0!3m2!1sid!2sid!4v1748025674249!5m2!1sid!2sid"
             width="100%" 
             height="100%" 
             style="border:0;" 
             allowfullscreen="" 
             loading="lazy"
-            class="absolute inset-0"
-            aria-label="Peta Lokasi Penginapan Cahaya"
-        ></iframe>
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent pointer-events-none"></div>
+                            class="rounded-lg"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ready to get started Section -->
+    <section class="bg-gray-900 text-white py-8 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <div class="text-lg">
+                    Cahaya Resort
+                </div>
+                <div class="flex items-center">
+                    <span class="mr-4">Ready to get started?</span>
+                    <button class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600 transition">
+                        Get Started
+                    </button>
+                </div>
+            </div>
     </div>
-    
+    </section>
 @endsection

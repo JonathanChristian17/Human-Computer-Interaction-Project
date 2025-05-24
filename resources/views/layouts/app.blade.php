@@ -1,158 +1,648 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Penginapan Cahaya' }}</title>
-    @auth
-    <meta name="user-id" content="{{ Auth::id() }}">
-    @endauth
-    @vite('resources/css/app.css')
+    <title>@yield('title', 'Cahaya Resort')</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Flatpickr -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @yield('head')
+    <style>
+        body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .custom-curve {
+            position: relative;
+            background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
+            border-radius: 0 0 100px 100px;
+        }
+        .custom-curve::before,
+        .custom-curve::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background-color: transparent;
+        }
+        .custom-curve::before {
+            left: -20px;
+            border-top-right-radius: 20px;
+            box-shadow: 10px 0 0 0 #ffffff;
+        }
+        .custom-curve::after {
+            right: -20px;
+            border-top-left-radius: 20px;
+            box-shadow: -10px 0 0 0 #ffffff;
+        }
+        .dropdown-menu {
+            display: none;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-item {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+        .dropdown-item:hover {
+            background-color: #F3F4F6;
+        }
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            width: 1.25rem;
+            text-align: center;
+        }
+        .dropdown-button.active {
+            color: #F3F4F6;
+        }
+        .dropdown-button i {
+            transition: transform 0.2s ease;
+        }
+        .dropdown-button.active i {
+            transform: rotate(180deg);
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: 100vh;
+        }
+
+        /* Shared Panel Styles */
+        .slide-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 30;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .slide-content {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 80px);
+            background: white;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            pointer-events: auto;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .slide-content-inner {
+            padding: 2rem;
+        }
+
+        .slide-panel.show {
+            pointer-events: auto;
+            opacity: 1;
+        }
+
+        .slide-panel.show .slide-content {
+            transform: translateY(0);
+        }
+
+        /* Back button styling */
+        .back-button {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            color: #4B5563;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-radius: 0.375rem;
+            background: white;
+            border: 1px solid #E5E7EB;
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            color: #1F2937;
+            transform: translateX(-2px);
+        }
+
+        .back-button svg {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Active nav item */
+        .nav-item {
+            position: relative;
+            padding-bottom: 2px;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #4B5563;
+            transition: width 0.3s ease;
+        }
+
+        .nav-item.active::after {
+            width: 100%;
+        }
+
+        .nav-item:hover::after {
+            width: 100%;
+        }
+
+        /* Updated Notification styles */
+        .notification-container {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 80px; /* Position below navbar */
+            width: 100%;
+            max-width: 600px;
+            z-index: 49;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .notification {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            pointer-events: auto;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            background: #10B981;
+            color: white;
+        }
+
+        .notification.error {
+            background: #EF4444;
+            color: white;
+        }
+
+        .notification i {
+            font-size: 1.25rem;
+        }
+
+        .notification-message {
+            font-weight: 500;
+        }
+
+        /* Animation for notifications */
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.animate {
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        /* Dropdown styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 0.5rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            z-index: 50;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background-color: #F3F4F6;
+        }
+
+        .dropdown-item i {
+            margin-right: 0.75rem;
+            width: 1rem;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #E5E7EB;
+            margin: 0.25rem 0;
+        }
+
+        /* Active state for dropdown button */
+        .dropdown-button.active {
+            color: #F3F4F6;
+        }
+
+        .dropdown-button i {
+            transition: transform 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .dropdown-button.active i {
+            transform: rotate(180deg);
+        }
+    </style>
+    @stack('styles')
 </head>
+<body>
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Logo -->
+            <div class="flex items-center absolute left-20 top-6">
+                <button onclick="hidePanel()" class="text-white text-2xl font-semibold">
+                    Cahaya Resort
+                </button>
+            </div>
 
-<body class="bg-gradient-to-r from-blue-900 via-teal-800 to-indigo-900 min-h-screen flex flex-col font-sans text-white">
+            <!-- Center Navigation -->
+            <div class="flex justify-center">
+                <div class="custom-curve px-32 py-5 shadow-[0_8px_15px_-3px_rgba(0,0,0,0.4)] bg-white">
+                    <div class="flex items-center space-x-16" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
+                        <button @click="activeTab = 'dashboard'; hidePanel(); localStorage.setItem('activeTab', 'dashboard')" 
+                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
+                           :class="{ 'active': activeTab === 'dashboard' }">
+                            Dashboard
+                        </button>
+                        <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')" 
+                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
+                           :class="{ 'active': activeTab === 'rooms' }">
+                            Rooms
+                        </button>
+                        <a href="{{ route('galeri') }}" 
+                           @click="activeTab = 'gallery'; localStorage.setItem('activeTab', 'gallery')"
+                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
+                           :class="{ 'active': activeTab === 'gallery' || '{{ request()->routeIs('galeri') }}' === '1' }">
+                            Gallery
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Navbar - Enhanced with dark theme -->
-    <header class="bg-gray-900/80 backdrop-blur-lg shadow-lg sticky top-0 z-50 transition-all duration-300 border-b border-gray-700/50">
-        <nav class="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
-            <a href="/" class="text-2xl font-extrabold text-white hover:text-amber-400 transition duration-300 flex items-center" aria-label="Beranda">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                <span class="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Cahaya</span>
-            </a>
-            
-            <ul class="hidden md:flex gap-8 font-medium text-lg ml-5">
-                <li>
-                    <a href="{{ route('kamar.index') }}" class="relative group text-gray-300 hover:text-white transition">
-                        Kamar & Suite
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('activities') }}" class="relative group text-gray-300 hover:text-white transition">
-                        Activities
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('galeri') }}" class="relative group text-gray-300 hover:text-white transition">
-                        What's in Samosir
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
-                    </a>
-                </li>
-            </ul>
-            
-           {{-- <a href="{{ route('kamar.index') }}" 
-   class="bg-yellow-400/80 backdrop-blur-md text-indigo-900 font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-400 transition"
-   role="button" aria-label="Pesan kamar sekarang">
-   Pesan
-</a> --}}
-
+            <!-- Auth Buttons -->
+            <div class="absolute right-8 top-6 flex items-center space-x-4">
 @auth
-    <!-- User dropdown menu -->
-    <div x-data="{ open: false }" class="relative">
-    <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
-        <span class="text-gray-300 hover:text-white">{{ Auth::user()->name }}</span>
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
+                    <div class="dropdown">
+                        <button type="button"
+                                class="dropdown-button text-white hover:text-gray-200 transition font-medium flex items-center">
+                            <span>{{ Auth::user()->name }}</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
     </button>
     
-    <div x-show="open" @click.away="open = false" 
-         class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-700">
-        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Profil</a>
-        <a href="{{ route('bookings.riwayat') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Riwayat Pemesanan</a>
-        <form method="POST" action="{{ route('logout') }}">
+                        <div class="dropdown-menu">
+                            <a href="{{ route('profile.edit') }}" 
+                               class="dropdown-item">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Profile</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <form id="logout-form" method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
-                Keluar
+                                <button type="button" 
+                                        onclick="confirmLogout()" 
+                                        class="dropdown-item text-red-600">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
             </button>
         </form>
     </div>
 </div>
-
 @else
-    <div class="flex items-center gap-4">
-        <a href="{{ route('login') }}" 
-           class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
-           Masuk
-        </a>
-        <a href="{{ route('register') }}" 
-           class="relative overflow-hidden bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-semibold px-5 py-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
-           role="button" aria-label="Daftar sekarang">
-           <span class="relative z-10">Daftar</span>
-           <span class="absolute inset-0 bg-gradient-to-r from-amber-600 to-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-        </a>
-    </div>
+                    <a href="{{ route('login') }}" class="text-white hover:text-gray-200 transition">Login</a>
+                    <a href="{{ route('register') }}" class="text-white hover:text-gray-200 transition">Register</a>
 @endauth
-        </nav>
-    </header>
-
-    <!-- Notification -->
-    @if(session('success'))
-    <div class="fixed top-20 right-4 z-50" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-        <div class="bg-green-500/10 border border-green-500/20 text-green-400 px-6 py-4 rounded-lg shadow-lg">
-            <div class="flex items-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {{ session('success') }}
             </div>
         </div>
-    </div>
-    @endif
+    </nav>
 
-    <!-- Konten -->
-    <main class="flex-grow">
+    <!-- Updated Notification Container -->
+    <div class="notification-container">
+        <div id="notification" class="notification" role="alert">
+            <i class="fas fa-check-circle"></i>
+            <span id="notification-message" class="notification-message"></span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
         @yield('content')
     </main>
 
-    <!-- Footer - Enhanced -->
-    <footer class="bg-gray-900/90 text-gray-400 p-8 text-center shadow-inner border-t border-gray-800">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <a href="/" class="text-xl font-bold flex items-center justify-center md:justify-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    <!-- Rooms Panel -->
+    <div class="slide-panel rooms-panel" id="roomsPanel">
+        <div class="slide-content">
+            <div class="slide-content-inner">
+                <!-- Back Button -->
+                <button onclick="hidePanel()" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        <span class="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Penginapan Cahaya</span>
-                    </a>
-                    <p class="mt-2 text-sm">Ketemu di Samosir, Danau Toba</p>
+                    Back
+                </button>
+                <div id="roomsContent"></div>
                 </div>
-                
-                <div class="flex space-x-6 mb-6 md:mb-0">
-                    <a href="#" class="text-gray-400 hover:text-amber-400 transition" aria-label="Facebook">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-amber-400 transition" aria-label="Instagram">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-amber-400 transition" aria-label="WhatsApp">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-6.29 3.01c-.173.075-.347.124-.52.124-.173 0-.347-.05-.495-.148-.148-.099-1.137-.563-1.938-1.712-.793-1.14-.869-2.133-.869-2.233.008-.1.05-.198.174-.273.124-.074.297-.05.446-.025.148.025.892.174 1.223.594.331.421.541.694.644.793.099.1.198.124.347.025.148-.099-.545-.421-.993-.793-.446-.372-.892-.843-1.04-1.042-.148-.198-.012-.306.112-.406.115-.093.297-.223.446-.338.148-.115.198-.198.297-.338.099-.139.05-.26-.025-.372-.075-.115-.594-1.429-.816-1.952-.223-.533-.446-.458-.614-.458-.173 0-.364.033-.545.09-.18.058-.342.145-.495.255-.446.347-1.072 1.08-1.072 2.223 0 1.144 1.074 2.555 1.223 2.719.149.174 2.112 3.22 5.15 4.487.52.223.825.297 1.105.347.446.083.853.058 1.174.033.384-.033 1.189-.434 1.356-.868.165-.434.165-.806.115-.868-.05-.066-.183-.099-.384-.198"/>
-                            <path d="M12 0a12 12 0 100 24 12 12 0 000-24zm5.797 17.305a3.661 3.661 0 01-2.108 2.108c-1.56.597-7.303.537-9.947-2.108-2.643-2.643-2.704-8.388-2.108-9.946a3.661 3.661 0 012.108-2.108c1.559-.597 7.303-.537 9.947 2.108 2.644 2.644 2.705 8.388 2.108 9.946z"/>
-                        </svg>
-                    </a>
                 </div>
             </div>
             
-            <div class="mt-8 pt-6 border-t border-gray-800 text-sm">
-                &copy; {{ date('Y') }} <span class="font-semibold text-amber-400">Penginapan Cahaya</span>. Semua hak cipta dilindungi.
+    <!-- Booking Panel -->
+    <div class="slide-panel booking-panel" id="bookingPanel">
+        <div class="slide-content">
+            <div class="slide-content-inner">
+                <!-- Back Button -->
+                <button onclick="hidePanel('rooms')" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Rooms
+                </button>
+                <div id="bookingContent"></div>
             </div>
         </div>
-    </footer>
+    </div>
 
-    @vite('resources/js/app.js')
     @stack('scripts')
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roomsPanel = document.getElementById('roomsPanel');
+        const bookingPanel = document.getElementById('bookingPanel');
+        const roomsContent = document.getElementById('roomsContent');
+        const bookingContent = document.getElementById('bookingContent');
+
+        // Set initial active tab based on URL
+        if (window.location.pathname.includes('/rooms')) {
+            localStorage.setItem('activeTab', 'rooms');
+        } else if (window.location.pathname.includes('/galeri')) {
+            localStorage.setItem('activeTab', 'gallery');
+        } else {
+            localStorage.setItem('activeTab', 'dashboard');
+        }
+
+        window.showRooms = async function() {
+            try {
+                const response = await fetch('{{ route("kamar.index") }}');
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const mainContent = doc.querySelector('.min-h-screen');
+                
+                if (mainContent) {
+                    roomsContent.innerHTML = mainContent.innerHTML;
+                    hidePanel();
+                    roomsPanel.classList.add('show');
+                    bindPanelPagination();
+                }
+            } catch (error) {
+                console.error('Error loading rooms:', error);
+            }
+        };
+
+        // Fungsi untuk rebind pagination di panel
+        function bindPanelPagination() {
+            document.querySelectorAll('#roomsPanel #pagination-links a').forEach(link => {
+                link.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const page = this.href.split('page=')[1];
+                    const roomsContainer = document.querySelector('#roomsPanel #rooms-container');
+                    try {
+                        const response = await fetch(`{{ route('kamar.index') }}?page=${page}`, {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        const html = await response.text();
+                        roomsContainer.innerHTML = html;
+                        bindPanelPagination(); // rebind lagi setelah update
+                    } catch (error) {
+                        console.error('Error loading rooms:', error);
+                    }
+                });
+            });
+        }
+
+        window.showBooking = async function(roomIds) {
+            try {
+                const queryString = roomIds.map(id => `room_ids[]=${id}`).join('&');
+                const response = await fetch(`{{ route("bookings.create") }}?${queryString}`);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const mainContent = doc.querySelector('main');
+                
+                if (mainContent) {
+                    bookingContent.innerHTML = mainContent.innerHTML;
+                    hidePanel();
+                    bookingPanel.classList.add('show');
+                    // Dispatch event when booking panel is shown
+                    document.dispatchEvent(new Event('bookingPanelShown'));
+                }
+            } catch (error) {
+                console.error('Error loading booking form:', error);
+            }
+        };
+
+        window.hidePanel = function(showPanel = null) {
+            roomsPanel.classList.remove('show');
+            bookingPanel.classList.remove('show');
+
+            if (showPanel === 'rooms') {
+                roomsPanel.classList.add('show');
+            }
+        };
+
+        // Initialize any existing panels
+        if (window.location.pathname.includes('/rooms')) {
+            showRooms();
+        }
+
+        // Updated showNotification function
+        window.showNotification = function(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notification-message');
+            
+            // Reset classes
+            notification.className = 'notification';
+            
+            // Set message and type
+            messageEl.textContent = message;
+            notification.classList.add(type);
+            
+            // Force a reflow to restart animation
+            notification.offsetHeight;
+            
+            // Add show and animate classes
+            notification.classList.add('show', 'animate');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show', 'animate');
+                setTimeout(() => {
+                    notification.className = 'notification';
+                }, 300);
+            }, 3000);
+        };
+
+        // Logout confirmation
+        window.confirmLogout = function() {
+            Swal.fire({
+                title: 'Logout Confirmation',
+                text: "Are you sure you want to logout?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            });
+        };
+
+        // Show welcome notification if just logged in
+        @if(session('login_success'))
+            showNotification('Welcome back, {{ Auth::user()->name }}! 👋', 'success');
+        @endif
+
+        // Show logout notification
+        @if(session('logout_success'))
+            showNotification('You have been successfully logged out!', 'success');
+        @endif
+
+        // Show any flash messages
+        @if(session('success'))
+            showNotification('{{ session("success") }}', 'success');
+        @endif
+
+        @if(session('error'))
+            showNotification('{{ session("error") }}', 'error');
+        @endif
+
+        // Dropdown functionality
+        function initializeDropdown() {
+            const dropdownButton = document.querySelector('.dropdown-button');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+            let isOpen = false;
+
+            if (!dropdownButton || !dropdownMenu) return;
+
+            function toggleDropdown(event) {
+                event.stopPropagation();
+                isOpen = !isOpen;
+                dropdownButton.classList.toggle('active');
+                dropdownMenu.classList.toggle('show');
+            }
+
+            function closeDropdown() {
+                if (!isOpen) return;
+                isOpen = false;
+                dropdownButton.classList.remove('active');
+                dropdownMenu.classList.remove('show');
+            }
+
+            // Toggle dropdown on button click
+            dropdownButton.addEventListener('click', toggleDropdown);
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const isClickInside = dropdownButton.contains(event.target) || 
+                                    dropdownMenu.contains(event.target);
+                if (!isClickInside) {
+                    closeDropdown();
+                }
+            });
+
+            // Close dropdown when pressing Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeDropdown();
+                }
+            });
+        }
+
+        // Initialize dropdown
+        initializeDropdown();
+    });
+    </script>
 </body>
 </html>

@@ -17,6 +17,7 @@ class RoomSeeder extends Seeder
             'capacity' => 2,
             'price_per_night' => 250000,
             'is_available' => true,
+            'image' => 'room-1.jpg',
         ]);
 
         Room::create([
@@ -27,6 +28,7 @@ class RoomSeeder extends Seeder
             'capacity' => 4,
             'price_per_night' => 500000,
             'is_available' => true,
+            'image' => 'room-2.jpg',
         ]);
 
         Room::create([
@@ -37,6 +39,7 @@ class RoomSeeder extends Seeder
             'capacity' => 2,
             'price_per_night' => 1000000,
             'is_available' => true,
+            'image' => 'room-3.jpg',
         ]);
 
         Room::create([
@@ -47,6 +50,7 @@ class RoomSeeder extends Seeder
             'capacity' => 2,
             'price_per_night' => 1000000,
             'is_available' => true,
+            'image' => 'room-4.jpg',
         ]);
 
         Room::create([
@@ -57,6 +61,7 @@ class RoomSeeder extends Seeder
             'capacity' => 2,
             'price_per_night' => 1000000,
             'is_available' => true,
+            'image' => 'room-5.jpg',
         ]);
 
         Room::create([
@@ -67,6 +72,7 @@ class RoomSeeder extends Seeder
             'capacity' => 2,
             'price_per_night' => 1000000,
             'is_available' => true,
+            'image' => 'room-6.jpg',
         ]);
 
         Room::create([
@@ -77,6 +83,7 @@ class RoomSeeder extends Seeder
             'capacity' => 2,
             'price_per_night' => 650000,
             'is_available' => true,
+            'image' => 'room-7.jpg',
         ]);
 
         Room::create([
@@ -87,6 +94,7 @@ class RoomSeeder extends Seeder
             'capacity' => 3,
             'price_per_night' => 1250000,
             'is_available' => true,
+            'image' => 'room-8.jpg',
         ]);
 
         Room::create([
@@ -97,6 +105,7 @@ class RoomSeeder extends Seeder
             'capacity' => 1,
             'price_per_night' => 400000,
             'is_available' => true,
+            'image' => 'room-9.jpg',
         ]);
 
         Room::create([
@@ -107,6 +116,7 @@ class RoomSeeder extends Seeder
             'capacity' => 4,
             'price_per_night' => 950000,
             'is_available' => true,
+            'image' => 'room-10.jpg',
         ]);
 
         Room::create([
@@ -117,6 +127,7 @@ class RoomSeeder extends Seeder
             'capacity' => 2,
             'price_per_night' => 600000,
             'is_available' => true,
+            'image' => 'room-11.jpg',
         ]);
 
         Room::create([
@@ -127,6 +138,7 @@ class RoomSeeder extends Seeder
             'capacity' => 5,
             'price_per_night' => 3000000,
             'is_available' => true,
+            'image' => 'room-12.jpg',
         ]);
 
         Room::create([
@@ -137,6 +149,7 @@ class RoomSeeder extends Seeder
             'capacity' => 2,
             'price_per_night' => 850000,
             'is_available' => true,
+            'image' => 'room-13.jpg',
         ]);
     }
 }

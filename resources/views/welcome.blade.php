@@ -1,104 +1,212 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Penginapan Cahaya - Tempat Nyaman untuk Istirahat</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cahaya Resort Panguruan</title>
     @vite('resources/css/app.css')
 </head>
-<body class="bg-gradient-to-r from-blue-500 to-indigo-700 min-h-screen flex flex-col font-sans">
-
-    <!-- Navbar -->
-    <header class="bg-white bg-opacity-30 backdrop-blur-md shadow-md sticky top-0 z-50">
-        <nav class="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
-            <a href="/" class="text-indigo-900 font-extrabold text-3xl hover:text-yellow-400 transition" aria-label="Beranda Penginapan Cahaya">
-                Penginapan Cahaya
-            </a>
-            <ul class="hidden md:flex space-x-8 text-white font-medium text-lg">
-                <li><a href="#rooms" class="hover:text-yellow-300 focus:outline-none focus:text-yellow-300 transition" tabindex="0">Kamar</a></li>
-                <li><a href="#about" class="hover:text-yellow-300 focus:outline-none focus:text-yellow-300 transition" tabindex="0">Tentang Kami</a></li>
-                <li><a href="#contact" class="hover:text-yellow-300 focus:outline-none focus:text-yellow-300 transition" tabindex="0">Kontak</a></li>
-            </ul>
-            <a href="{{ route('rooms.create') }}" 
-               class="ml-4 bg-yellow-400 text-indigo-900 font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-400 transition"
-               role="button" aria-label="Pesan kamar sekarang">
-               Pesan Sekarang
-            </a>
-        </nav>
-    </header>
+<body class="bg-white">
+    <!-- Include Navbar -->
+    @include('components.navbar')
 
     <!-- Hero Section -->
-    <section class="flex-grow flex flex-col justify-center items-center text-center px-6 md:px-12 py-20">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-white drop-shadow-lg leading-tight max-w-4xl">
-            Selamat Datang di <br />
-            <span class="text-yellow-300">Penginapan Cahaya</span>
-        </h1>
-        <p class="mt-6 max-w-3xl text-white text-xl md:text-2xl drop-shadow-md leading-relaxed">
-            Tempat nyaman untuk istirahat Anda dengan pelayanan terbaik dan harga terjangkau.
-        </p>
-        <a href="#rooms" 
-           class="mt-10 bg-yellow-400 text-indigo-900 font-semibold px-10 py-3 rounded-lg shadow-lg hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-400 transition"
-           role="button" aria-label="Lihat kamar kami">
-           Lihat Kamar Kami
-        </a>
-    </section>
+    <section class="relative h-screen">
+        <!-- Hero Background Image -->
+        <div class="absolute inset-0">
+            <img src="{{ asset('images/hero-bg.jpg') }}" alt="Resort View" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black/40"></div>
+        </div>
 
-    <!-- Rooms Section -->
-    <section id="rooms" class="bg-white rounded-t-3xl p-8 max-w-7xl mx-auto mt-16 shadow-lg">
-        <h2 class="text-3xl font-bold mb-8 text-center text-indigo-900">Daftar Kamar</h2>
+        <!-- Hero Content -->
+        <div class="relative h-full flex items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="max-w-3xl">
+                    <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+                        CAHAYA RESORT<br>PANGURUAN
+                    </h1>
+                    <p class="text-white text-lg mb-8">
+                        We provide a variety of the best lodging accommodations for those of you who need it.
+                    </p>
 
-        @if($rooms->isEmpty())
-            <p class="text-center text-gray-600 text-lg">Belum ada kamar yang tersedia saat ini.</p>
-        @else
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                @foreach($rooms as $room)
-                    <article tabindex="0" role="region" aria-labelledby="room-{{ $room->id }}-name" 
-                             class="border rounded-lg p-6 hover:shadow-xl transition cursor-pointer focus:outline-none focus:ring-4 focus:ring-yellow-400">
-                        <h3 id="room-{{ $room->id }}-name" class="font-semibold text-2xl text-indigo-900 mb-3">{{ $room->name }}</h3>
-                        <p class="text-gray-700 mb-5">{{ \Illuminate\Support\Str::limit($room->description, 100) }}</p>
-                        <p class="font-bold text-yellow-600 mb-2 text-lg">Rp{{ number_format($room->price, 0, ',', '.') }}</p>
-                        <p class="text-gray-600 text-md">Kapasitas: {{ $room->capacity }} orang</p>
-                    </article>
-                @endforeach
+                    <!-- Booking Form -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-lg inline-flex items-center space-x-4">
+                        <div class="flex items-center space-x-4">
+                            <div>
+                                <label class="text-white text-sm">Check In</label>
+                                <input type="date" class="bg-transparent text-white border-b border-white">
+                            </div>
+                            <div>
+                                <label class="text-white text-sm">Check Out</label>
+                                <input type="date" class="bg-transparent text-white border-b border-white">
+                            </div>
+                            <div>
+                                <label class="text-white text-sm">Rooms / Guests</label>
+                                <select class="bg-transparent text-white border-b border-white">
+                                    <option>1 Room, 2 Guests</option>
+                                    <option>2 Rooms, 4 Guests</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 transition">
+                            Book Now
+                        </button>
+                    </div>
+                </div>
             </div>
-        @endif
+        </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="max-w-7xl mx-auto p-8 mt-20 text-center text-white px-6 md:px-0">
-        <h2 class="text-3xl font-bold mb-6">Tentang Penginapan Cahaya</h2>
-        <p class="max-w-4xl mx-auto leading-relaxed text-lg md:text-xl drop-shadow-md">
-            Penginapan Cahaya berdiri dengan visi memberikan tempat istirahat yang nyaman dan aman untuk setiap pengunjung. Kami mengutamakan keramahan dan kenyamanan agar Anda merasa seperti di rumah sendiri.
-        </p>
+    <!-- Room Choice Section -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-semibold text-center mb-4">WELCOME TO CAHAYA RESORT</h2>
+            <h3 class="text-2xl font-medium text-center mb-12">Room Choice in Cahaya Resort</h3>
+            
+            <!-- Room Carousel -->
+            <div class="relative">
+                <div class="flex space-x-6 overflow-x-auto pb-6">
+                    <!-- Room Cards -->
+                    @foreach(['Deluxe Room', 'Suite Room', 'Twin Room', 'Double Room', 'Family Room'] as $room)
+                    <div class="flex-none w-72">
+                        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                            <img src="{{ asset('images/rooms/room-1.jpg') }}" alt="{{ $room }}" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <h4 class="font-semibold">{{ $room }}</h4>
+                                <p class="text-orange-500">Rp 500.000</p>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="bg-white rounded-t-3xl p-8 max-w-7xl mx-auto mt-20 shadow-lg mb-20 px-6 md:px-0">
-        <h2 class="text-3xl font-bold mb-8 text-indigo-900 text-center">Kontak Kami</h2>
-        <form action="#" method="POST" class="max-w-2xl mx-auto space-y-6" role="form" aria-label="Formulir kontak">
-            <label for="name" class="block text-indigo-900 font-semibold mb-1">Nama Anda</label>
-            <input id="name" type="text" name="name" placeholder="Nama Anda" required
-                class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+    <!-- Why Choose Us Section -->
+    <section class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-semibold text-center mb-12">Why Cahaya Resort?</h2>
             
-            <label for="email" class="block text-indigo-900 font-semibold mb-1">Email Anda</label>
-            <input id="email" type="email" name="email" placeholder="Email Anda" required
-                class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-            
-            <label for="message" class="block text-indigo-900 font-semibold mb-1">Pesan Anda</label>
-            <textarea id="message" name="message" rows="5" placeholder="Pesan Anda" required
-                class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"></textarea>
-            
-            <button type="submit"
-                class="bg-yellow-400 text-indigo-900 font-semibold px-8 py-3 rounded hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-400 transition w-full">
-                Kirim Pesan
-            </button>
-        </form>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold mb-4">Traditional</h3>
+                    <p>From local hotels to international, discover folklore of hotels all around the world.</p>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold mb-4">Modern</h3>
+                    <p>No need to search another site. The biggest names in hotel are right here.</p>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold mb-4">Affordable</h3>
+                    <p>We've scored deals with the world's leading hotels and we share those savings with you.</p>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <footer class="bg-indigo-900 text-white p-6 text-center text-sm">
-        &copy; {{ date('Y') }} Penginapan Cahaya. Semua hak cipta dilindungi.
+    <!-- Dream in Serene Luxury Section -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-semibold mb-6">Dream In Serene Luxury</h2>
+                    <p class="text-gray-600 mb-8">
+                        Cahaya Panguruan Inn, comfortable with local nuances and natural panorama of Samosir. Wake up with cool air, calming lake views, and a calm atmosphere that refreshes the soul. Enjoy the hospitality of the host, complete facilities, and comfort like at home.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <img src="{{ asset('images/facilities/rooms.jpg') }}" alt="Rooms" class="rounded-lg">
+                    <img src="{{ asset('images/facilities/parking.jpg') }}" alt="Parking Area" class="rounded-lg">
+                    <img src="{{ asset('images/facilities/park.jpg') }}" alt="Mini Park" class="rounded-lg">
+                    <img src="{{ asset('images/facilities/lobby.jpg') }}" alt="Lobby" class="rounded-lg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-2xl font-semibold mb-4">Stay in the know</h2>
+                    <p class="mb-6">Sign up to get marketing emails from Cahaya Resort, including promotions, rewards, and information about Cahaya Resort services.</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Email Address" class="flex-1 px-4 py-2 rounded-l-full bg-white/10">
+                        <button class="bg-orange-500 px-6 py-2 rounded-r-full hover:bg-orange-600 transition">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6">Preferred Room</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-white/10 p-4 rounded-lg text-center">Delux</div>
+                        <div class="bg-white/10 p-4 rounded-lg text-center">Standard</div>
+                        <div class="bg-white/10 p-4 rounded-lg text-center">Suite</div>
+                        <div class="bg-white/10 p-4 rounded-lg text-center">Twin</div>
+                        <div class="bg-white/10 p-4 rounded-lg text-center">Double</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Cahaya Resort</h3>
+                    <p class="text-gray-400">Subscribe to our newsletter</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Book Meeting</li>
+                        <li>Workspace</li>
+                        <li>Office</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">About</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Our Story</li>
+                        <li>Benefits</li>
+                        <li>Team</li>
+                        <li>Careers</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Help</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>FAQs</li>
+                        <li>Contact Us</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 flex justify-between items-center">
+                <div class="text-gray-400">
+                    <a href="#" class="mr-4">Terms & Conditions</a>
+                    <a href="#" class="mr-4">Privacy Policy</a>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </footer>
 
-    @vite('resources/js/app.js')
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </body>
 </html>

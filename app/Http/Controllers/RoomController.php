@@ -8,20 +8,18 @@ use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
+    public function index(Request $request)
+    {
+        $rooms = Room::where('status', 'available')
+                    ->select('id', 'name', 'price_per_night', 'capacity', 'description', 'image')
+                    ->paginate(6);
 
-public function index()
-{
-    $rooms = Room::all(); // Ambil semua kamar dari database
-    return view('landingpage', compact('rooms')); // Sesuaikan nama view dengan yang kamu pakai
-}
+        if ($request->ajax()) {
+            return view('partials.room-list', compact('rooms'))->render();
+        }
 
-public function list()
-{
-    $rooms = Room::paginate(9); // Ambil 12 kamar per halaman (3x4)
-    return view('kamar', compact('rooms')); // Mengarah ke resources/views/kamar.blade.php
-}
-
-
+        return view('kamar', compact('rooms'));
+    }
 
     /**
      * Show the form for creating a new room booking.
