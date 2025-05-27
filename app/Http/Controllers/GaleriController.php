@@ -8,8 +8,8 @@ class GaleriController extends Controller
 {
     public function index()
     {
-        return view('galeri.index', [
-            'title' => 'Galeri - Penginapan Cahaya'
+        return view('galeri', [
+            'title' => 'Gallery - Cahaya Resort'
         ]);
     }
 } 

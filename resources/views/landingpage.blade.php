@@ -6,6 +6,152 @@ use Illuminate\Support\Facades\Storage;
 
 @section('title', 'Welcome to Cahaya Resort Pangururan')
 
+@section('head')
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* Calendar Modal */
+    .calendar-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+    }
+
+    .calendar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .calendar-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 600px;
+    }
+
+    /* FullCalendar Customization */
+    .fc {
+        font-family: inherit;
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .fc .fc-toolbar {
+        margin-bottom: 1.5em;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 1.2em;
+        font-weight: 600;
+    }
+
+    .fc .fc-button-primary {
+        background-color: #f59e0b;
+        border-color: #f59e0b;
+        font-weight: 500;
+        text-transform: capitalize;
+        padding: 0.5em 0.85em;
+    }
+
+    .fc .fc-button-primary:hover {
+        background-color: #d97706;
+        border-color: #d97706;
+    }
+
+    .fc .fc-button-primary:disabled {
+        background-color: #fcd34d;
+        border-color: #fcd34d;
+    }
+
+    .fc .fc-daygrid-day.fc-day-today {
+        background-color: #fef3c7;
+    }
+
+    .fc .fc-highlight {
+        background-color: #fde68a;
+    }
+
+    .fc .fc-day-past {
+        background-color: #f3f4f6;
+    }
+
+    .fc .fc-day-disabled {
+        background-color: #fee2e2;
+        text-decoration: line-through;
+        opacity: 0.7;
+    }
+
+    .fc .fc-day {
+        cursor: pointer;
+    }
+
+    .fc .fc-day:hover {
+        background-color: #f3f4f6;
+    }
+
+    .fc .fc-day.selected {
+        background-color: #fef3c7;
+    }
+
+    /* Calendar Actions */
+    .calendar-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .calendar-actions button {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel {
+        background-color: #e5e7eb;
+        color: #4b5563;
+        border: none;
+    }
+
+    .btn-cancel:hover {
+        background-color: #d1d5db;
+    }
+
+    .btn-apply {
+        background-color: #f59e0b;
+        color: white;
+        border: none;
+    }
+
+    .btn-apply:hover {
+        background-color: #d97706;
+    }
+</style>
+@endsection
+
 @section('content')
     <!-- Hero Section -->
     <section class="relative h-screen">
@@ -43,23 +189,26 @@ use Illuminate\Support\Facades\Storage;
                     <!-- Booking Form -->
                     <div class="inline-flex items-center gap-4 p-4 mt-10 bg-black/40 backdrop-blur-md rounded-xl">
                 <!-- Check-in -->
-                <div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/30">
-                    <i class="text-white fas fa-calendar"></i>
-                    <input type="date" 
-                           id="landing_check_in"
-                           name="landing_check_in"
-                           class="text-white placeholder-white bg-transparent border-none focus:outline-none" 
-                           placeholder="Check in">
-                            </div>
-                            
-                <!-- Check-out -->
-                <div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/30">
-                    <i class="text-white fas fa-calendar"></i>
-                    <input type="date" 
-                           id="landing_check_out"
-                           name="landing_check_out"
-                           class="text-white placeholder-white bg-transparent border-none focus:outline-none" 
-                           placeholder="Checkout">
+<!-- Check-in -->
+<div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg cursor-pointer" onclick="openCalendar?.('check_in')">
+    <i class="fas fa-calendar text-white"></i>
+    <input type="date" 
+           id="landing_check_in"
+           name="landing_check_in"
+           class="bg-transparent text-white border-none focus:outline-none placeholder-white w-32"
+           placeholder="Check in">
+</div>
+
+<!-- Check-out -->
+<div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg cursor-pointer" onclick="openCalendar?.('check_out')">
+    <i class="fas fa-calendar text-white"></i>
+    <input type="date" 
+           id="landing_check_out"
+           name="landing_check_out"
+           class="bg-transparent text-white border-none focus:outline-none placeholder-white w-32"
+           placeholder="Check out">
+</div>
+
             </div>
             
                 <!-- Room & Guests -->
@@ -499,4 +648,156 @@ use Illuminate\Support\Facades\Storage;
             </div>
         </div>
     </section>
+
+    <!-- Calendar Modal -->
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-overlay"></div>
+        <div class="calendar-container">
+            <div id="calendar"></div>
+            <div class="calendar-actions">
+                <button class="btn-cancel" onclick="closeCalendar()">Cancel</button>
+                <button class="btn-apply" onclick="applyDates()">Apply</button>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<!-- FullCalendar Scripts -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    window.calendar = null;
+    window.selectedStartDate = null;
+    window.selectedEndDate = null;
+    window.currentInputType = null;
+
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
+
+    // Initialize calendar
+    window.calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        selectable: true,
+        selectMirror: true,
+        unselectAuto: false,
+        dateClick: handleDateClick,
+        validRange: {
+            start: new Date()
+        },
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        }
+    });
+
+    window.calendar.render();
+});
+
+// Calendar Functions
+window.openCalendar = function(type) {
+    window.currentInputType = type;
+    document.querySelector('.calendar-modal').style.display = 'block';
+    if (window.calendar) {
+        window.calendar.render();
+        
+        // Set appropriate valid range based on input type
+        if (type === 'check_out' && window.selectedStartDate) {
+            const nextDay = new Date(window.selectedStartDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            window.calendar.setOption('validRange', {
+                start: nextDay
+            });
+        } else {
+            window.calendar.setOption('validRange', {
+                start: new Date()
+            });
+        }
+    }
+};
+
+window.closeCalendar = function() {
+    document.querySelector('.calendar-modal').style.display = 'none';
+};
+
+window.applyDates = function() {
+    if (window.currentInputType === 'check_in' && window.selectedStartDate) {
+        document.getElementById('landing_check_in').value = formatDate(window.selectedStartDate);
+        // Clear check-out if it's before new check-in
+        if (window.selectedEndDate && window.selectedEndDate <= window.selectedStartDate) {
+            window.selectedEndDate = null;
+            document.getElementById('landing_check_out').value = '';
+        }
+        closeCalendar();
+        // Automatically open check-out selection
+        setTimeout(() => openCalendar('check_out'), 100);
+    } else if (window.currentInputType === 'check_out' && window.selectedEndDate) {
+        document.getElementById('landing_check_out').value = formatDate(window.selectedEndDate);
+        closeCalendar();
+    }
+};
+
+window.handleDateClick = function(info) {
+    const clickedDate = new Date(info.dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (clickedDate < today) {
+        return; // Prevent selecting past dates
+    }
+
+    if (window.currentInputType === 'check_in') {
+        window.selectedStartDate = clickedDate;
+        highlightDates();
+    } else if (window.currentInputType === 'check_out') {
+        if (!window.selectedStartDate) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Select Check-in First',
+                text: 'Please select a check-in date before selecting check-out date.',
+                confirmButtonColor: '#f59e0b'
+            });
+            closeCalendar();
+            openCalendar('check_in');
+            return;
+        }
+        if (clickedDate <= window.selectedStartDate) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Date',
+                text: 'Check-out date must be after check-in date.',
+                confirmButtonColor: '#f59e0b'
+            });
+            return;
+        }
+        window.selectedEndDate = clickedDate;
+        highlightDates();
+    }
+};
+
+window.highlightDates = function() {
+    window.calendar.getEvents().forEach(event => event.remove());
+    
+    if (window.selectedStartDate) {
+        window.calendar.addEvent({
+            start: window.selectedStartDate,
+            end: window.selectedEndDate || window.selectedStartDate,
+            display: 'background',
+            backgroundColor: '#fef3c7'
+        });
+    }
+};
+
+window.formatDate = function(date) {
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+};
+
+// Event Listeners
+document.querySelector('.calendar-overlay')?.addEventListener('click', closeCalendar);
+</script>
+@endpush
