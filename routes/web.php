@@ -106,6 +106,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Room Management
     Route::resource('rooms', App\Http\Controllers\Admin\RoomController::class);
     
+    // Booking Management
+    Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class);
+    
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
