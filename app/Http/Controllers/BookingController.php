@@ -7,6 +7,8 @@ use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Transaction;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -28,59 +30,74 @@ class BookingController extends Controller
                 ->with('error', 'Please select at least one room to proceed with booking.');
         }
         
-        // Get booked dates for the selected rooms
-        $unavailableDates = [];
+        // Get booked dates for all rooms
+        $bookedDates = [];
         foreach ($selectedRooms as $room) {
-            $bookedDates = DB::table('booking_room')
+            $bookings = DB::table('booking_room')
                 ->join('bookings', 'booking_room.booking_id', '=', 'bookings.id')
                 ->where('booking_room.room_id', $room->id)
-                ->where('bookings.status', '!=', 'cancelled')
+                ->whereNotIn('bookings.status', ['cancelled', 'refunded']) // Exclude cancelled and refunded bookings
                 ->where(function($query) {
-                    $query->where('bookings.check_out_date', '>=', now())
-                        ->orWhere('bookings.check_in_date', '>=', now());
+                    $query->where('bookings.check_out_date', '>=', now()->format('Y-m-d'))
+                        ->orWhere('bookings.check_in_date', '>=', now()->format('Y-m-d'));
                 })
-                ->select('bookings.check_in_date', 'bookings.check_out_date')
+                ->select('bookings.check_in_date', 'bookings.check_out_date', 'booking_room.room_id')
                 ->get();
 
-            foreach ($bookedDates as $booking) {
+            foreach ($bookings as $booking) {
+                $startDate = new \DateTime($booking->check_in_date);
+                $endDate = new \DateTime($booking->check_out_date);
                 $period = new \DatePeriod(
-                    new \DateTime($booking->check_in_date),
+                    $startDate,
                     new \DateInterval('P1D'),
-                    (new \DateTime($booking->check_out_date))->modify('+1 day')
+                    $endDate->modify('+1 day')
                 );
 
                 foreach ($period as $date) {
-                    $unavailableDates[] = $date->format('Y-m-d');
+                    $dateStr = $date->format('Y-m-d');
+                    if (!isset($bookedDates[$dateStr])) {
+                        $bookedDates[$dateStr] = [];
+                    }
+                    $bookedDates[$dateStr][] = $room->id;
                 }
             }
         }
-        
-        // Remove duplicates and sort dates
-        $unavailableDates = array_values(array_unique($unavailableDates));
-        sort($unavailableDates);
+
+        // Log booked dates for debugging
+        \Log::info('Booked dates:', $bookedDates);
         
         // Calculate initial totals
-        $subtotal = $selectedRooms->sum('price_per_night');
-        $tax = round($subtotal * 0.1);
-        $deposit = $selectedRooms->count() * 300000;
-        $total = $subtotal + $tax + $deposit;
+        $nights = 1; // Default to 1 night for initial calculation
+        $subtotal = 0;
+        foreach ($selectedRooms as $room) {
+            $subtotal += $room->price_per_night * $nights;
+        }
+        
+        // No tax, no deposit
+        $tax = 0;
+        $deposit = 0;
+        $total = $subtotal;
         
         if ($request->ajax()) {
-            return view('bookings.create', compact('selectedRooms', 'subtotal', 'tax', 'deposit', 'total', 'unavailableDates'))
+            return view('bookings.create', compact('selectedRooms', 'subtotal', 'tax', 'deposit', 'total', 'bookedDates'))
                 ->render();
         }
         
-        return view('bookings.create', compact('selectedRooms', 'subtotal', 'tax', 'deposit', 'total', 'unavailableDates'));
+        return view('bookings.create', compact('selectedRooms', 'subtotal', 'tax', 'deposit', 'total', 'bookedDates'));
     }
 
     public function store(Request $request)
     {
         \Log::info('Booking request received', [
             'request' => $request->all(),
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
+            'route' => $request->route()->getName(),
+            'url' => $request->url(),
+            'method' => $request->method()
         ]);
 
         try {
+            // Validate the request
             $validated = $request->validate([
                 'selected_rooms' => 'required|json',
                 'full_name' => 'required|string|max:255',
@@ -89,107 +106,252 @@ class BookingController extends Controller
                 'id_number' => 'required|string|max:50',
                 'check_in_date' => 'required|date|after_or_equal:today',
                 'check_out_date' => 'required|date|after:check_in_date',
-                'special_requests' => 'nullable|string'
+                'special_requests' => 'nullable|string',
+                'payment_method' => 'required|in:midtrans,direct'
             ]);
+
+            \Log::info('Validation passed', $validated);
 
             // Decode selected rooms
             $selectedRooms = json_decode($validated['selected_rooms'], true);
             if (empty($selectedRooms)) {
+                \Log::error('No rooms selected');
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Please select at least one room.'
+                    ], 422);
+                }
                 return back()->withErrors([
-                    'selected_rooms' => 'Silakan pilih setidaknya satu kamar.'
+                    'selected_rooms' => 'Please select at least one room.'
                 ])->withInput();
             }
 
-            \Log::info('Selected rooms decoded', [
-                'selected_rooms' => $selectedRooms,
-                'check_in' => $validated['check_in_date'],
-                'check_out' => $validated['check_out_date']
-            ]);
+            // Calculate nights
+            $checkIn = \Carbon\Carbon::parse($validated['check_in_date']);
+            $checkOut = \Carbon\Carbon::parse($validated['check_out_date']);
+            $nights = $checkIn->diffInDays($checkOut);
 
-            // Start database transaction
-            DB::beginTransaction();
-
-            try {
-                // Calculate initial total price
-                $checkIn = new \DateTime($validated['check_in_date']);
-                $checkOut = new \DateTime($validated['check_out_date']);
-                $nights = $checkIn->diff($checkOut)->days;
-
-                $totalPrice = 0;
-                foreach ($selectedRooms as $roomData) {
-                    $totalPrice += $roomData['price_per_night'] * $nights;
+            // Calculate totals
+            $subtotal = 0;
+            foreach ($selectedRooms as $roomData) {
+                $room = Room::find($roomData['id']);
+                if (!$room) {
+                    throw new \Exception("Room with ID {$roomData['id']} not found.");
                 }
 
-                $tax = round($totalPrice * 0.1);
-                $deposit = count($selectedRooms) * 300000;
-                $finalTotal = $totalPrice + $tax + $deposit;
+                // Check if room is available
+                $isAvailable = $room->isAvailableForDates(
+                    $validated['check_in_date'],
+                    $validated['check_out_date']
+                );
 
-                // Create the booking with initial total price
-                $booking = Booking::create([
-                    'user_id' => auth()->id(),
-                    'full_name' => $validated['full_name'],
-                    'email' => $validated['email'],
-                    'phone' => $validated['phone'],
-                    'id_number' => $validated['id_number'],
-                    'check_in_date' => $validated['check_in_date'],
-                    'check_out_date' => $validated['check_out_date'],
-                    'special_requests' => $validated['special_requests'],
-                    'status' => 'pending',
-                    'payment_status' => 'pending',
-                    'total_price' => $finalTotal,
-                    'tax' => $tax,
-                    'deposit' => $deposit
-                ]);
-
-                // Attach rooms to booking
-                foreach ($selectedRooms as $roomData) {
-                    $room = Room::find($roomData['id']);
-                    if (!$room) {
-                        throw new \Exception("Kamar dengan ID {$roomData['id']} tidak ditemukan.");
-                    }
-
-                    // Check if room is available for the selected dates
-                    $isAvailable = $room->isAvailableForDates(
-                        $validated['check_in_date'],
-                        $validated['check_out_date']
-                    );
-
-                    if (!$isAvailable) {
-                        throw new \Exception("Kamar {$room->name} tidak tersedia untuk tanggal yang dipilih.");
-                    }
-
-                    // Calculate room price
-                    $roomPrice = $room->price_per_night * $nights;
-
-                    // Attach room to booking
-                    $booking->rooms()->attach($room->id, [
-                        'price_per_night' => $room->price_per_night,
-                        'subtotal' => $roomPrice,
-                        'quantity' => 1
-                    ]);
+                if (!$isAvailable) {
+                    throw new \Exception("Room {$room->name} is not available for the selected dates.");
                 }
 
-                DB::commit();
-
-                \Log::info('Booking created successfully', ['booking_id' => $booking->id]);
-
-                // Clear selected rooms from session storage and redirect with success message
-                return redirect()->route('bookings.show', $booking)
-                    ->with('success', 'Pemesanan berhasil dibuat! Silakan lakukan pembayaran untuk mengkonfirmasi pemesanan Anda.')
-                    ->with('clearCart', true);
-
-            } catch (\Exception $e) {
-                DB::rollBack();
-                \Log::error('Error creating booking: ' . $e->getMessage());
-                return back()->withErrors(['error' => $e->getMessage()])->withInput();
+                $pricePerNight = $room->price_per_night;
+                $roomSubtotal = $pricePerNight * $nights;
+                $subtotal += $roomSubtotal;
             }
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation error: ' . json_encode($e->errors()));
-            return back()->withErrors($e->errors())->withInput();
+            // Calculate final total (no tax, no deposit)
+            $finalTotal = $subtotal;
+            $tax = 0;
+            $deposit = 0;
+
+            \Log::info('Price calculation', [
+                'subtotal' => $subtotal,
+                'tax' => $tax,
+                'deposit' => $deposit,
+                'finalTotal' => $finalTotal,
+                'nights' => $nights,
+                'payment_method' => $validated['payment_method']
+            ]);
+
+            if ($validated['payment_method'] === 'midtrans') {
+                try {
+                    DB::beginTransaction();
+
+                    // Generate order ID
+                    $orderId = sprintf('ORDER-%d-%d', time(), auth()->id());
+
+                    // Create booking first
+                    $booking = Booking::create([
+                        'user_id' => auth()->id(),
+                        'full_name' => $validated['full_name'],
+                        'email' => $validated['email'],
+                        'phone' => $validated['phone'],
+                        'id_number' => $validated['id_number'],
+                        'check_in_date' => $validated['check_in_date'],
+                        'check_out_date' => $validated['check_out_date'],
+                        'special_requests' => $validated['special_requests'],
+                        'status' => 'pending',
+                        'payment_status' => 'pending',
+                        'total_price' => $finalTotal,
+                        'tax' => $tax,
+                        'deposit' => $deposit
+                    ]);
+
+                    // Attach rooms
+                    foreach ($selectedRooms as $roomData) {
+                        $room = Room::find($roomData['id']);
+                        $booking->rooms()->attach($room->id, [
+                            'price_per_night' => $room->price_per_night,
+                            'subtotal' => $room->price_per_night * $nights,
+                            'quantity' => 1
+                        ]);
+                    }
+
+                    // Create transaction record
+                    $transaction = Transaction::create([
+                        'booking_id' => $booking->id,
+                        'order_id' => $orderId,
+                        'gross_amount' => $finalTotal,
+                        'payment_type' => 'pending',
+                        'transaction_status' => 'pending',
+                        'payment_status' => 'pending',
+                        'raw_response' => json_encode([
+                            'transaction_details' => [
+                                'order_id' => $orderId,
+                                'gross_amount' => $finalTotal
+                            ],
+                            'customer_details' => [
+                                'first_name' => $validated['full_name'],
+                                'email' => $validated['email'],
+                                'phone' => $validated['phone']
+                            ],
+                            'item_details' => [
+                                [
+                                    'id' => 'room_charge',
+                                    'price' => $finalTotal,
+                                    'quantity' => 1,
+                                    'name' => 'Room Charge for ' . $nights . ' night(s)'
+                                ]
+                            ],
+                            'enabled_payments' => [
+                                'bca_va', 'bni_va', 'bri_va', 'mandiri_va', 'permata_va', 'other_va',
+                                'gopay', 'shopeepay', 'indomaret',
+                                'bca_klikbca', 'bca_klikpay', 'cimb_clicks', 'danamon_online', 'bri_epay'
+                            ],
+                            'callbacks' => [
+                                'finish' => url('/payment/finish'),
+                                'error' => url('/payment/error'),
+                                'cancel' => url('/payment/cancel')
+                            ]
+                        ])
+                    ]);
+
+                    \Log::info('Booking and transaction created successfully', [
+                        'booking_id' => $booking->id,
+                        'transaction_id' => $transaction->id,
+                        'order_id' => $orderId
+                    ]);
+
+                    // Set up Midtrans configuration
+                    \Midtrans\Config::$serverKey = config('midtrans.server_key');
+                    \Midtrans\Config::$isProduction = config('midtrans.is_production');
+
+                    \Log::info('Setting up Midtrans with config', [
+                        'server_key' => config('midtrans.server_key'),
+                        'is_production' => config('midtrans.is_production'),
+                        'order_id' => $orderId,
+                        'amount' => $finalTotal
+                    ]);
+
+                    // Prepare Midtrans parameters
+                    $params = [
+                        'transaction_details' => [
+                            'order_id' => $orderId,
+                            'gross_amount' => (float) $finalTotal
+                        ],
+                        'customer_details' => [
+                            'first_name' => $validated['full_name'],
+                            'email' => $validated['email'],
+                            'phone' => $validated['phone']
+                        ],
+                        'item_details' => [
+                            [
+                                'id' => 'room_charge',
+                                'price' => (float) $finalTotal,
+                                'quantity' => 1,
+                                'name' => 'Room Charge for ' . $nights . ' night(s)'
+                            ]
+                        ],
+                        'enabled_payments' => [
+                            'bca_va', 'bni_va', 'bri_va', 'mandiri_va', 'permata_va', 'other_va',
+                            'gopay', 'shopeepay', 'indomaret',
+                            'bca_klikbca', 'bca_klikpay', 'cimb_clicks', 'danamon_online', 'bri_epay'
+                        ],
+                        'callbacks' => [
+                            'finish' => url('/payment/finish'),
+                            'error' => url('/payment/error'),
+                            'cancel' => url('/payment/cancel')
+                        ]
+                    ];
+
+                    \Log::info('Midtrans parameters prepared', $params);
+
+                    // Get Snap Token
+                    $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+                    \Log::info('Midtrans snap token generated', [
+                        'order_id' => $orderId,
+                        'snap_token' => $snapToken
+                    ]);
+
+                    DB::commit();
+
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => true,
+                            'snap_token' => $snapToken
+                        ]);
+                    }
+
+                    return redirect()->route('bookings.show', $booking)
+                        ->with('snap_token', $snapToken);
+
+                } catch (\Exception $e) {
+                    DB::rollback();
+                    \Log::error('Error in booking process: ' . $e->getMessage(), [
+                        'exception' => $e,
+                        'params' => $params ?? null
+                    ]);
+
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Failed to process payment. Please try again.'
+                        ], 500);
+                    }
+
+                    return back()->withErrors([
+                        'payment' => 'Failed to process payment. Please try again.'
+                    ])->withInput();
+                }
+            } else {
+                // Handle direct payment
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'booking_id' => $booking->id
+                    ]);
+                }
+            }
+
+            return redirect()->route('bookings.show', $booking->id)
+                ->with('success', 'Booking created successfully!');
+
         } catch (\Exception $e) {
-            \Log::error('Unexpected error: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Terjadi kesalahan saat membuat pemesanan. Silakan coba lagi.'])->withInput();
+            \Log::error('Error in booking process: ' . $e->getMessage());
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 422);
+            }
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
 
@@ -200,7 +362,7 @@ class BookingController extends Controller
 
     public function riwayat()
     {
-        $riwayat = Booking::with('rooms') // Updated to use rooms relationship
+        $riwayat = Booking::with('rooms')
                     ->where('user_id', Auth::id())
                     ->latest()
                     ->get();
@@ -213,7 +375,7 @@ class BookingController extends Controller
         $bookedDates = DB::table('booking_room')
             ->join('bookings', 'booking_room.booking_id', '=', 'bookings.id')
             ->where('booking_room.room_id', $roomId)
-            ->where('bookings.status', '!=', 'cancelled')
+            ->whereNotIn('bookings.status', ['cancelled', 'refunded']) // Exclude cancelled and refunded bookings
             ->where(function($query) {
                 $query->where('bookings.check_out_date', '>=', now())
                     ->orWhere('bookings.check_in_date', '>=', now());
@@ -235,5 +397,51 @@ class BookingController extends Controller
         }
 
         return response()->json(array_values(array_unique($dates)));
+    }
+
+    public function finish(Request $request)
+    {
+        Log::info('Finish endpoint called', [
+            'request' => $request->all(),
+            'session' => session()->all()
+        ]);
+
+        try {
+            // Get transaction from order_id if available
+            $orderId = $request->input('order_id');
+            if ($orderId) {
+                $transaction = Transaction::where('order_id', $orderId)->first();
+                if ($transaction) {
+                    Log::info('Transaction found', ['transaction_id' => $transaction->id]);
+                    // Redirect to landing page with transaction panel open
+                    return redirect()->to('/?panel=transactions&source=midtrans')
+                        ->with('success', 'Payment processed successfully!');
+                }
+            }
+
+            // If no transaction found, redirect to home with error
+            Log::error('No transaction found for order_id: ' . $orderId);
+            return redirect()->route('home')
+                ->with('error', 'Transaction not found. Please contact support if you have made a payment.');
+
+        } catch (\Exception $e) {
+            Log::error('Error in finish endpoint: ' . $e->getMessage());
+            return redirect()->route('home')
+                ->with('error', 'An error occurred while processing your payment.');
+        }
+    }
+
+    public function error()
+    {
+        session()->forget('temp_booking');
+        return redirect()->route('home')
+            ->with('error', 'Payment failed. Please try again.');
+    }
+
+    public function cancel()
+    {
+        session()->forget('temp_booking');
+        return redirect()->route('home')
+            ->with('info', 'Booking cancelled.');
     }
 }

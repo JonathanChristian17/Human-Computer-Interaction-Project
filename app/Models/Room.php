@@ -110,7 +110,7 @@ class Room extends Model
         // Check for any overlapping bookings (including pending)
         $conflictingBookings = $this->bookings()
             ->where(function($query) use ($checkIn, $checkOut) {
-                $query->whereIn('status', ['pending', 'confirmed', 'checked_in'])
+                $query->whereNotIn('status', ['cancelled', 'refunded']) // Exclude cancelled and refunded bookings
                     ->where(function($q) use ($checkIn, $checkOut) {
                         // Check for any date overlap scenarios:
                         // 1. New booking's check-in date falls between existing booking
