@@ -18,7 +18,7 @@ class AdminSeeder extends Seeder
             User::create([
                 'name' => 'Super Admin',
                 'email' => 'admin@penginapan-cahaya.com',
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make(value: 'admin123'),
                 'role' => 'admin',
                 'phone' => '081234567890',
                 'address' => 'Jl. Admin No. 1',
