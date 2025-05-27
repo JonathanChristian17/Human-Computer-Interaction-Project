@@ -12,10 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->string('full_name')->after('room_id');
-            $table->string('email')->after('full_name');
-            $table->string('phone')->after('email');
-            $table->string('id_number')->after('phone');
             $table->integer('guests')->after('id_number');
             $table->string('billing_address')->after('guests');
             $table->string('billing_city')->after('billing_address');
@@ -31,10 +27,6 @@ return new class extends Migration
     {
         Schema::table('bookings', function (Blueprint $table) {
             $table->dropColumn([
-                'full_name',
-                'email',
-                'phone',
-                'id_number',
                 'guests',
                 'billing_address',
                 'billing_city',

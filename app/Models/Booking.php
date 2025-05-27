@@ -17,20 +17,23 @@ class Booking extends Model
         'id_number',
         'check_in_date',
         'check_out_date',
-        'total_price',
-        'special_requests',
         'status',
         'payment_status',
+        'total_price',
+        'special_requests',
         'checked_in_at',
-        'checked_out_at'
+        'checked_out_at',
+        'managed_by',
+        'check_in_time',
+        'check_out_time'
     ];
 
     protected $casts = [
-        'check_in_date' => 'date',
-        'check_out_date' => 'date',
-        'total_price' => 'decimal:2',
+        'check_in_date' => 'datetime',
+        'check_out_date' => 'datetime',
         'checked_in_at' => 'datetime',
-        'checked_out_at' => 'datetime'
+        'checked_out_at' => 'datetime',
+        'total_price' => 'decimal:2'
     ];
 
     protected $attributes = [
@@ -40,6 +43,19 @@ class Booking extends Model
 
     protected $appends = ['room'];
 
+    // Add status constants
+    const STATUS_PENDING = 'pending';
+    const STATUS_CONFIRMED = 'confirmed';
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_CHECKED_IN = 'checked_in';
+    const STATUS_CHECKED_OUT = 'checked_out';
+
+    // Add payment status constants
+    const PAYMENT_PENDING = 'pending';
+    const PAYMENT_PAID = 'paid';
+    const PAYMENT_CANCELLED = 'cancelled';
+    const PAYMENT_REFUNDED = 'refunded';
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -47,18 +63,15 @@ class Booking extends Model
 
     public function rooms()
     {
-        return $this->belongsToMany(Room::class)
+        return $this->belongsToMany(Room::class, 'booking_room')
                     ->withPivot(['price_per_night', 'quantity', 'subtotal'])
                     ->withTimestamps();
     }
 
     // Helper method to get the first room
-    public function getRoomAttribute()
+    public function room()
     {
-        if ($this->relationLoaded('rooms')) {
-            return $this->rooms->first();
-        }
-        return $this->rooms()->first();
+        return $this->belongsToMany(Room::class, 'booking_room')->first();
     }
 
     public function receptionist()
@@ -78,27 +91,61 @@ class Booking extends Model
 
     public function isPending()
     {
-        return $this->status === 'pending';
+        return $this->status === self::STATUS_PENDING;
     }
 
     public function isConfirmed()
     {
-        return $this->status === 'confirmed';
-    }
-
-    public function isCheckedIn()
-    {
-        return $this->status === 'checked_in';
-    }
-
-    public function isCheckedOut()
-    {
-        return $this->status === 'checked_out';
+        return $this->status === self::STATUS_CONFIRMED;
     }
 
     public function isCancelled()
     {
-        return $this->status === 'cancelled';
+        return $this->status === self::STATUS_CANCELLED;
+    }
+
+    public function isCheckedIn()
+    {
+        return $this->status === self::STATUS_CHECKED_IN;
+    }
+
+    public function isCheckedOut()
+    {
+        return $this->status === self::STATUS_CHECKED_OUT;
+    }
+
+    public function isPaymentPending()
+    {
+        return $this->payment_status === self::PAYMENT_PENDING;
+    }
+
+    public function isPaymentPaid()
+    {
+        return $this->payment_status === self::PAYMENT_PAID;
+    }
+
+    public function isPaymentCancelled()
+    {
+        return $this->payment_status === self::PAYMENT_CANCELLED;
+    }
+
+    public function isPaymentRefunded()
+    {
+        return $this->payment_status === self::PAYMENT_REFUNDED;
+    }
+
+    public function markAsPaid()
+    {
+        $this->payment_status = self::PAYMENT_PAID;
+        $this->status = self::STATUS_CONFIRMED;
+        return $this->save();
+    }
+
+    public function markAsCancelled()
+    {
+        $this->payment_status = self::PAYMENT_CANCELLED;
+        $this->status = self::STATUS_CANCELLED;
+        return $this->save();
     }
 
     // Scope untuk pemesanan aktif
@@ -128,6 +175,6 @@ class Booking extends Model
     // Format harga untuk tampilan
     public function getFormattedTotalPriceAttribute()
     {
-        return 'Rp' . number_format($this->total_price, 0, ',', '.');
+        return 'Rp ' . number_format($this->total_price, 0, ',', '.');
     }
 }

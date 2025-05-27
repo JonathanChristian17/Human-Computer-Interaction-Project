@@ -29,15 +29,23 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Add welcome notification
-        session()->flash('success', 'Selamat datang kembali, ' . Auth::user()->name . '!');
+        // Get authenticated user
+        $user = Auth::user();
 
-        if (Auth::user()->role === 'admin') {
-            return redirect()->intended(route('admin.dashboard'));
-        }
+        if ($user) {
+            // Add welcome notification with user's name
+            session()->flash('success', 'Selamat datang kembali, ' . $user->name . '!');
 
-        if (Auth::user()->role === 'receptionist') {
-            return redirect()->intended(route('receptionist.dashboard'));
+            if ($user->role === 'admin') {
+                return redirect()->intended(route('admin.dashboard'));
+            }
+
+            if ($user->role === 'receptionist') {
+                return redirect()->intended(route('receptionist.dashboard'));
+            }
+        } else {
+            // Fallback message if user is not available
+            session()->flash('success', 'Selamat datang kembali!');
         }
 
         return redirect()->intended(route('landing'))
