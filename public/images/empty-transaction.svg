@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle -->
+    <circle cx="120" cy="120" r="120" fill="#FFF7ED" />
+    
+    <!-- Receipt Paper -->
+    <path d="M70 60C70 56.6863 72.6863 54 76 54H164C167.314 54 170 56.6863 170 60V180L156 170L142 180L128 170L114 180L100 170L86 180L70 170V60Z" fill="white" stroke="#FB923C" stroke-width="2"/>
+    
+    <!-- Receipt Lines -->
+    <line x1="90" y1="80" x2="150" y2="80" stroke="#E5E7EB" stroke-width="4" stroke-linecap="round"/>
+    <line x1="90" y1="100" x2="150" y2="100" stroke="#E5E7EB" stroke-width="4" stroke-linecap="round"/>
+    <line x1="90" y1="120" x2="150" y2="120" stroke="#E5E7EB" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Plus Icon -->
+    <circle cx="120" cy="140" r="20" fill="#FB923C"/>
+    <path d="M120 130V150M110 140H130" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg> 

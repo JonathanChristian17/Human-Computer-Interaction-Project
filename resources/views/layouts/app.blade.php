@@ -29,6 +29,46 @@
             padding: 0;
         }
 
+        /* Scrollbar Styling */
+        * {
+            scrollbar-width: thin;  /* For Firefox */
+            scrollbar-color: rgba(75, 85, 99, 0.6) transparent;  /* For Firefox - dark gray with transparency */
+        }
+
+        /* Chrome, Safari, Edge Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background-color: transparent;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.6); /* Dark gray with 60% opacity */
+            border-radius: 3px;
+            transition: background-color 0.2s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(75, 85, 99, 0.8); /* Darker on hover */
+        }
+
+        /* Make scrollbars overlay content */
+        .overlay-scrollbar {
+            overflow: overlay !important;  /* Modern browsers */
+            -ms-overflow-style: -ms-autohiding-scrollbar;  /* IE/Edge */
+        }
+
+        /* Fallback for browsers that don't support overlay */
+        @supports not (overflow: overlay) {
+            .overlay-scrollbar {
+                overflow: auto !important;
+            }
+        }
+
         .custom-curve {
             position: relative;
             background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
@@ -767,13 +807,7 @@
                         window.history.replaceState({}, document.title, newUrl);
 
                         // Show success message
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Payment Processed',
-                            text: 'Your payment has been processed. Please check your transaction status below.',
-                            timer: 3000,
-                            showConfirmButton: false
-                        });
+                        
                     }
                 }, 300);
             }
@@ -1701,32 +1735,230 @@
                         const response = await fetch('{{ route("transactions.index") }}', {
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             }
                         });
                         
                         if (!response.ok) {
-                            throw new Error('Failed to load transactions');
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to load transactions');
                         }
                         
                         const data = await response.json();
                         if (data.html) {
                             document.getElementById('transactionList').innerHTML = data.html;
+                        } else {
+                            throw new Error('Invalid response format');
                         }
                     } catch (error) {
                         console.error('Error loading transactions:', error);
                         document.getElementById('transactionList').innerHTML = `
-                            <div class="text-center py-4">
-                                <svg class="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <div class="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg">
+                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <h3 class="mt-2 text-base font-medium text-gray-900">Error</h3>
-                                <p class="mt-1 text-sm text-gray-500">Failed to load transactions. Please try again.</p>
-                                <button onclick="window.transactionPanel.loadTransactions()" class="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+                                <h3 class="mt-4 text-lg font-medium text-gray-900">Failed to Load Transactions</h3>
+                                <p class="mt-1 text-sm text-gray-500">There was an error loading your transactions. Please try again.</p>
+                                <button onclick="window.transactionPanel.loadTransactions()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                    <svg class="mr-2 -ml-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
                                     Retry
                                 </button>
                             </div>
                         `;
+                    }
+                },
+                async showDetails(id) {
+                    try {
+                        const response = await fetch(`/transactions/${id}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to load transaction details');
+                        }
+
+                        const data = await response.json();
+                        
+                        // Format the dates
+                        const checkIn = data.booking ? new Date(data.booking.check_in_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+                        const checkOut = data.booking ? new Date(data.booking.check_out_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+                        const createdAt = new Date(data.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                        // Get status colors
+                        const getStatusColor = (status) => {
+                            switch(status?.toLowerCase()) {
+                                case 'pending':
+                                    return 'bg-orange-100 text-orange-800';
+                                case 'paid':
+                                case 'settlement':
+                                    return 'bg-green-100 text-green-800';
+                                case 'cancel':
+                                case 'cancelled':
+                                case 'failed':
+                                    return 'bg-red-100 text-red-800';
+                                default:
+                                    return 'bg-gray-100 text-gray-800';
+                            }
+                        };
+
+                        // Show the details in a SweetAlert2 modal with fixed height
+                        Swal.fire({
+                            title: `<div class="flex items-center">
+                                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-orange-100 text-orange-600 mr-4">
+                                    <i class="fas fa-receipt text-2xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-gray-900">Order #${data.order_id}</h3>
+                                    <p class="text-sm text-gray-500">${createdAt}</p>
+                                </div>
+                            </div>`,
+                            html: `
+                                <div class="text-left">
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        <!-- Left Column -->
+                                        <div class="space-y-3">
+                                            <!-- Order Information -->
+                                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div class="flex items-center mb-2">
+                                                    <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                                                    <h3 class="font-bold text-gray-900">Order Information</h3>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                                    <div class="text-gray-600">Transaction ID:</div>
+                                                    <div class="font-medium">${data.transaction_id || '-'}</div>
+                                                    <div class="text-gray-600">Status:</div>
+                                                    <div class="font-medium">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(data.transaction_status)}">
+                                                            ${data.transaction_status ? data.transaction_status.charAt(0).toUpperCase() + data.transaction_status.slice(1) : '-'}
+                                                        </span>
+                                                    </div>
+                                                    <div class="text-gray-600">Payment Type:</div>
+                                                    <div class="font-medium capitalize">${data.payment_type || '-'}</div>
+                                                    <div class="text-gray-600">Payment Code:</div>
+                                                    <div class="font-medium">${data.payment_code || '-'}</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Booking Details -->
+                                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div class="flex items-center mb-2">
+                                                    <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
+                                                    <h3 class="font-bold text-gray-900">Booking Details</h3>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                                    <div class="text-gray-600">Check-in:</div>
+                                                    <div class="font-medium">${checkIn}</div>
+                                                    <div class="text-gray-600">Check-out:</div>
+                                                    <div class="font-medium">${checkOut}</div>
+                                                    <div class="text-gray-600">Duration:</div>
+                                                    <div class="font-medium">${data.booking ? data.booking.duration + ' night(s)' : '-'}</div>
+                                                    <div class="text-gray-600">Guest Name:</div>
+                                                    <div class="font-medium">${data.booking ? data.booking.guest_name : '-'}</div>
+                                                    <div class="text-gray-600">Phone:</div>
+                                                    <div class="font-medium">${data.booking ? data.booking.phone : '-'}</div>
+                                                    <div class="text-gray-600">Email:</div>
+                                                    <div class="font-medium">${data.booking ? data.booking.email : '-'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Column -->
+                                        <div class="space-y-3">
+                                            <!-- Room Details -->
+                                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <div class="flex items-center">
+                                                        <i class="fas fa-bed text-green-500 mr-2"></i>
+                                                        <h3 class="font-bold text-gray-900">Room Details</h3>
+                                                    </div>
+                                                    <span class="text-sm text-gray-500">${data.booking?.rooms?.length || 0} room(s)</span>
+                                                </div>
+                                                ${data.booking && data.booking.rooms ? `
+                                                    <div class="space-y-2 max-h-[200px] overlay-scrollbar pr-2">
+                                                        ${data.booking.rooms.map(room => `
+                                                            <div class="p-2 bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow">
+                                                                <div class="flex items-center justify-between mb-1.5">
+                                                                    <h4 class="font-semibold text-gray-900">Room ${room.room_number}</h4>
+                                                                    <span class="text-sm px-2 py-0.5 bg-blue-50 text-blue-700 rounded">${room.type}</span>
+                                                                </div>
+                                                                <div class="grid grid-cols-2 gap-1 text-sm">
+                                                                    <div class="text-gray-600">Price/Night:</div>
+                                                                    <div class="font-medium">Rp ${new Intl.NumberFormat('id-ID').format(room.pivot.price_per_night)}</div>
+                                                                    <div class="text-gray-600">Nights:</div>
+                                                                    <div class="font-medium">${data.booking.duration} night(s)</div>
+                                                                    <div class="text-gray-600">Subtotal:</div>
+                                                                    <div class="font-medium text-green-600">Rp ${new Intl.NumberFormat('id-ID').format(room.pivot.subtotal)}</div>
+                                                                </div>
+                                                            </div>
+                                                        `).join('')}
+                                                    </div>
+                                                ` : '<p class="text-gray-500 text-sm">No room details available</p>'}
+                                            </div>
+
+                                            <!-- Payment Details -->
+                                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div class="flex items-center mb-2">
+                                                    <i class="fas fa-credit-card text-indigo-500 mr-2"></i>
+                                                    <h3 class="font-bold text-gray-900">Payment Details</h3>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                                    <div class="text-gray-600">Amount:</div>
+                                                    <div class="font-medium text-lg text-green-600">Rp ${new Intl.NumberFormat('id-ID').format(data.gross_amount)}</div>
+                                                    <div class="text-gray-600">Payment Status:</div>
+                                                    <div class="font-medium">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(data.payment_status)}">
+                                                            ${data.payment_status ? data.payment_status.charAt(0).toUpperCase() + data.payment_status.slice(1) : '-'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `,
+                            width: '75%',
+                            showCloseButton: true,
+                            showConfirmButton: false,
+                            customClass: {
+                                container: 'transaction-detail-modal',
+                                popup: 'rounded-xl',
+                                closeButton: 'focus:outline-none hover:text-gray-700',
+                                htmlContainer: 'overflow-visible'
+                            }
+                        });
+
+                        // Add custom scrollbar styles
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .scrollbar-thin::-webkit-scrollbar {
+                                width: 6px;
+                            }
+                            .scrollbar-thin::-webkit-scrollbar-track {
+                                background: #f1f1f1;
+                                border-radius: 3px;
+                            }
+                            .scrollbar-thin::-webkit-scrollbar-thumb {
+                                background: #cbd5e0;
+                                border-radius: 3px;
+                            }
+                            .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                                background: #a0aec0;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    } catch (error) {
+                        console.error('Error loading transaction details:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to load transaction details. Please try again.'
+                        });
                     }
                 },
                 async cancelTransaction(id) {
@@ -1782,6 +2014,17 @@
                 },
                 async payTransaction(id) {
                     try {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we initialize your payment',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
                         const response = await fetch(`/transactions/${id}/pay`, {
                             method: 'POST',
                             headers: {
@@ -1792,56 +2035,143 @@
                             }
                         });
 
+                        const data = await response.json();
+
                         if (!response.ok) {
-                            throw new Error('Failed to process payment');
+                            throw new Error(data.message || 'Failed to process payment');
                         }
 
-                        const data = await response.json();
+                        if (!data.success || !data.snap_token) {
+                            throw new Error('Failed to initialize payment');
+                        }
+
+                        // Close loading dialog
+                        Swal.close();
                         
-                        if (data.success && data.snap_token) {
-                            // Open Midtrans Snap popup
-                            window.snap.pay(data.snap_token, {
-                                onSuccess: function(result) {
+                        // Open Midtrans Snap popup
+                        window.snap.pay(data.snap_token, {
+                            onSuccess: async function(result) {
+                                try {
+                                    // Show loading state
+                                    Swal.fire({
+                                        title: 'Completing Payment...',
+                                        text: 'Please wait while we process your payment',
+                                        allowOutsideClick: false,
+                                        showConfirmButton: false,
+                                        willOpen: () => {
+                                            Swal.showLoading();
+                                        }
+                                    });
+
+                                    // Call payment finish endpoint via AJAX
+                                    const finishResponse = await fetch(`/payment/finish/ajax?order_id=${result.order_id}`, {
+                                        headers: {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'Accept': 'application/json'
+                                        }
+                                    });
+
+                                    let finishData;
+                                    try {
+                                        finishData = await finishResponse.json();
+                                    } catch (parseError) {
+                                        console.error('Failed to parse response as JSON:', parseError);
+                                        throw new Error('Server returned an invalid response format');
+                                    }
+
+                                    if (!finishResponse.ok || !finishData.success) {
+                                        throw new Error(finishData.message || 'Failed to complete payment');
+                                    }
+
+                                    // Show success message
                                     Swal.fire({
                                         icon: 'success',
                                         title: 'Payment Successful',
-                                        text: 'Your payment has been processed successfully.',
-                                        timer: 2000,
-                                        showConfirmButton: false
-                                    }).then(() => {
-                                        window.location.reload();
+                                        text: finishData.message || 'Your payment has been processed successfully',
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'OK'
                                     });
-                                },
-                                onPending: function(result) {
-                                    Swal.fire({
-                                        icon: 'info',
-                                        title: 'Payment Pending',
-                                        text: 'Please complete your payment using the provided instructions.',
-                                        timer: 2000,
-                                        showConfirmButton: false
-                                    }).then(() => {
-                                        window.location.reload();
-                                    });
-                                },
-                                onError: function(result) {
+
+                                    // Refresh transaction list
+                                    if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
+                                        window.transactionPanel.loadTransactions();
+                                    }
+                                } catch (error) {
+                                    console.error('Payment completion error:', error);
                                     Swal.fire({
                                         icon: 'error',
-                                        title: 'Payment Failed',
-                                        text: 'An error occurred during payment. Please try again.',
-                                        timer: 2000,
-                                        showConfirmButton: false
+                                        title: 'Error',
+                                        text: error.message || 'Failed to complete payment. Please check your transaction history.',
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        // Refresh transaction list even on error to show latest status
+                                        if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
+                                            window.transactionPanel.loadTransactions();
+                                        }
                                     });
-                                },
-                                onClose: function() {
-                                    // Redirect to landing page with transaction panel and source
-                                    window.location.href = '/?panel=transactions&source=midtrans';
                                 }
-                            });
-                        } else {
-                            throw new Error(data.message || 'Failed to initialize payment');
-                        }
+                            },
+                            onPending: function(result) {
+                                // Save payment details to localStorage
+                                localStorage.setItem('lastPaymentMethod', result.payment_type);
+                                localStorage.setItem('lastTransactionId', id);
+                                
+                                // Show pending payment instructions
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Complete Your Payment',
+                                    text: 'Please complete your payment using the provided payment instructions.',
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'View Payment Instructions',
+                                }).then(() => {
+                                    // Show transaction panel
+                                    hidePanel();
+                                    document.getElementById('transactionPanel').classList.add('show');
+                                    if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
+                                        window.transactionPanel.loadTransactions();
+                                    }
+                                });
+                            },
+                            onError: function(result) {
+                                console.error('Midtrans payment error:', result);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Payment Failed',
+                                    text: 'An error occurred while processing your payment. Please try again.',
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'Close',
+                                });
+                            },
+                            onClose: function() {
+                                // Check if payment method was selected
+                                const lastPaymentMethod = localStorage.getItem('lastPaymentMethod');
+                                const lastTransactionId = localStorage.getItem('lastTransactionId');
+                                
+                                if (lastPaymentMethod && lastTransactionId === id.toString()) {
+                                    // If payment method was selected, show confirmation message
+                                    Swal.fire({
+                                        icon: 'info',
+                                        title: 'Payment Method Selected',
+                                        text: 'Your order has been confirmed. Please check your transaction history to continue the payment.',
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'View Transactions',
+                                    }).then(() => {
+                                        // Clear stored payment info
+                                        localStorage.removeItem('lastPaymentMethod');
+                                        localStorage.removeItem('lastTransactionId');
+                                        
+                                        // Redirect to landing page with transaction panel open
+                                        window.location.href = '{{ route("landing") }}?panel=transactions&source=midtrans';
+                                    });
+                                } else {
+                                    // If no payment method was selected, just close without saving
+                                    console.log('Popup closed without selecting payment method');
+                                }
+                            }
+                        });
                     } catch (error) {
-                        console.error('Error:', error);
+                        console.error('Payment initialization error:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',

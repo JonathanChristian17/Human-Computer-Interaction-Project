@@ -576,20 +576,24 @@ function initializeRoomNavigation() {
     console.log('Initializing room navigation');
     const prevBtn = document.getElementById('prevRoomBtn');
     const nextBtn = document.getElementById('nextRoomBtn');
-        const dots = document.querySelectorAll('.room-navigation-dot');
-        
+    const dots = document.querySelectorAll('.room-navigation-dot');
+    
     if (!prevBtn || !nextBtn) {
         console.log('Navigation buttons not found');
-            return;
-        }
+        return;
+    }
 
-    prevBtn.onclick = prevRoom;
-    nextBtn.onclick = nextRoom;
+    // Remove any existing event listeners
+    prevBtn.removeEventListener('click', prevRoom);
+    nextBtn.removeEventListener('click', nextRoom);
+    
+    // Add new event listeners
+    prevBtn.addEventListener('click', prevRoom);
+    nextBtn.addEventListener('click', nextRoom);
     
     dots.forEach(dot => {
-        dot.onclick = function() {
-            goToRoom(parseInt(this.dataset.index));
-        };
+        dot.removeEventListener('click', () => goToRoom(parseInt(dot.dataset.index)));
+        dot.addEventListener('click', () => goToRoom(parseInt(dot.dataset.index)));
     });
 
     updateRoomDisplay();
@@ -670,10 +674,23 @@ function initializeDatePickers() {
     // Destroy existing instances if they exist
     if (checkInPicker) {
         checkInPicker.destroy();
-        }
+    }
     if (checkOutPicker) {
         checkOutPicker.destroy();
     }
+
+    // Get booked dates from PHP
+    const allBookedDates = @json($allBookedDates ?? []);
+    const unionBookedDates = @json($unionBookedDates ?? []);
+    
+    // Store in window for global access
+    window.allBookedDatesCache = allBookedDates;
+    window.unionBookedDatesCache = unionBookedDates;
+    
+    // Debug logging
+    console.log('All booked dates:', allBookedDates);
+    console.log('Union booked dates:', unionBookedDates);
+    console.log('Selected rooms:', document.getElementById('selected_rooms').value);
 
     const commonConfig = {
         dateFormat: "Y-m-d",
@@ -685,7 +702,25 @@ function initializeDatePickers() {
             firstDayOfWeek: 1
         },
         altInput: true,
-        altFormat: "d/m/Y"
+        altFormat: "d/m/Y",
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+            const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+            const selectedRooms = JSON.parse(document.getElementById('selected_rooms').value);
+            
+            if (selectedRooms.length > 1) {
+                // For multiple rooms, mark the date as booked if it exists in unionBookedDates
+                if (dateStr in window.unionBookedDatesCache) {
+                    dayElem.classList.add('fully-booked');
+                }
+            } else if (selectedRooms.length === 1) {
+                // For single room, check that room's specific dates
+                const roomId = selectedRooms[0].id;
+                if (window.allBookedDatesCache[roomId] && 
+                    window.allBookedDatesCache[roomId][dateStr]) {
+                    dayElem.classList.add('fully-booked');
+                }
+            }
+        }
     };
 
     // Initialize check-in picker
@@ -700,24 +735,96 @@ function initializeDatePickers() {
                     checkOutPicker.set('minDate', nextDay);
                     
                     const checkOutDate = checkOutPicker.selectedDates[0];
-                    if (!checkOutDate || checkOutDate <= selectedDates[0]) {
-                        checkOutPicker.setDate(nextDay);
+                    if (checkOutDate) {
+                        const hasConflict = checkForDateRangeConflict(selectedDates[0], checkOutDate);
+                        if (hasConflict) {
+                            checkOutPicker.clear();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Booking Conflict',
+                                text: 'One or more selected rooms are not available for the entire date range.',
+                                confirmButtonColor: '#f97316'
+                            });
+                        }
                     }
                 }
                 updateBookingSummary();
             }
+        },
+        onOpen: function() {
+            this.redraw();
         }
     });
 
     // Initialize check-out picker
     checkOutPicker = flatpickr(checkOutInput, {
         ...commonConfig,
-        onChange: function() {
-            updateBookingSummary();
+        onChange: function(selectedDates) {
+            if (selectedDates[0] && checkInPicker.selectedDates[0]) {
+                const hasConflict = checkForDateRangeConflict(checkInPicker.selectedDates[0], selectedDates[0]);
+                if (hasConflict) {
+                    checkOutPicker.clear();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Booking Conflict',
+                        text: 'One or more selected rooms are not available for the entire date range.',
+                        confirmButtonColor: '#f97316'
+                    });
+                } else {
+                    updateBookingSummary();
+                }
+            }
+        },
+        onOpen: function() {
+            this.redraw();
         }
     });
 
-    console.log('Date pickers initialized');
+    // Add custom styles for booked dates
+    const style = document.createElement('style');
+    style.textContent = `
+        .flatpickr-day.fully-booked {
+            background-color: #fee2e2 !important;
+            color: #991b1b !important;
+            text-decoration: line-through;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .flatpickr-day.fully-booked:hover {
+            background-color: #fecaca !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Function to check if there are any conflicts in the date range
+function checkForDateRangeConflict(startDate, endDate) {
+    const selectedRooms = JSON.parse(document.getElementById('selected_rooms').value);
+    
+    // Create array of dates between start and end
+    const dates = [];
+    const currentDate = new Date(startDate);
+    const end = new Date(endDate);
+    
+    while (currentDate <= end) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        dates.push(dateStr);
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Check each date for conflicts
+    return dates.some(dateStr => {
+        if (selectedRooms.length > 1) {
+            // For multiple rooms, check if the date exists in unionBookedDates
+            return dateStr in window.unionBookedDatesCache;
+        } else if (selectedRooms.length === 1) {
+            // For single room, check that room's specific dates
+            const roomId = selectedRooms[0].id;
+            return window.allBookedDatesCache[roomId] && 
+                   window.allBookedDatesCache[roomId][dateStr];
+        }
+        return false;
+    });
 }
 
 function updateBookingSummary() {
@@ -929,6 +1036,102 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Function to create and finalize booking
+async function createAndFinalizeBooking(bookingData, orderId, status) {
+    try {
+        // Map Midtrans status to our payment status
+        const paymentStatus = status === 'settlement' || status === 'capture' ? 'paid' : 
+                            status === 'pending' ? 'pending' : 
+                            'cancelled';
+
+        console.log('Creating booking with data:', {
+            ...bookingData,
+            payment_status: paymentStatus,
+            order_id: orderId
+        });
+
+        // Create booking
+        const createResponse = await fetch('{{ route("bookings.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                ...bookingData,
+                payment_status: paymentStatus,
+                order_id: orderId
+            })
+        });
+
+        const createResult = await createResponse.json();
+        console.log('Create booking response:', createResult);
+
+        if (!createResponse.ok) {
+            throw new Error(createResult.message || 'Failed to create booking');
+        }
+
+        if (orderId) {
+            // Get Midtrans transaction status first
+            const statusResponse = await fetch(`/transactions/status/${orderId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const midtransStatus = await statusResponse.json();
+            console.log('Midtrans status:', midtransStatus);
+
+            // Format payment details
+            let paymentDetails = '';
+            if (midtransStatus.payment_type === 'bank_transfer') {
+                if (midtransStatus.va_numbers && midtransStatus.va_numbers.length > 0) {
+                    const va = midtransStatus.va_numbers[0];
+                    paymentDetails = `${va.bank.toUpperCase()} Virtual Account ${va.va_number}`;
+                }
+            } else if (midtransStatus.payment_type === 'echannel') {
+                paymentDetails = `Mandiri Bill ${midtransStatus.bill_key}`;
+            } else {
+                paymentDetails = midtransStatus.payment_type;
+            }
+
+            // Now call finish-ajax endpoint
+            const finishResponse = await fetch(`/payment/finish-ajax?order_id=${orderId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const finishResult = await finishResponse.json();
+            console.log('Payment finish response:', finishResult);
+
+            if (!finishResponse.ok) {
+                throw new Error(finishResult.message || 'Failed to finalize payment');
+            }
+
+            // Return combined response with formatted payment details
+            return {
+                ...finishResult,
+                transaction: {
+                    ...midtransStatus,
+                    formatted_payment_type: paymentDetails
+                }
+            };
+        }
+
+        return createResult;
+    } catch (error) {
+        console.error('Error in createAndFinalizeBooking:', error);
+        throw error;
+    }
+}
+
 // Process Payment Function
 function processPayment() {
     const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
@@ -945,24 +1148,12 @@ function processPayment() {
     const formData = new FormData(form);
     
     // Create the data object
-    let jsonData = {};
+    let bookingData = {};
     
     try {
         // Get selected rooms data
         const selectedRoomsInput = document.getElementById('selected_rooms');
         const selectedRoomsValue = selectedRoomsInput.value;
-        let selectedRooms;
-        
-        try {
-            selectedRooms = JSON.parse(selectedRoomsValue);
-        } catch (e) {
-            console.error('Error parsing selected rooms:', e);
-            throw new Error('Invalid room data format');
-        }
-
-        if (!Array.isArray(selectedRooms)) {
-            throw new Error('Selected rooms must be an array');
-        }
 
         // Get dates in the correct format (Y-m-d)
         const checkInDate = checkInPicker ? checkInPicker.selectedDates[0]?.toISOString().split('T')[0] : null;
@@ -973,7 +1164,7 @@ function processPayment() {
         }
 
         // Build the request data
-        jsonData = {
+        bookingData = {
             check_in_date: checkInDate,
             check_out_date: checkOutDate,
             full_name: formData.get('full_name'),
@@ -982,15 +1173,15 @@ function processPayment() {
             id_number: formData.get('id_number'),
             special_requests: formData.get('special_requests'),
             payment_method: paymentMethod,
-            selected_rooms: JSON.stringify(selectedRooms),
+            selected_rooms: selectedRoomsValue,
             _token: '{{ csrf_token() }}'
         };
 
-        console.log('Prepared data:', jsonData);
+        console.log('Prepared booking data:', bookingData);
         
         // Validate required fields
         const requiredFields = ['check_in_date', 'check_out_date', 'full_name', 'email', 'phone', 'id_number'];
-        const missingFields = requiredFields.filter(field => !jsonData[field]);
+        const missingFields = requiredFields.filter(field => !bookingData[field]);
         
         if (missingFields.length > 0) {
             throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
@@ -1008,109 +1199,9 @@ function processPayment() {
         return;
     }
 
-    // Send booking data to server
-    fetch('{{ route("bookings.store") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify(jsonData)
-    })
-    .then(async response => {
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message || 'Server error occurred');
-        }
-        return data;
-    })
-    .then(result => {
-        if (result.success) {
-            if (paymentMethod === 'midtrans' && result.snap_token) {
-                // Open Midtrans Snap for online payment
-                window.snap.pay(result.snap_token, {
-                    onSuccess: function(result) {
-                        // Log the success
-                        console.log('Payment Success:', result);
-                        
-                        // Finalize the booking with order ID
-                        finalizeBooking(result.order_id).then(() => {
-                            // Show success message and redirect
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Payment Successful',
-                                text: 'Your payment has been processed successfully.',
-                                showConfirmButton: false,
-                                timer: 2000
-                            }).then(() => {
-                                window.location.href = '/?panel=transactions&source=midtrans';
-                            });
-                        });
-                    },
-                    onPending: function(result) {
-                        // Log the pending status
-                        console.log('Payment Pending:', result);
-                        
-                        // Finalize the booking with order ID
-                        finalizeBooking(result.order_id).then(() => {
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'Payment Pending',
-                                text: 'Please complete your payment using the provided instructions.',
-                                showConfirmButton: false,
-                                timer: 2000
-                            }).then(() => {
-                                window.location.href = '/?panel=transactions&source=midtrans';
-                            });
-                        });
-                    },
-                    onError: function(result) {
-                        // Log the error
-                        console.error('Payment Error:', result);
-                        
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Payment Failed',
-                            text: 'An error occurred during payment. Please try again.',
-                            confirmButtonColor: '#f97316'
-                        }).then(() => {
-                            window.location.href = '/?panel=transactions&source=midtrans';
-                        });
-                    },
-                    onClose: function() {
-                        // Log the closure
-                        console.log('Payment popup closed');
-                        
-                        // Redirect to landing page with transaction panel open
-                        window.location.href = '/?panel=transactions&source=midtrans';
-                    }
-                });
-            } else {
-                // Handle direct payment success
-                handleDirectPaymentSuccess(result.booking_id);
-            }
-        } else {
-            throw new Error(result.message || 'Failed to process booking');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Booking Failed',
-            text: error.message || 'An error occurred while processing your booking.',
-            confirmButtonColor: '#f97316'
-        });
-        resetPaymentButton();
-    });
-}
-
-// Function to finalize booking
-async function finalizeBooking(orderId) {
-    try {
-        const response = await fetch('{{ route("bookings.finalize") }}', {
+    if (paymentMethod === 'midtrans') {
+        // For Midtrans payment, first get snap token
+        fetch('{{ route("bookings.store") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1118,17 +1209,187 @@ async function finalizeBooking(orderId) {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ order_id: orderId })
-        });
+            body: JSON.stringify(bookingData)
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Server error occurred');
+            }
+            return data;
+        })
+        .then(result => {
+            if (result.success && result.snap_token) {
+                // Store booking data temporarily
+                const tempBookingData = {
+                    ...bookingData,
+                    order_id: result.booking_data.order_id
+                };
 
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to finalize booking');
-        }
-        return data;
-    } catch (error) {
-        console.error('Error finalizing booking:', error);
-        throw error;
+                // Clear any existing payment flags
+                localStorage.removeItem('hasSelectedPayment');
+                localStorage.removeItem('midtransOrderId');
+
+                // Open Midtrans Snap
+                window.snap.pay(result.snap_token, {
+                    onSuccess: function(result) {
+                        console.log('Payment Success:', result);
+                        localStorage.setItem('hasSelectedPayment', 'true');
+                        localStorage.setItem('midtransOrderId', result.order_id);
+                        
+                        // Create and finalize booking
+                        createAndFinalizeBooking(tempBookingData, result.order_id, result.transaction_status)
+                            .then((response) => {
+                                const paymentDetails = response.transaction?.formatted_payment_type || '';
+                                const isSettlement = response.status === 'settlement' || response.status === 'capture';
+
+                                // Show status badges like in transaction history
+                                const statusBadges = isSettlement ? 
+                                    `<div class="mb-2">
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-lg">Settlement</span>
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-lg mt-1">Payment: Paid</span>
+                                    </div>` :
+                                    '';
+
+                                Swal.fire({
+                                    icon: isSettlement ? 'success' : 'info',
+                                    title: isSettlement ? 'Payment Successful' : 'Payment Instructions',
+                                    html: `
+                                        ${statusBadges}
+                                        <div class="text-left">
+                                            ${paymentDetails ? `<p class="mb-2 text-blue-600 bg-blue-50 p-2 rounded">${paymentDetails}</p>` : ''}
+                                            <p>${isSettlement ? 'Your booking has been confirmed.' : 'Please complete your payment using the provided details.'}</p>
+                                        </div>
+                                    `,
+                                    confirmButtonText: 'View Transactions',
+                                    confirmButtonColor: '#f97316'
+                                }).then(() => {
+                                    window.location.href = '/?panel=transactions&source=midtrans';
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error after payment:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'There was an error processing your booking. Please contact support.',
+                                    confirmButtonColor: '#f97316'
+                                });
+                            });
+                    },
+                    onPending: function(result) {
+                        // Similar implementation as onSuccess but with pending status
+                        console.log('Payment Pending:', result);
+                        localStorage.setItem('hasSelectedPayment', 'true');
+                        localStorage.setItem('midtransOrderId', result.order_id);
+                        
+                        createAndFinalizeBooking(tempBookingData, result.order_id, result.transaction_status)
+                            .then((response) => {
+                                const paymentDetails = response.transaction?.formatted_payment_type || '';
+
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Payment Instructions',
+                                    html: `
+                                        <div class="text-left">
+                                            ${paymentDetails ? `<p class="mb-2 text-blue-600 bg-blue-50 p-2 rounded">${paymentDetails}</p>` : ''}
+                                            <p>Please complete your payment using the provided details.</p>
+                                        </div>
+                                    `,
+                                    confirmButtonText: 'View Transactions',
+                                    confirmButtonColor: '#f97316'
+                                }).then(() => {
+                                    window.location.href = '/?panel=transactions&source=midtrans';
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error after payment:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'There was an error processing your booking. Please contact support.',
+                                    confirmButtonColor: '#f97316'
+                                });
+                            });
+                    },
+                    onError: function(result) {
+                        console.error('Payment Error:', result);
+                        localStorage.removeItem('hasSelectedPayment');
+                        localStorage.removeItem('midtransOrderId');
+                        resetPaymentButton();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Payment Failed',
+                            text: 'An error occurred during payment. Please try again.',
+                            confirmButtonColor: '#f97316'
+                        });
+                    },
+                    onClose: function() {
+                        const hasSelectedPayment = localStorage.getItem('hasSelectedPayment') === 'true';
+                        const orderId = localStorage.getItem('midtransOrderId');
+                        
+                        console.log('Midtrans popup closed', {
+                            hasSelectedPayment,
+                            orderId
+                        });
+
+                        if (hasSelectedPayment && orderId) {
+                            // Only show the confirmation dialog if payment method was actually selected
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Payment Method Selected',
+                                text: 'Your order has been confirmed. Please check your transaction history to continue the payment.',
+                                showConfirmButton: true,
+                                confirmButtonText: 'View Transactions',
+                                confirmButtonColor: '#f97316'
+                            }).then(() => {
+                                localStorage.removeItem('hasSelectedPayment');
+                                localStorage.removeItem('midtransOrderId');
+                                window.location.href = '/?panel=transactions&source=midtrans';
+                            });
+                        } else {
+                            // Just reset the payment button if no payment method was selected
+                            localStorage.removeItem('hasSelectedPayment');
+                            localStorage.removeItem('midtransOrderId');
+                            resetPaymentButton();
+                            console.log('Popup closed without selecting payment method');
+                        }
+                    }
+                });
+            } else {
+                throw new Error('Failed to get payment token');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Booking Failed',
+                text: error.message || 'An error occurred while processing your booking.',
+                confirmButtonColor: '#f97316'
+            });
+            resetPaymentButton();
+        });
+    } else {
+        // For direct payment
+        createAndFinalizeBooking(bookingData, null, 'pending')
+            .then(result => {
+                if (result.success) {
+                    handleDirectPaymentSuccess(result.booking_id);
+                } else {
+                    throw new Error(result.message || 'Failed to create booking');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Booking Failed',
+                    text: error.message || 'An error occurred while processing your booking.',
+                    confirmButtonColor: '#f97316'
+                });
+                resetPaymentButton();
+            });
     }
 }
 
@@ -1148,9 +1409,44 @@ function resetPaymentButton() {
     const paymentSpinner = document.getElementById('paymentSpinner');
     const paymentButtonText = document.getElementById('paymentButtonText');
     
-    paymentButton.disabled = false;
-    paymentSpinner.classList.add('hidden');
-    paymentButtonText.textContent = document.querySelector('input[name="payment_method"]:checked').value === 'direct' ? 'CONFIRM BOOKING' : 'PAY NOW';
+    if (paymentButton && paymentSpinner && paymentButtonText) {
+        // Enable the button
+        paymentButton.disabled = false;
+        // Hide the spinner
+        paymentSpinner.classList.add('hidden');
+        // Reset button text based on payment method
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+        paymentButtonText.textContent = selectedMethod && selectedMethod.value === 'direct' ? 'CONFIRM BOOKING' : 'PAY NOW';
+    }
+}
+
+// Update deletePendingBooking function
+async function deletePendingBooking() {
+    const bookingId = localStorage.getItem('pendingBookingId');
+    if (!bookingId) return;
+
+    try {
+        const response = await fetch(`/bookings/${bookingId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete pending booking');
+        }
+
+        // Clear stored booking ID
+        localStorage.removeItem('pendingBookingId');
+        localStorage.removeItem('hasSelectedPayment');
+    } catch (error) {
+        console.error('Error deleting pending booking:', error);
+        throw error; // Re-throw to handle in the calling function
+    }
 }
 </script>
 @endpush
