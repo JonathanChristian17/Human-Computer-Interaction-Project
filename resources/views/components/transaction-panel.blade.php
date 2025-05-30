@@ -39,6 +39,20 @@
                                 <div class="mt-8">
                                     <div class="flow-root">
                                         <div class="divide-y divide-gray-200">
+                                            <!-- Empty State -->
+                                            @if(empty($transactions) || count($transactions) === 0)
+                                            <div class="flex flex-col items-center justify-center py-12">
+                                                <img src="{{ asset('images/empty-transaction.svg') }}" alt="No transactions" class="w-48 h-48 mb-6">
+                                                <h3 class="text-xl font-medium text-gray-900 mb-2">No Transactions Yet</h3>
+                                                <p class="text-gray-500 text-center mb-8">Ready to start your journey? Book a room and create unforgettable memories with us.</p>
+                                                <a href="{{ route('rooms.index') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                                    <svg class="mr-2 -ml-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                                    </svg>
+                                                    Book a Room Now
+                                                </a>
+                                            </div>
+                                            @else
                                             <!-- Transaction Items -->
                                             @foreach($transactions as $transaction)
                                             <div class="flex py-6">
@@ -69,6 +83,7 @@
                                                 </div>
                                             </div>
                                             @endforeach
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

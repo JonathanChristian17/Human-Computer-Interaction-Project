@@ -6,12 +6,12 @@
     <title>Cahaya Resort Panguruan</title>
     @vite('resources/css/app.css')
 </head>
-<body>
+<body class="bg-white">
     <!-- Include Navbar -->
     @include('components.navbar')
 
     <!-- Hero Section -->
-    <section class="relative h-screen mt-0 pt-0 -mt-[100px]">
+    <section class="relative h-screen">
         <!-- Hero Background Image -->
         <div class="absolute inset-0">
             <img src="{{ asset('images/hero-bg.jpg') }}" alt="Resort View" class="w-full h-full object-cover">

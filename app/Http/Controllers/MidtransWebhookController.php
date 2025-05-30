@@ -75,12 +75,35 @@ class MidtransWebhookController extends Controller
             $fraudStatus = $notificationBody['fraud_status'] ?? null;
             $paymentType = $notificationBody['payment_type'] ?? null;
             $transactionId = $notificationBody['transaction_id'] ?? null;
+            $vaNumbers = $notificationBody['va_numbers'] ?? null;
+            $permataVaNumber = $notificationBody['permata_va_number'] ?? null;
+            $paymentCode = null;
+            
+            // Set payment type based on Midtrans response
+            if ($paymentType === 'bank_transfer') {
+                if (!empty($vaNumbers)) {
+                    $bankName = strtoupper($vaNumbers[0]['bank']);
+                    $paymentType = $bankName . ' Virtual Account';
+                    $paymentCode = $vaNumbers[0]['va_number'];
+                } elseif (!empty($permataVaNumber)) {
+                    $paymentType = 'PERMATA Virtual Account';
+                    $paymentCode = $permataVaNumber;
+                }
+            } elseif ($paymentType === 'echannel') {
+                $paymentType = 'Mandiri Bill Payment';
+                $paymentCode = $notificationBody['bill_key'] ?? null;
+            } elseif ($paymentType === 'gopay' || $paymentType === 'shopeepay') {
+                $paymentType = strtoupper($paymentType);
+            } elseif ($paymentType === 'qris') {
+                $paymentType = 'QRIS';
+            }
             
             Log::info('Processing notification', [
                 'order_id' => $orderId,
                 'status' => $transactionStatus,
                 'fraud' => $fraudStatus,
-                'payment_type' => $paymentType
+                'payment_type' => $paymentType,
+                'payment_code' => $paymentCode
             ]);
 
             // Find transaction by order ID
@@ -99,64 +122,57 @@ class MidtransWebhookController extends Controller
             $transaction->raw_response = json_encode($notificationBody);
             $transaction->transaction_id = $transactionId;
             $transaction->payment_type = $paymentType;
+            $transaction->payment_code = $paymentCode;
             $transaction->transaction_status = $transactionStatus;
 
             // Update transaction and booking status based on notification
             switch ($transactionStatus) {
                 case 'capture':
                     if ($fraudStatus == 'challenge') {
-                        $transaction->payment_status = 'challenge';
+                        $transaction->transaction_status = 'challenge';
+                        $transaction->payment_status = 'pending';
                         $booking->payment_status = 'pending';
                         $booking->status = 'pending';
                     } else if ($fraudStatus == 'accept') {
+                        $transaction->transaction_status = 'success';
                         $transaction->payment_status = 'paid';
                         $booking->payment_status = 'paid';
                         $booking->status = 'confirmed';
                     }
                     break;
-
                 case 'settlement':
+                    $transaction->transaction_status = 'settlement';
                     $transaction->payment_status = 'paid';
                     $booking->payment_status = 'paid';
                     $booking->status = 'confirmed';
                     break;
-
                 case 'pending':
+                    $transaction->transaction_status = 'pending';
                     $transaction->payment_status = 'pending';
                     $booking->payment_status = 'pending';
                     $booking->status = 'pending';
                     break;
-
                 case 'deny':
-                case 'expire':
                 case 'cancel':
-                    $transaction->payment_status = 'failed';
-                    $booking->payment_status = 'failed';
+                case 'expire':
+                    $transaction->transaction_status = $transactionStatus;
+                    $transaction->payment_status = 'cancelled';
+                    $booking->payment_status = 'cancelled';
                     $booking->status = 'cancelled';
                     break;
             }
 
-            // Save changes
             $transaction->save();
             $booking->save();
 
-            Log::info('Webhook processed successfully', [
-                'order_id' => $orderId,
-                'transaction_status' => $transactionStatus,
-                'payment_status' => $transaction->payment_status,
-                'booking_status' => $booking->status
-            ]);
-
             DB::commit();
+
             return response()->json(['status' => 'success']);
 
         } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Error processing webhook: ' . $e->getMessage(), [
-                'exception' => $e,
-                'payload' => $request->all()
-            ]);
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            DB::rollBack();
+            Log::error('Webhook Error: ' . $e->getMessage());
+            return response()->json(['status' => 'error'], 500);
         }
     }
 } 

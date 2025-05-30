@@ -33,8 +33,10 @@ Route::get('/kamar', [RoomController::class, 'index'])->name('kamar.index');
 Route::middleware(['auth'])->group(function () {
     Route::get('/riwayat-pemesanan', [BookingController::class, 'riwayat'])->name('bookings.riwayat');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
     Route::post('/transactions/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('transactions.cancel');
     Route::post('/transactions/{transaction}/pay', [TransactionController::class, 'pay'])->name('transactions.pay');
+    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
 });
 
 /*
@@ -215,6 +217,10 @@ Route::get('/bookings/error', [BookingController::class, 'error'])->name('bookin
 Route::get('/bookings/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
 // Payment callback routes
-Route::get('/payment/finish', [PaymentController::class, 'finish'])->name('payment.finish');
+Route::get('/payment/finish', [TransactionController::class, 'finish'])->name('payment.finish');
+Route::get('/payment/finish/ajax', [TransactionController::class, 'finishAjax'])->name('payment.finish.ajax');
 Route::get('/payment/error', [PaymentController::class, 'error'])->name('payment.error');
 Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
+
+// Midtrans webhook
+Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handle'])->name('midtrans.webhook');
