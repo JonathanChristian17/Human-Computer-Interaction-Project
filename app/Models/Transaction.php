@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Transaction extends Model
 {
@@ -20,12 +21,19 @@ class Transaction extends Model
         'transaction_time',
         'payment_code',
         'pdf_url',
-        'raw_response'
+        'raw_response',
+        'payment_deadline',
+        'is_deposit'
     ];
 
     protected $casts = [
         'gross_amount' => 'decimal:2',
-        'raw_response' => 'json'
+        'raw_response' => 'json',
+        'payment_deadline' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'transaction_time' => 'datetime',
+        'is_deposit' => 'boolean'
     ];
 
     protected $attributes = [
@@ -48,6 +56,16 @@ class Transaction extends Model
     const PAYMENT_PAID = 'paid';
     const PAYMENT_CANCELLED = 'cancelled';
     const PAYMENT_REFUNDED = 'refunded';
+
+    protected static function booted()
+    {
+        static::creating(function ($transaction) {
+            // Set payment deadline to 1 hour from now when creating a new transaction
+            if (!$transaction->payment_deadline) {
+                $transaction->payment_deadline = Carbon::now()->addHour();
+            }
+        });
+    }
 
     public function booking()
     {
@@ -92,5 +110,24 @@ class Transaction extends Model
     public function isRefunded()
     {
         return $this->transaction_status === self::STATUS_REFUND;
+    }
+
+    public function getRemainingTimeAttribute()
+    {
+        if (!$this->payment_deadline || !$this->isPending()) {
+            return null;
+        }
+
+        $now = Carbon::now();
+        if ($now->gt($this->payment_deadline)) {
+            return 0;
+        }
+
+        return $now->diffInSeconds($this->payment_deadline);
+    }
+
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
     }
 } 

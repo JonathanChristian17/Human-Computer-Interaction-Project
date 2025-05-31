@@ -186,45 +186,45 @@ use Illuminate\Support\Facades\Storage;
             </div>
             
                     <!-- Booking Form -->
-                    <div class="mt-10 bg-black/40 backdrop-blur-md p-4 rounded-xl inline-flex items-center gap-4">
-                <!-- Check-in -->
-                <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg cursor-pointer" onclick="openCalendar('check_in')">
-                    <i class="fas fa-calendar text-white"></i>
-                    <input type="text" 
-                           id="landing_check_in"
-                           name="landing_check_in"
-                           class="bg-transparent text-white border-none focus:outline-none placeholder-white w-32" 
-                           placeholder="Check in"
-                           readonly>
-                            </div>
+                    <form id="searchForm" class="mt-10 bg-black/40 backdrop-blur-md p-4 rounded-xl inline-flex items-center gap-4">
+                        <!-- Check-in -->
+                        <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg cursor-pointer" onclick="openCalendar('check_in')">
+                            <i class="fas fa-calendar text-white"></i>
+                            <input type="text" 
+                                   id="landing_check_in"
+                                   name="check_in"
+                                   class="bg-transparent text-white border-none focus:outline-none placeholder-white w-32" 
+                                   placeholder="Check in"
+                                   readonly>
+                        </div>
                             
-                <!-- Check-out -->
-                <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg cursor-pointer" onclick="openCalendar('check_out')">
-                    <i class="fas fa-calendar text-white"></i>
-                    <input type="text" 
-                           id="landing_check_out"
-                           name="landing_check_out"
-                           class="bg-transparent text-white border-none focus:outline-none placeholder-white w-32" 
-                           placeholder="Check out"
-                           readonly>
-            </div>
+                        <!-- Check-out -->
+                        <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg cursor-pointer" onclick="openCalendar('check_out')">
+                            <i class="fas fa-calendar text-white"></i>
+                            <input type="text" 
+                                   id="landing_check_out"
+                                   name="check_out"
+                                   class="bg-transparent text-white border-none focus:outline-none placeholder-white w-32" 
+                                   placeholder="Check out"
+                                   readonly>
+                        </div>
             
-                <!-- Room & Guests -->
-                <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
-                    <i class="fas fa-house text-white"></i>
-                    <select id="landing_room_guests"
-                            name="landing_room_guests"
-                            class="bg-transparent text-white focus:outline-none">
-                        <option value="1-2" class="text-black">1 Room, 2 guest</option>
-                        <option value="2-4" class="text-black">2 Rooms, 4 guests</option>
-                    </select>
-                </div>
+                        <!-- Room & Guests -->
+                        <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
+                            <i class="fas fa-house text-white"></i>
+                            <select id="landing_room_guests"
+                                    name="guests"
+                                    class="bg-transparent text-white focus:outline-none">
+                                <option value="1-2" class="text-black">1 Room, 2 guest</option>
+                                <option value="2-4" class="text-black">2 Rooms, 4 guests</option>
+                            </select>
+                        </div>
                 
-                <!-- Search Button -->
-                <button class="bg-orange-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-orange-600 transition-all">
-                    Search
-                </button>
-                </div>
+                        <!-- Search Button -->
+                        <button type="submit" class="bg-orange-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-orange-600 transition-all">
+                            Search
+                        </button>
+                    </form>
                 
                 </div>
             </div>
@@ -676,7 +676,7 @@ window.closeCalendar = function() {
 
 window.applyDates = function() {
     if (window.currentInputType === 'check_in' && window.selectedStartDate) {
-        document.getElementById('landing_check_in').value = formatDate(window.selectedStartDate);
+        document.getElementById('landing_check_in').value = formatDateForDisplay(window.selectedStartDate);
         // Clear check-out if it's before new check-in
         if (window.selectedEndDate && window.selectedEndDate <= window.selectedStartDate) {
             window.selectedEndDate = null;
@@ -686,10 +686,94 @@ window.applyDates = function() {
         // Automatically open check-out selection
         setTimeout(() => openCalendar('check_out'), 100);
     } else if (window.currentInputType === 'check_out' && window.selectedEndDate) {
-        document.getElementById('landing_check_out').value = formatDate(window.selectedEndDate);
+        document.getElementById('landing_check_out').value = formatDateForDisplay(window.selectedEndDate);
         closeCalendar();
     }
 };
+
+window.formatDateForDisplay = function(date) {
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+};
+
+// Add a new function to format date for form submission
+window.formatDateForSubmit = function(date) {
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+};
+
+// Add form submit handler
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get the dates
+            const checkIn = window.selectedStartDate;
+            const checkOut = window.selectedEndDate;
+            
+            if (!checkIn || !checkOut) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please Select Dates',
+                    text: 'You must select both check-in and check-out dates.',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+            
+            // Format dates for the request
+            const formattedCheckIn = formatDateForSubmit(checkIn);
+            const formattedCheckOut = formatDateForSubmit(checkOut);
+            const guests = document.getElementById('landing_room_guests').value;
+            
+            try {
+                const response = await fetch(`{{ route('kamar.index') }}?check_in=${formattedCheckIn}&check_out=${formattedCheckOut}&guests=${guests}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const roomsContainer = doc.querySelector('#rooms-container');
+                
+                if (roomsContainer) {
+                    const roomsContent = document.getElementById('roomsContent');
+                    if (roomsContent) {
+                        roomsContent.innerHTML = doc.querySelector('.min-h-screen').innerHTML;
+                        hidePanel();
+                        document.getElementById('roomsPanel').classList.add('show');
+                        
+                        // Update search inputs in the panel
+                        const searchCheckIn = roomsContent.querySelector('#search_check_in');
+                        const searchCheckOut = roomsContent.querySelector('#search_check_out');
+                        const searchGuests = roomsContent.querySelector('#search_guests');
+                        
+                        if (searchCheckIn) searchCheckIn.value = formattedCheckIn;
+                        if (searchCheckOut) searchCheckOut.value = formattedCheckOut;
+                        if (searchGuests) searchGuests.value = guests;
+                    } else {
+                        throw new Error('Rooms content container not found');
+                    }
+                } else {
+                    throw new Error('Rooms container not found in response');
+                }
+            } catch (error) {
+                console.error('Error loading rooms:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load available rooms. Please try again.',
+                    confirmButtonColor: '#f59e0b'
+                });
+            }
+        });
+    }
+});
 
 window.handleDateClick = function(info) {
     const clickedDate = new Date(info.dateStr);
@@ -733,9 +817,14 @@ window.highlightDates = function() {
     window.calendar.getEvents().forEach(event => event.remove());
     
     if (window.selectedStartDate) {
+        // Create a new date object for end date to avoid modifying the original
+        let displayEndDate = window.selectedEndDate ? new Date(window.selectedEndDate) : window.selectedStartDate;
+        // Subtract one day from the end date for display purposes
+        displayEndDate.setDate(displayEndDate.getDate() - 1);
+        
         window.calendar.addEvent({
             start: window.selectedStartDate,
-            end: window.selectedEndDate || window.selectedStartDate,
+            end: displayEndDate,
             display: 'background',
             backgroundColor: '#fef3c7'
         });

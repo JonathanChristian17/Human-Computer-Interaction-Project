@@ -3,6 +3,8 @@
 @section('head')
 @parent
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script src="{{ asset('js/echo.js') }}"></script>
 <style>
 /* Reset all positioning and z-index */
 * {
@@ -106,6 +108,27 @@ button {
 .flatpickr-day:hover {
     background: #fed7aa !important;
     border-color: #fed7aa !important;
+}
+
+/* Add custom styles for booked and disabled dates */
+.flatpickr-day.fully-booked {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+    text-decoration: line-through;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.flatpickr-day.fully-booked:hover {
+    background-color: #fecaca !important;
+}
+
+.flatpickr-day.disabled-date {
+    color: #ccc !important;
+    background-color: transparent !important;
+    pointer-events: none;
+    text-decoration: none;
+    opacity: 0.3;
 }
 </style>
 @endsection
@@ -420,45 +443,33 @@ button {
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Select Payment Method</h3>
                             <div class="space-y-4" id="paymentMethods">
-                                <!-- Midtrans Payment -->
+                                <!-- Online Payment -->
                                 <label class="relative block">
                                     <input type="radio" name="payment_method" value="midtrans" class="peer sr-only" checked>
                                     <div class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition peer-checked:border-orange-500 peer-checked:ring-1 peer-checked:ring-orange-500">
                                         <div class="flex-1">
                                             <h4 class="font-medium text-gray-900">Online Payment</h4>
-                                            <p class="text-sm text-gray-600">Pay securely with Midtrans</p>
+                                            <p class="text-sm text-gray-600">Pay full amount securely with Midtrans</p>
                                             <div class="mt-2 flex items-center gap-2">
-                                                <img src="{{ asset('storage/payment/bni.png') }}" alt="Mastercard" class="h-6">
+                                                <img src="{{ asset('storage/payment/bni.png') }}" alt="BNI" class="h-6">
                                                 <img src="{{ asset('storage/payment/bca.png') }}" alt="BCA" class="h-6">
                                                 <img src="{{ asset('storage/payment/mandiri.png') }}" alt="Mandiri" class="h-6">
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="w-6 h-6 border-2 rounded-full peer-checked:border-orange-500 peer-checked:bg-orange-500 peer-checked:text-white flex items-center justify-center">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                                                </svg>
                                             </div>
                                         </div>
                                     </div>
                                 </label>
 
-                                <!-- Direct Payment -->
+                                <!-- Deposit Payment -->
                                 <label class="relative block">
-                                    <input type="radio" name="payment_method" value="direct" class="peer sr-only">
+                                    <input type="radio" name="payment_method" value="deposit" class="peer sr-only">
                                     <div class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition peer-checked:border-orange-500 peer-checked:ring-1 peer-checked:ring-orange-500">
                                         <div class="flex-1">
-                                            <h4 class="font-medium text-gray-900">Direct Payment</h4>
-                                            <p class="text-sm text-gray-600">Pay directly to our account</p>
-                                            <div class="mt-2 text-sm text-gray-600">
-                                                <p>Bank Transfer or Cash on Check-in</p>
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="w-6 h-6 border-2 rounded-full peer-checked:border-orange-500 peer-checked:bg-orange-500 peer-checked:text-white flex items-center justify-center">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                                                </svg>
+                                            <h4 class="font-medium text-gray-900">Deposit Payment</h4>
+                                            <p class="text-sm text-gray-600">Pay Rp 100.000 deposit now, remaining balance at check-in</p>
+                                            <div class="mt-2 flex items-center gap-2">
+                                                <img src="{{ asset('storage/payment/bni.png') }}" alt="BNI" class="h-6">
+                                                <img src="{{ asset('storage/payment/bca.png') }}" alt="BCA" class="h-6">
+                                                <img src="{{ asset('storage/payment/mandiri.png') }}" alt="Mandiri" class="h-6">
                                             </div>
                                         </div>
                                     </div>
@@ -702,21 +713,89 @@ function initializeDatePickers() {
             firstDayOfWeek: 1
         },
         altInput: true,
-        altFormat: "d/m/Y",
+        altFormat: "Y-m-d",
+        formatDate: (date) => {
+            return formatDateForDatabase(date);
+        },
+        parseDate: (dateStr) => {
+            const [year, month, day] = dateStr.split('-');
+            const date = new Date(year, parseInt(month) - 1, parseInt(day));
+            date.setHours(12, 0, 0, 0);
+            return date;
+        },
         onDayCreate: function(dObj, dStr, fp, dayElem) {
             const dateStr = dayElem.dateObj.toISOString().split('T')[0];
             const selectedRooms = JSON.parse(document.getElementById('selected_rooms').value);
             
+            // For check-out calendar, disable dates before check-in
+            if (this.input.id === 'check_out_date' && checkInPicker.selectedDates[0]) {
+                const checkInDate = checkInPicker.selectedDates[0];
+                if (dayElem.dateObj < checkInDate) {
+                    dayElem.classList.add('disabled-date');
+                    return;
+                }
+            }
+            
+            // For display purposes, we need to check if this date is a check-in date
+            const isCheckInDate = (roomId) => {
+                if (window.allBookedDatesCache[roomId]) {
+                    // Get the previous day
+                    const prevDay = new Date(dayElem.dateObj);
+                    prevDay.setDate(prevDay.getDate() - 1);
+                    const prevDayStr = prevDay.toISOString().split('T')[0];
+                    
+                    // This date is a check-in date if it's booked and the previous day isn't
+                    return window.allBookedDatesCache[roomId][dateStr] && 
+                           !window.allBookedDatesCache[roomId][prevDayStr];
+                }
+                return false;
+            };
+
+            // Check if this date is a check-out date
+            const isCheckOutDate = (roomId) => {
+                if (window.allBookedDatesCache[roomId]) {
+                    // Get the next day
+                    const nextDay = new Date(dayElem.dateObj);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    const nextDayStr = nextDay.toISOString().split('T')[0];
+                    
+                    // This date is a check-out date if it's booked but the next day isn't
+                    return window.allBookedDatesCache[roomId][dateStr] && 
+                           !window.allBookedDatesCache[roomId][nextDayStr];
+                }
+                return false;
+            };
+            
             if (selectedRooms.length > 1) {
-                // For multiple rooms, mark the date as booked if it exists in unionBookedDates
+                // For multiple rooms
+                const prevDay = new Date(dayElem.dateObj);
+                prevDay.setDate(prevDay.getDate() - 1);
+                const prevDayStr = prevDay.toISOString().split('T')[0];
+                
+                const nextDay = new Date(dayElem.dateObj);
+                nextDay.setDate(nextDay.getDate() + 1);
+                const nextDayStr = nextDay.toISOString().split('T')[0];
+                
                 if (dateStr in window.unionBookedDatesCache) {
+                    // If it's a check-out date, don't mark as booked
+                    if (!(nextDayStr in window.unionBookedDatesCache)) {
+                        return;
+                    }
+                    // Otherwise mark as booked (including check-in dates)
                     dayElem.classList.add('fully-booked');
                 }
             } else if (selectedRooms.length === 1) {
-                // For single room, check that room's specific dates
+                // For single room
                 const roomId = selectedRooms[0].id;
                 if (window.allBookedDatesCache[roomId] && 
                     window.allBookedDatesCache[roomId][dateStr]) {
+                    
+                    // If it's a check-out date, don't mark as booked
+                    if (isCheckOutDate(roomId)) {
+                        return;
+                    }
+                    
+                    // Otherwise mark as booked (including check-in dates)
                     dayElem.classList.add('fully-booked');
                 }
             }
@@ -726,19 +805,35 @@ function initializeDatePickers() {
     // Initialize check-in picker
     checkInPicker = flatpickr(checkInInput, {
         ...commonConfig,
+        dateFormat: "Y-m-d",
+        altFormat: "Y-m-d",
         onChange: function(selectedDates) {
             if (selectedDates[0]) {
-                const nextDay = new Date(selectedDates[0]);
-                nextDay.setDate(nextDay.getDate() + 1);
+                const selectedDate = selectedDates[0];
+                
+                // Store the selected date directly without modification
+                this.input.value = formatDateForDatabase(selectedDate);
                 
                 if (checkOutPicker) {
-                    checkOutPicker.set('minDate', nextDay);
+                    const minCheckOut = new Date(selectedDate);
+                    minCheckOut.setDate(minCheckOut.getDate() + 1);
+                    checkOutPicker.set('minDate', minCheckOut);
                     
                     const checkOutDate = checkOutPicker.selectedDates[0];
                     if (checkOutDate) {
-                        const hasConflict = checkForDateRangeConflict(selectedDates[0], checkOutDate);
+                        window.checkOutDate = checkOutDate;
+                        const hasConflict = checkForDateRangeConflict(selectedDate, checkOutDate);
                         if (hasConflict) {
+                            // Store current calendar view before clearing
+                            const currentMonth = checkOutPicker.currentMonth;
+                            const currentYear = checkOutPicker.currentYear;
+                            
                             checkOutPicker.clear();
+                            window.checkOutDate = null;
+                            
+                            // Restore calendar view after clearing
+                            checkOutPicker.jumpToDate(new Date(currentYear, currentMonth));
+                            
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Booking Conflict',
@@ -747,23 +842,47 @@ function initializeDatePickers() {
                             });
                         }
                     }
+                    // Automatically open check-out picker after selecting check-in date
+                    setTimeout(() => {
+                        checkOutPicker.open();
+                    }, 100);
                 }
                 updateBookingSummary();
             }
         },
         onOpen: function() {
-            this.redraw();
+            // If check-out is already open, close it
+            if (checkOutPicker && checkOutPicker.isOpen) {
+                checkOutPicker.close();
+            }
         }
     });
 
     // Initialize check-out picker
     checkOutPicker = flatpickr(checkOutInput, {
         ...commonConfig,
+        dateFormat: "Y-m-d",
+        altFormat: "Y-m-d",
         onChange: function(selectedDates) {
             if (selectedDates[0] && checkInPicker.selectedDates[0]) {
-                const hasConflict = checkForDateRangeConflict(checkInPicker.selectedDates[0], selectedDates[0]);
+                const selectedDate = selectedDates[0];
+                
+                // Store the selected date directly without modification
+                this.input.value = formatDateForDatabase(selectedDate);
+                
+                window.checkOutDate = selectedDate;
+                const hasConflict = checkForDateRangeConflict(checkInPicker.selectedDates[0], selectedDate);
                 if (hasConflict) {
-                    checkOutPicker.clear();
+                    // Store current calendar view before clearing
+                    const currentMonth = this.currentMonth;
+                    const currentYear = this.currentYear;
+                    
+                    this.clear();
+                    window.checkOutDate = null;
+                    
+                    // Restore calendar view after clearing
+                    this.jumpToDate(new Date(currentYear, currentMonth));
+                    
                     Swal.fire({
                         icon: 'error',
                         title: 'Booking Conflict',
@@ -776,7 +895,24 @@ function initializeDatePickers() {
             }
         },
         onOpen: function() {
-            this.redraw();
+            // If no check-in date is selected, close check-out and open check-in
+            if (!checkInPicker.selectedDates[0]) {
+                this.close();
+                setTimeout(() => {
+                    checkInPicker.open();
+                }, 100);
+                // Optional: Show a gentle reminder
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Pilih Tanggal Check-in',
+                    text: 'Silakan pilih tanggal check-in terlebih dahulu',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
         }
     });
 
@@ -793,6 +929,13 @@ function initializeDatePickers() {
         .flatpickr-day.fully-booked:hover {
             background-color: #fecaca !important;
         }
+        .flatpickr-day.disabled-date {
+            color: #ccc !important;
+            background-color: transparent !important;
+            pointer-events: none;
+            text-decoration: none;
+            opacity: 0.3;
+        }
     `;
     document.head.appendChild(style);
 }
@@ -801,12 +944,13 @@ function initializeDatePickers() {
 function checkForDateRangeConflict(startDate, endDate) {
     const selectedRooms = JSON.parse(document.getElementById('selected_rooms').value);
     
-    // Create array of dates between start and end
+    // Create array of dates between start and end, EXCLUDING the end date
     const dates = [];
     const currentDate = new Date(startDate);
     const end = new Date(endDate);
     
-    while (currentDate <= end) {
+    // Only check dates up to but not including the end date
+    while (currentDate < end) {
         const dateStr = currentDate.toISOString().split('T')[0];
         dates.push(dateStr);
         currentDate.setDate(currentDate.getDate() + 1);
@@ -816,15 +960,44 @@ function checkForDateRangeConflict(startDate, endDate) {
     return dates.some(dateStr => {
         if (selectedRooms.length > 1) {
             // For multiple rooms, check if the date exists in unionBookedDates
-            return dateStr in window.unionBookedDatesCache;
+            // AND it's not a check-out date
+            const nextDay = new Date(dateStr);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const nextDayStr = nextDay.toISOString().split('T')[0];
+            
+            return dateStr in window.unionBookedDatesCache && 
+                   nextDayStr in window.unionBookedDatesCache;
         } else if (selectedRooms.length === 1) {
             // For single room, check that room's specific dates
             const roomId = selectedRooms[0].id;
-            return window.allBookedDatesCache[roomId] && 
-                   window.allBookedDatesCache[roomId][dateStr];
+            if (!window.allBookedDatesCache[roomId]) return false;
+            
+            // Check if this date is booked AND it's not a check-out date
+            const nextDay = new Date(dateStr);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const nextDayStr = nextDay.toISOString().split('T')[0];
+            
+            return window.allBookedDatesCache[roomId][dateStr] && 
+                   window.allBookedDatesCache[roomId][nextDayStr];
         }
         return false;
     });
+}
+
+// Add helper function for consistent date formatting
+function formatDateForDatabase(date) {
+    // Ensure we're working with a Date object
+    if (!(date instanceof Date)) {
+        date = new Date(date);
+    }
+    
+    // Get the date components in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    // Return in YYYY-MM-DD format
+    return `${year}-${month}-${day}`;
 }
 
 function updateBookingSummary() {
@@ -836,13 +1009,13 @@ function updateBookingSummary() {
     if (checkInDate && checkOutDate) {
         const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
 
-        // Update display dates (using the alt format)
+        // Update display dates using the same format
         document.querySelectorAll('.summary_check_in').forEach(el => {
-            el.textContent = checkInPicker.altInput.value;
+            el.textContent = formatDateForDatabase(checkInDate);
         });
 
         document.querySelectorAll('.summary_check_out').forEach(el => {
-            el.textContent = checkOutPicker.altInput.value;
+            el.textContent = formatDateForDatabase(checkOutDate);
         });
 
         document.querySelectorAll('.total_nights').forEach(el => {
@@ -877,18 +1050,164 @@ function updatePrices(nights) {
     }
 }
 
-// Initialize everything when DOM is ready
+// Function to update booked dates for all selected rooms
+async function updateBookedDates() {
+    try {
+        const selectedRooms = JSON.parse(document.getElementById('selected_rooms')?.value || '[]');
+        if (selectedRooms.length > 0) {
+            // Clear existing booked dates cache
+            window.allBookedDatesCache = {};
+            window.unionBookedDatesCache = {};
+
+            // Show loading state in calendar
+            if (checkInPicker) {
+                checkInPicker._input.placeholder = 'Loading dates...';
+            }
+            if (checkOutPicker) {
+                checkOutPicker._input.placeholder = 'Loading dates...';
+            }
+
+            // Fetch new booked dates for each room
+            for (const room of selectedRooms) {
+                const response = await fetch(`/rooms/${room.id}/booked-dates`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch booked dates for room ${room.id}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.unavailable_dates) {
+                    // Update the global booked dates cache
+                    window.allBookedDatesCache[room.id] = {};
+                    data.unavailable_dates.forEach(date => {
+                        // Only add dates that are today or in the future
+                        const dateObj = new Date(date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        if (dateObj >= today) {
+                            window.allBookedDatesCache[room.id][date] = true;
+                        }
+                    });
+
+                    // Update union booked dates
+                    data.unavailable_dates.forEach(date => {
+                        const dateObj = new Date(date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        if (dateObj >= today) {
+                            window.unionBookedDatesCache[date] = true;
+                        }
+                    });
+                }
+            }
+
+            // Reset placeholders
+            if (checkInPicker) {
+                checkInPicker._input.placeholder = 'Select check-in date';
+            }
+            if (checkOutPicker) {
+                checkOutPicker._input.placeholder = 'Select check-out date';
+            }
+
+            // Re-initialize date pickers with new data
+            if (checkInPicker && checkOutPicker) {
+                const currentCheckIn = checkInPicker.selectedDates[0];
+                const currentCheckOut = checkOutPicker.selectedDates[0];
+
+                // Re-initialize pickers
+                await initializeDatePickers();
+
+                // Restore selected dates if they were set and still valid
+                if (currentCheckIn && currentCheckOut) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Only restore dates if they're not in the past
+                    if (currentCheckIn >= today) {
+                        const hasConflict = checkForDateRangeConflict(currentCheckIn, currentCheckOut);
+                        if (!hasConflict) {
+                            checkInPicker.setDate(currentCheckIn);
+                            checkOutPicker.setDate(currentCheckOut);
+                        }
+                    }
+                }
+            }
+
+            // Update booking summary
+            updateBookingSummary();
+        }
+    } catch (error) {
+        console.error('Error updating booked dates:', error);
+        // Reset placeholders on error
+        if (checkInPicker) {
+            checkInPicker._input.placeholder = 'Select check-in date';
+        }
+        if (checkOutPicker) {
+            checkOutPicker._input.placeholder = 'Select check-out date';
+        }
+    }
+}
+
+// Initialize room navigation when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded');
     initializeRoomNavigation();
     initializeDatePickers();
+
+    // Initialize Pusher channels for booking updates
+    if (window.pusherClient && typeof safeSubscribe === 'function') {
+        safeSubscribe('bookings', {
+            'booking.status.changed': async (e) => {
+                console.log('Received real-time update:', e);
+                
+                // Check if any of the affected rooms are currently selected
+                const selectedRooms = JSON.parse(document.getElementById('selected_rooms')?.value || '[]');
+                const hasAffectedRoom = selectedRooms.some(room => e.room_ids.includes(room.id));
+                
+                if (hasAffectedRoom) {
+                    console.log('Affected room is currently selected, updating calendar...');
+                    
+                    // Update booked dates and refresh calendar
+                    await updateBookedDates();
+
+                    // Show notification
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+
+                    Toast.fire({
+                        icon: 'info',
+                        title: e.message
+                    });
+                }
+            }
+        });
+    }
+
+    // Listen for booking status changes
+    window.addEventListener('booking-status-changed', async function() {
+        console.log('Booking status changed, updating calendar...');
+        await updateBookedDates();
+    });
+
+    // Listen for calendar refresh events
+    window.addEventListener('refresh-calendar', async function() {
+        console.log('Calendar refresh requested');
+        await updateBookedDates();
+    });
 });
 
 // Re-initialize when booking panel is shown
 document.addEventListener('bookingPanelShown', function() {
     console.log('Booking panel shown event received');
     setTimeout(() => {
-    initializeRoomNavigation();
+        initializeRoomNavigation();
         initializeDatePickers();
     }, 100);
 });
@@ -906,8 +1225,12 @@ function handleFormSubmit(event) {
     }
 
     // Check if dates are selected
-    const checkInDate = document.getElementById('check_in_date').value;
-    const checkOutDate = document.getElementById('check_out_date').value;
+    const checkInInput = document.getElementById('check_in_date');
+    const checkOutInput = document.getElementById('check_out_date');
+    
+    // Use the values directly from the inputs
+    const checkInDate = checkInInput.value;
+    const checkOutDate = checkOutInput.value;
         
     if (!checkInDate || !checkOutDate) {
         Swal.fire({
@@ -946,14 +1269,15 @@ function showPaymentPanel() {
         return;
     }
 
-    // Get values for payment summary
+    // Get the display dates from the inputs directly
     const checkInDate = document.getElementById('check_in_date').value;
     const checkOutDate = document.getElementById('check_out_date').value;
+
     const totalNights = document.querySelectorAll('.total_nights')[0].textContent;
     const totalAmount = document.getElementById('total').textContent;
     const totalRooms = {{ count($selectedRooms) }};
 
-    // Update payment summary
+    // Update payment summary with the dates
     document.getElementById('payment_check_in').textContent = checkInDate;
     document.getElementById('payment_check_out').textContent = checkOutDate;
     document.getElementById('payment_nights').textContent = totalNights;
@@ -1025,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     paymentMethods.forEach(method => {
         method.addEventListener('change', function() {
-            if (this.value === 'direct') {
+            if (this.value === 'deposit') {
                 directPaymentInstructions.classList.remove('hidden');
                 paymentButtonText.textContent = 'CONFIRM BOOKING';
     } else {
@@ -1087,16 +1411,9 @@ async function createAndFinalizeBooking(bookingData, orderId, status) {
             console.log('Midtrans status:', midtransStatus);
 
             // Format payment details
-            let paymentDetails = '';
-            if (midtransStatus.payment_type === 'bank_transfer') {
-                if (midtransStatus.va_numbers && midtransStatus.va_numbers.length > 0) {
-                    const va = midtransStatus.va_numbers[0];
-                    paymentDetails = `${va.bank.toUpperCase()} Virtual Account ${va.va_number}`;
-                }
-            } else if (midtransStatus.payment_type === 'echannel') {
-                paymentDetails = `Mandiri Bill ${midtransStatus.bill_key}`;
-            } else {
-                paymentDetails = midtransStatus.payment_type;
+            let formattedPaymentType = midtransStatus.payment_type;
+            if (midtransStatus.payment_type === 'bank_transfer' && midtransStatus.va_numbers && midtransStatus.va_numbers.length > 0) {
+                formattedPaymentType = `${midtransStatus.va_numbers[0].bank.toUpperCase()} Virtual Account`;
             }
 
             // Now call finish-ajax endpoint
@@ -1120,7 +1437,7 @@ async function createAndFinalizeBooking(bookingData, orderId, status) {
                 ...finishResult,
                 transaction: {
                     ...midtransStatus,
-                    formatted_payment_type: paymentDetails
+                    formatted_payment_type: formattedPaymentType
                 }
             };
         }
@@ -1155,9 +1472,9 @@ function processPayment() {
         const selectedRoomsInput = document.getElementById('selected_rooms');
         const selectedRoomsValue = selectedRoomsInput.value;
 
-        // Get dates in the correct format (Y-m-d)
-        const checkInDate = checkInPicker ? checkInPicker.selectedDates[0]?.toISOString().split('T')[0] : null;
-        const checkOutDate = checkOutPicker ? checkOutPicker.selectedDates[0]?.toISOString().split('T')[0] : null;
+        // Get dates directly from the inputs
+        const checkInDate = document.getElementById('check_in_date').value;
+        const checkOutDate = document.getElementById('check_out_date').value;
 
         if (!checkInDate || !checkOutDate) {
             throw new Error('Please select valid check-in and check-out dates');
@@ -1199,198 +1516,238 @@ function processPayment() {
         return;
     }
 
-    if (paymentMethod === 'midtrans') {
-        // For Midtrans payment, first get snap token
-        fetch('{{ route("bookings.store") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify(bookingData)
-        })
-        .then(async response => {
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || 'Server error occurred');
-            }
-            return data;
-        })
-        .then(result => {
-            if (result.success && result.snap_token) {
-                // Store booking data temporarily
-                const tempBookingData = {
-                    ...bookingData,
-                    order_id: result.booking_data.order_id
-                };
+    // Always use Midtrans for both full payment and deposit
+    fetch('{{ route("bookings.store") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(bookingData)
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Server error occurred');
+        }
+        return data;
+    })
+    .then(result => {
+        if (result.success && result.snap_token) {
+            // Store booking data temporarily
+            const tempBookingData = {
+                ...bookingData,
+                order_id: result.booking_data.order_id
+            };
 
-                // Clear any existing payment flags
-                localStorage.removeItem('hasSelectedPayment');
-                localStorage.removeItem('midtransOrderId');
+            // Clear any existing payment flags
+            localStorage.removeItem('hasSelectedPayment');
+            localStorage.removeItem('midtransOrderId');
 
-                // Open Midtrans Snap
-                window.snap.pay(result.snap_token, {
-                    onSuccess: function(result) {
-                        console.log('Payment Success:', result);
-                        localStorage.setItem('hasSelectedPayment', 'true');
-                        localStorage.setItem('midtransOrderId', result.order_id);
-                        
-                        // Create and finalize booking
-                        createAndFinalizeBooking(tempBookingData, result.order_id, result.transaction_status)
-                            .then((response) => {
-                                const paymentDetails = response.transaction?.formatted_payment_type || '';
-                                const isSettlement = response.status === 'settlement' || response.status === 'capture';
+            // Open Midtrans Snap
+            window.snap.pay(result.snap_token, {
+                onSuccess: async function(result) {
+                    console.log('Payment Success:', result);
+                    localStorage.setItem('hasSelectedPayment', 'true');
+                    localStorage.setItem('midtransOrderId', result.order_id);
+                    
+                    try {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Completing Payment...',
+                            text: 'Please wait while we process your payment',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
 
-                                // Show status badges like in transaction history
-                                const statusBadges = isSettlement ? 
-                                    `<div class="mb-2">
-                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-lg">Settlement</span>
-                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-lg mt-1">Payment: Paid</span>
-                                    </div>` :
-                                    '';
+                        // Format payment type and code
+                        let formattedPaymentType = result.payment_type;
+                        if (result.payment_type === 'bank_transfer' && result.va_numbers && result.va_numbers.length > 0) {
+                            formattedPaymentType = `${result.va_numbers[0].bank.toUpperCase()} Virtual Account`;
+                        }
 
-                                Swal.fire({
-                                    icon: isSettlement ? 'success' : 'info',
-                                    title: isSettlement ? 'Payment Successful' : 'Payment Instructions',
-                                    html: `
-                                        ${statusBadges}
-                                        <div class="text-left">
-                                            ${paymentDetails ? `<p class="mb-2 text-blue-600 bg-blue-50 p-2 rounded">${paymentDetails}</p>` : ''}
-                                            <p>${isSettlement ? 'Your booking has been confirmed.' : 'Please complete your payment using the provided details.'}</p>
-                                        </div>
-                                    `,
-                                    confirmButtonText: 'View Transactions',
-                                    confirmButtonColor: '#f97316'
-                                }).then(() => {
-                                    window.location.href = '/?panel=transactions&source=midtrans';
-                                });
-                            })
-                            .catch(error => {
-                                console.error('Error after payment:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'There was an error processing your booking. Please contact support.',
-                                    confirmButtonColor: '#f97316'
-                                });
-                            });
-                    },
-                    onPending: function(result) {
-                        // Similar implementation as onSuccess but with pending status
-                        console.log('Payment Pending:', result);
-                        localStorage.setItem('hasSelectedPayment', 'true');
-                        localStorage.setItem('midtransOrderId', result.order_id);
-                        
-                        createAndFinalizeBooking(tempBookingData, result.order_id, result.transaction_status)
-                            .then((response) => {
-                                const paymentDetails = response.transaction?.formatted_payment_type || '';
+                        // Add transaction details to the booking data
+                        const finalBookingData = {
+                            ...tempBookingData,
+                            transaction_id: result.transaction_id,
+                            payment_type: formattedPaymentType,
+                            payment_code: result.va_numbers ? result.va_numbers[0].va_number : result.payment_code,
+                            raw_payment_type: result.payment_type,
+                            raw_bank: result.va_numbers ? result.va_numbers[0].bank : null,
+                            payment_status: result.transaction_status
+                        };
 
-                                Swal.fire({
-                                    icon: 'info',
-                                    title: 'Payment Instructions',
-                                    html: `
-                                        <div class="text-left">
-                                            ${paymentDetails ? `<p class="mb-2 text-blue-600 bg-blue-50 p-2 rounded">${paymentDetails}</p>` : ''}
-                                            <p>Please complete your payment using the provided details.</p>
-                                        </div>
-                                    `,
-                                    confirmButtonText: 'View Transactions',
-                                    confirmButtonColor: '#f97316'
-                                }).then(() => {
-                                    window.location.href = '/?panel=transactions&source=midtrans';
-                                });
-                            })
-                            .catch(error => {
-                                console.error('Error after payment:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'There was an error processing your booking. Please contact support.',
-                                    confirmButtonColor: '#f97316'
-                                });
-                            });
-                    },
-                    onError: function(result) {
-                        console.error('Payment Error:', result);
+                        // Create and finalize booking with payment status
+                        const response = await createAndFinalizeBooking(finalBookingData, result.order_id, result.transaction_status);
+                        console.log('Booking finalized:', response);
+
+                        const paymentDetails = response.transaction?.formatted_payment_type || '';
+                        const isSettlement = response.transaction?.transaction_status === 'settlement' || 
+                                           response.transaction?.transaction_status === 'capture';
+
+                        // Show success message with payment details
+                        Swal.fire({
+                            icon: isSettlement ? 'success' : 'info',
+                            title: isSettlement ? 'Payment Successful' : 'Payment Instructions',
+                            html: `
+                                <div class="mb-2">
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-lg">
+                                        ${isSettlement ? 'Settlement' : 'Pending'}
+                                    </span>
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-lg mt-1">
+                                        Payment: ${isSettlement ? 'Paid' : 'Pending'}
+                                    </span>
+                                </div>
+                                <div class="text-left">
+                                    ${paymentDetails ? `<p class="mb-2 text-blue-600 bg-blue-50 p-2 rounded">${paymentDetails}</p>` : ''}
+                                    <p>${isSettlement ? 'Your booking has been confirmed.' : 'Please complete your payment using the provided details.'}</p>
+                                </div>
+                            `,
+                            confirmButtonText: 'View Transactions',
+                            confirmButtonColor: '#f97316'
+                        }).then(() => {
+                            window.location.href = '/?panel=transactions&source=midtrans';
+                        });
+                    } catch (error) {
+                        console.error('Error after payment:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'There was an error processing your booking. Please contact support.',
+                            confirmButtonColor: '#f97316'
+                        });
+                        resetPaymentButton();
+                    }
+                },
+                onPending: async function(result) {
+                    console.log('Payment Pending:', result);
+                    localStorage.setItem('hasSelectedPayment', 'true');
+                    localStorage.setItem('midtransOrderId', result.order_id);
+                    
+                    try {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we confirm your booking',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Format payment type and code
+                        let formattedPaymentType = result.payment_type;
+                        if (result.payment_type === 'bank_transfer' && result.va_numbers && result.va_numbers.length > 0) {
+                            formattedPaymentType = `${result.va_numbers[0].bank.toUpperCase()} Virtual Account`;
+                        }
+
+                        // Add transaction details to the booking data
+                        const finalBookingData = {
+                            ...tempBookingData,
+                            transaction_id: result.transaction_id,
+                            payment_type: formattedPaymentType,
+                            payment_code: result.va_numbers ? result.va_numbers[0].va_number : result.payment_code,
+                            raw_payment_type: result.payment_type,
+                            raw_bank: result.va_numbers ? result.va_numbers[0].bank : null,
+                            payment_status: 'pending'
+                        };
+
+                        // Create and finalize booking with pending status
+                        const response = await createAndFinalizeBooking(finalBookingData, result.order_id, 'pending');
+                        console.log('Booking created with pending status:', response);
+
+                        const paymentDetails = response.transaction?.formatted_payment_type || '';
+
+                        // Show pending payment instructions
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Payment Instructions',
+                            html: `
+                                <div class="text-left">
+                                    ${paymentDetails ? `<p class="mb-2 text-blue-600 bg-blue-50 p-2 rounded">${paymentDetails}</p>` : ''}
+                                    <p>Please complete your payment using the provided details.</p>
+                                </div>
+                            `,
+                            confirmButtonText: 'View Transactions',
+                            confirmButtonColor: '#f97316'
+                        }).then(() => {
+                            window.location.href = '/?panel=transactions&source=midtrans';
+                        });
+                    } catch (error) {
+                        console.error('Error creating pending booking:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'There was an error processing your booking. Please try again.',
+                            confirmButtonColor: '#f97316'
+                        });
+                        resetPaymentButton();
+                    }
+                },
+                onError: function(result) {
+                    console.error('Payment Error:', result);
+                    localStorage.removeItem('hasSelectedPayment');
+                    localStorage.removeItem('midtransOrderId');
+                    resetPaymentButton();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: 'An error occurred during payment. Please try again.',
+                        confirmButtonColor: '#f97316'
+                    });
+                },
+                onClose: function() {
+                    const hasSelectedPayment = localStorage.getItem('hasSelectedPayment') === 'true';
+                    const orderId = localStorage.getItem('midtransOrderId');
+                    
+                    console.log('Midtrans popup closed', {
+                        hasSelectedPayment,
+                        orderId
+                    });
+
+                    if (hasSelectedPayment && orderId) {
+                        // Only show the confirmation dialog if payment method was actually selected
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Payment Method Selected',
+                            text: 'Your order has been confirmed. Please check your transaction history to continue the payment.',
+                            showConfirmButton: true,
+                            confirmButtonText: 'View Transactions',
+                            confirmButtonColor: '#f97316'
+                        }).then(() => {
+                            localStorage.removeItem('hasSelectedPayment');
+                            localStorage.removeItem('midtransOrderId');
+                            window.location.href = '/?panel=transactions&source=midtrans';
+                        });
+                    } else {
+                        // Just reset the payment button if no payment method was selected
                         localStorage.removeItem('hasSelectedPayment');
                         localStorage.removeItem('midtransOrderId');
                         resetPaymentButton();
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Payment Failed',
-                            text: 'An error occurred during payment. Please try again.',
-                            confirmButtonColor: '#f97316'
-                        });
-                    },
-                    onClose: function() {
-                        const hasSelectedPayment = localStorage.getItem('hasSelectedPayment') === 'true';
-                        const orderId = localStorage.getItem('midtransOrderId');
-                        
-                        console.log('Midtrans popup closed', {
-                            hasSelectedPayment,
-                            orderId
-                        });
-
-                        if (hasSelectedPayment && orderId) {
-                            // Only show the confirmation dialog if payment method was actually selected
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'Payment Method Selected',
-                                text: 'Your order has been confirmed. Please check your transaction history to continue the payment.',
-                                showConfirmButton: true,
-                                confirmButtonText: 'View Transactions',
-                                confirmButtonColor: '#f97316'
-                            }).then(() => {
-                                localStorage.removeItem('hasSelectedPayment');
-                                localStorage.removeItem('midtransOrderId');
-                                window.location.href = '/?panel=transactions&source=midtrans';
-                            });
-                        } else {
-                            // Just reset the payment button if no payment method was selected
-                            localStorage.removeItem('hasSelectedPayment');
-                            localStorage.removeItem('midtransOrderId');
-                            resetPaymentButton();
-                            console.log('Popup closed without selecting payment method');
-                        }
+                        console.log('Popup closed without selecting payment method');
                     }
-                });
-            } else {
-                throw new Error('Failed to get payment token');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Booking Failed',
-                text: error.message || 'An error occurred while processing your booking.',
-                confirmButtonColor: '#f97316'
-            });
-            resetPaymentButton();
-        });
-    } else {
-        // For direct payment
-        createAndFinalizeBooking(bookingData, null, 'pending')
-            .then(result => {
-                if (result.success) {
-                    handleDirectPaymentSuccess(result.booking_id);
-                } else {
-                    throw new Error(result.message || 'Failed to create booking');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Booking Failed',
-                    text: error.message || 'An error occurred while processing your booking.',
-                    confirmButtonColor: '#f97316'
-                });
-                resetPaymentButton();
             });
-    }
+        } else {
+            throw new Error('Failed to get payment token');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Booking Failed',
+            text: error.message || 'An error occurred while processing your booking.',
+            confirmButtonColor: '#f97316'
+        });
+        resetPaymentButton();
+    });
 }
 
 function handleDirectPaymentSuccess(bookingId) {
@@ -1416,7 +1773,7 @@ function resetPaymentButton() {
         paymentSpinner.classList.add('hidden');
         // Reset button text based on payment method
         const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
-        paymentButtonText.textContent = selectedMethod && selectedMethod.value === 'direct' ? 'CONFIRM BOOKING' : 'PAY NOW';
+        paymentButtonText.textContent = selectedMethod && selectedMethod.value === 'deposit' ? 'CONFIRM BOOKING' : 'PAY NOW';
     }
 }
 
@@ -1448,6 +1805,43 @@ async function deletePendingBooking() {
         throw error; // Re-throw to handle in the calling function
     }
 }
+
+// Add click handlers for the input wrappers
+document.addEventListener('DOMContentLoaded', function() {
+    const checkInWrapper = document.querySelector('#check_in_date').closest('.date-input-wrapper');
+    const checkOutWrapper = document.querySelector('#check_out_date').closest('.date-input-wrapper');
+
+    if (checkInWrapper) {
+        checkInWrapper.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('flatpickr-input')) {
+                checkInPicker.open();
+            }
+        });
+    }
+
+    if (checkOutWrapper) {
+        checkOutWrapper.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('flatpickr-input')) {
+                if (!checkInPicker.selectedDates[0]) {
+                    checkInPicker.open();
+                    // Optional: Show a gentle reminder
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Pilih Tanggal Check-in',
+                        text: 'Silakan pilih tanggal check-in terlebih dahulu',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                } else {
+                    checkOutPicker.open();
+                }
+            }
+        });
+    }
+});
 </script>
 @endpush
 @endsection
