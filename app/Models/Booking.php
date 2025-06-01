@@ -29,8 +29,8 @@ class Booking extends Model
     ];
 
     protected $casts = [
-        'check_in_date' => 'datetime',
-        'check_out_date' => 'datetime',
+        'check_in_date' => 'date:Y-m-d',
+        'check_out_date' => 'date:Y-m-d',
         'checked_in_at' => 'datetime',
         'checked_out_at' => 'datetime',
         'total_price' => 'decimal:2'
@@ -176,5 +176,32 @@ class Booking extends Model
     public function getFormattedTotalPriceAttribute()
     {
         return 'Rp ' . number_format($this->total_price, 0, ',', '.');
+    }
+
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d');
+    }
+
+    public function getCheckInDateAttribute($value)
+    {
+        if (!$value) return null;
+        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+    }
+
+    public function getCheckOutDateAttribute($value)
+    {
+        if (!$value) return null;
+        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+    }
+
+    public function setCheckInDateAttribute($value)
+    {
+        $this->attributes['check_in_date'] = $value;
+    }
+
+    public function setCheckOutDateAttribute($value)
+    {
+        $this->attributes['check_out_date'] = $value;
     }
 }

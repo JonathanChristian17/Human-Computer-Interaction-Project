@@ -16,7 +16,7 @@
                         </svg>
                         <h3 class="text-xl font-semibold text-white">Selamat Datang</h3>
                     </div>
-                    <p class="text-gray-300">Halo, <span class="font-medium text-amber-400">{{ Auth::user()->name }}</span>! Anda telah berhasil login.</p>
+                    <p class="text-gray-300">Halo, <span class="font-medium text-amber-400" data-user-name>{{ Auth::user()->name }}</span>! Anda telah berhasil login.</p>
                 </div>
 
                 {{-- Email --}}

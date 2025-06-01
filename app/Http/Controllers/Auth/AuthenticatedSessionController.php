@@ -34,7 +34,11 @@ class AuthenticatedSessionController extends Controller
 
         if ($user) {
             // Add welcome notification with user's name
-            session()->flash('success', 'Selamat datang kembali, ' . $user->name . '!');
+            $welcomeMessage = $request->boolean('remember') 
+                ? 'Selamat datang kembali, ' . $user->name . '! Anda akan tetap masuk.'
+                : 'Selamat datang kembali, ' . $user->name . '!';
+            
+            session()->flash('success', $welcomeMessage);
 
             if ($user->role === 'admin') {
                 return redirect()->intended(route('admin.dashboard'));
@@ -57,6 +61,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $name = Auth::user()->name; // Get user name before logout
+        
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
@@ -64,6 +70,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/')
-            ->with('logout_success', true);
+            ->with('success', 'Sampai jumpa kembali, ' . $name . '! Anda telah berhasil keluar.');
     }
 } 

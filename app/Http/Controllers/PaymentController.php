@@ -10,6 +10,7 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -20,6 +21,8 @@ class PaymentController extends Controller
         Config::$isProduction = config('midtrans.is_production');
         Config::$isSanitized = true;
         Config::$is3ds = true;
+        Config::$paymentIdempotencyKey = true;
+        Config::$overrideNotifUrl = route('midtrans.webhook');
 
         // Validate Midtrans configuration
         if (empty(config('midtrans.server_key'))) {
@@ -156,7 +159,13 @@ class PaymentController extends Controller
                     'phone' => $booking->phone,
                 ],
                 'item_details' => $itemDetails,
-                'enabled_payments' => $enabledPayments
+                'enabled_payments' => $enabledPayments,
+                'expiry' => [
+                    'start_time' => $startTime->format('Y-m-d H:i:s O'),
+                    'unit' => 'minutes',
+                    'duration' => $startTime->diffInMinutes($paymentDeadline)
+                ],
+                'custom_field1' => json_encode(['payment_deadline' => $paymentDeadline->format('Y-m-d H:i:s O')])
             ];
 
             Log::info('Midtrans parameters:', $params);
@@ -165,6 +174,10 @@ class PaymentController extends Controller
                 // Create Snap token
                 $snapToken = Snap::getSnapToken($params);
                 
+                // Set payment deadline
+                $startTime = Carbon::now('Asia/Jakarta');
+                $paymentDeadline = $startTime->copy()->addHour();
+
                 // Create transaction record
                 $transaction = Transaction::create([
                     'booking_id' => $booking->id,
@@ -172,7 +185,8 @@ class PaymentController extends Controller
                     'gross_amount' => $booking->total_price,
                     'payment_type' => $validated['payment_method'],
                     'transaction_status' => 'pending',
-                    'snap_token' => $snapToken
+                    'snap_token' => $snapToken,
+                    'payment_deadline' => $paymentDeadline
                 ]);
 
                 // Update booking status

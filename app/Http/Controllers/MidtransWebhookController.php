@@ -79,6 +79,44 @@ class MidtransWebhookController extends Controller
             $permataVaNumber = $notificationBody['permata_va_number'] ?? null;
             $paymentCode = null;
             
+            // Extract custom fields
+            $customField1 = json_decode($notificationBody['custom_field1'] ?? '{}', true);
+            $isDeposit = $customField1['is_deposit'] ?? false;
+            
+            Log::info('Processing webhook notification', [
+                'order_id' => $orderId,
+                'status' => $transactionStatus,
+                'fraud' => $fraudStatus,
+                'payment_type' => $paymentType,
+                'is_deposit' => $isDeposit
+            ]);
+
+            // Find transaction by order ID with retries
+            $maxRetries = 3;
+            $retryDelay = 1; // seconds
+            $attempt = 1;
+            $transaction = null;
+
+            while ($attempt <= $maxRetries) {
+                $transaction = Transaction::where('order_id', $orderId)->first();
+                if ($transaction) {
+                    break;
+                }
+                Log::info("Transaction not found on attempt {$attempt}, retrying...", ['order_id' => $orderId]);
+                sleep($retryDelay);
+                $attempt++;
+            }
+
+            if (!$transaction) {
+                throw new \Exception("Transaction not found for order_id: {$orderId}");
+            }
+
+            // Find booking
+            $booking = $transaction->booking;
+            if (!$booking) {
+                throw new \Exception("Booking not found for transaction: {$transaction->id}");
+            }
+
             // Set payment type based on Midtrans response
             if ($paymentType === 'bank_transfer') {
                 if (!empty($vaNumbers)) {
@@ -92,30 +130,21 @@ class MidtransWebhookController extends Controller
             } elseif ($paymentType === 'echannel') {
                 $paymentType = 'Mandiri Bill Payment';
                 $paymentCode = $notificationBody['bill_key'] ?? null;
-            } elseif ($paymentType === 'gopay' || $paymentType === 'shopeepay') {
-                $paymentType = strtoupper($paymentType);
             } elseif ($paymentType === 'qris') {
                 $paymentType = 'QRIS';
-            }
-            
-            Log::info('Processing notification', [
-                'order_id' => $orderId,
-                'status' => $transactionStatus,
-                'fraud' => $fraudStatus,
-                'payment_type' => $paymentType,
-                'payment_code' => $paymentCode
-            ]);
-
-            // Find transaction by order ID
-            $transaction = Transaction::where('order_id', $orderId)->first();
-            if (!$transaction) {
-                throw new \Exception("Transaction not found for order_id: {$orderId}");
-            }
-
-            // Find booking
-            $booking = Booking::find($transaction->booking_id);
-            if (!$booking) {
-                throw new \Exception("Booking not found for transaction: {$transaction->id}");
+                $paymentCode = $transactionId;
+            } elseif ($paymentType === 'gopay') {
+                $paymentType = 'GoPay';
+                $paymentCode = $transactionId;
+            } elseif ($paymentType === 'shopeepay') {
+                $paymentType = 'ShopeePay';
+                $paymentCode = $transactionId;
+            } elseif ($paymentType === 'credit_card') {
+                $paymentType = 'Credit Card';
+                $paymentCode = $notificationBody['masked_card'] ?? $transactionId;
+            } elseif ($paymentType === 'cstore') {
+                $paymentType = ucfirst($notificationBody['store'] ?? 'Convenience Store');
+                $paymentCode = $notificationBody['payment_code'] ?? $transactionId;
             }
 
             // Store complete notification data
@@ -124,50 +153,52 @@ class MidtransWebhookController extends Controller
             $transaction->payment_type = $paymentType;
             $transaction->payment_code = $paymentCode;
             $transaction->transaction_status = $transactionStatus;
+            $transaction->transaction_time = $notificationBody['transaction_time'] ?? null;
 
-            // Update transaction and booking status based on notification
-            switch ($transactionStatus) {
-                case 'capture':
-                    if ($fraudStatus == 'challenge') {
-                        $transaction->transaction_status = 'challenge';
-                        $transaction->payment_status = 'pending';
-                        $booking->payment_status = 'pending';
-                        $booking->status = 'pending';
-                    } else if ($fraudStatus == 'accept') {
-                        $transaction->transaction_status = 'success';
-                        $transaction->payment_status = 'paid';
-                        $booking->payment_status = 'paid';
-                        $booking->status = 'confirmed';
-                    }
-                    break;
-                case 'settlement':
-                    $transaction->transaction_status = 'settlement';
-                    $transaction->payment_status = 'paid';
-                    $booking->payment_status = 'paid';
-                    $booking->status = 'confirmed';
-                    break;
-                case 'pending':
-                    $transaction->transaction_status = 'pending';
+            // Update payment status based on transaction status
+            if ($transactionStatus == 'capture') {
+                if ($fraudStatus == 'challenge') {
                     $transaction->payment_status = 'pending';
                     $booking->payment_status = 'pending';
                     $booking->status = 'pending';
-                    break;
-                case 'deny':
-                case 'cancel':
-                case 'expire':
-                    $transaction->transaction_status = $transactionStatus;
-                    $transaction->payment_status = 'cancelled';
-                    $booking->payment_status = 'cancelled';
-                    $booking->status = 'cancelled';
-                    break;
+                } else if ($fraudStatus == 'accept') {
+                    $transaction->payment_status = $transaction->is_deposit ? 'deposit' : 'paid';
+                    $booking->payment_status = $transaction->is_deposit ? 'deposit' : 'paid';
+                    $booking->status = 'confirmed';
+                }
+            } else if ($transactionStatus == 'settlement') {
+                $transaction->payment_status = $transaction->is_deposit ? 'deposit' : 'paid';
+                $booking->payment_status = $transaction->is_deposit ? 'deposit' : 'paid';
+                $booking->status = 'confirmed';
+            } else if ($transactionStatus == 'pending') {
+                $transaction->payment_status = 'pending';
+                $booking->payment_status = 'pending';
+                $booking->status = 'pending';
+            } else if (in_array($transactionStatus, ['deny', 'cancel', 'expire', 'failure'])) {
+                $transaction->payment_status = 'cancelled';
+                $booking->payment_status = 'cancelled';
+                $booking->status = 'cancelled';
             }
 
+            // Save changes
             $transaction->save();
             $booking->save();
 
             DB::commit();
 
-            return response()->json(['status' => 'success']);
+            Log::info('Webhook processing completed', [
+                'order_id' => $orderId,
+                'final_status' => [
+                    'transaction_status' => $transaction->transaction_status,
+                    'payment_status' => $transaction->payment_status,
+                    'booking_status' => $booking->status
+                ]
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification processed successfully'
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();

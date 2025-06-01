@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Illuminate\Support\Facades\DB;
+use App\Events\BookingStatusChanged;
 
 class TransactionController extends Controller
 {
@@ -17,24 +18,79 @@ class TransactionController extends Controller
         Config::$isProduction = config('midtrans.is_production');
         Config::$isSanitized = true;
         Config::$is3ds = true;
+        Config::$paymentIdempotencyKey = true;
+        Config::$overrideNotifUrl = route('midtrans.webhook');
     }
 
     public function index()
     {
-        $transactions = Transaction::with('booking')
-            ->whereHas('booking', function($query) {
-                $query->where('user_id', auth()->id());
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        try {
+            $user = auth()->user();
+            $transactions = Transaction::with(['booking.rooms'])
+                ->whereHas('booking', function($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                ->latest()
+                ->get()
+                ->map(function($transaction) {
+                    // Calculate payment deadline and expired status
+                    $paymentDeadline = null;
+                    $isExpired = false;
+                    
+                    if ($transaction->payment_status === 'pending') {
+                        $createdAt = \Carbon\Carbon::parse($transaction->created_at)->timezone('Asia/Jakarta');
+                        $deadline = $createdAt->copy()->addHour();
+                        $now = \Carbon\Carbon::now()->timezone('Asia/Jakarta');
+                        
+                        $paymentDeadline = $deadline->format('Y-m-d H:i:s');
+                        $isExpired = $now->isAfter($deadline);
+                    }
 
-        if (request()->wantsJson()) {
-            return response()->json([
-                'html' => view('transactions._list', compact('transactions'))->render()
+                    // Format the transaction data
+                    return [
+                        'id' => $transaction->id,
+                        'order_id' => $transaction->order_id,
+                        'transaction_id' => $transaction->transaction_id,
+                        'created_at' => $transaction->created_at,
+                        'status' => $isExpired ? 'Expired' : ucfirst($transaction->payment_status),
+                        'payment_status' => $transaction->payment_status,
+                        'transaction_status' => $transaction->transaction_status,
+                        'payment_type' => $transaction->payment_type,
+                        'payment_code' => $transaction->payment_code,
+                        'gross_amount' => $transaction->gross_amount,
+                        'payment_deadline' => $paymentDeadline,
+                        'is_expired' => $isExpired,
+                        'booking' => [
+                            'check_in_date' => $transaction->booking->check_in_date,
+                            'check_out_date' => $transaction->booking->check_out_date,
+                            'room_number' => $transaction->booking->rooms->first()->room_number ?? null,
+                        ]
+                    ];
+                });
+
+            $html = view('transactions._list', [
+                'transactions' => $transactions,
+                'showPayButton' => function($transaction) {
+                    return $transaction['payment_status'] !== 'paid' 
+                        && $transaction['payment_status'] !== 'deposit'
+                        && $transaction['payment_status'] !== 'cancelled'
+                        && !$transaction['is_expired'];
+                },
+                'showCancelButton' => function($transaction) {
+                    return $transaction['payment_status'] !== 'paid'
+                        && $transaction['payment_status'] !== 'deposit'
+                        && $transaction['payment_status'] !== 'cancelled'
+                        && !$transaction['is_expired'];
+                }
+            ])->render();
+
+            return response()->json(['html' => $html]);
+        } catch (\Exception $e) {
+            \Log::error('Error loading transactions: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
             ]);
+            return response()->json(['error' => 'Failed to load transactions'], 500);
         }
-
-        return view('transactions.index', compact('transactions'));
     }
 
     public function show(Transaction $transaction)
@@ -115,9 +171,8 @@ class TransactionController extends Controller
             }
 
             // Check if transaction can be cancelled
-            if (!in_array($transaction->transaction_status, ['pending']) || 
-                !in_array($transaction->payment_status, ['pending', 'failed'])) {
-                throw new \Exception('Transaction cannot be cancelled');
+            if (!in_array($transaction->payment_status, ['pending'])) {
+                throw new \Exception('This transaction cannot be cancelled.');
             }
 
             // Update transaction status
@@ -139,6 +194,12 @@ class TransactionController extends Controller
                     $room->update(['status' => 'available']);
                 }
             }
+
+            // Get room IDs from the booking
+            $roomIds = $booking->rooms->pluck('id')->toArray();
+
+            // Broadcast the event
+            event(new BookingStatusChanged($roomIds, 'Booking has been cancelled'));
 
             DB::commit();
 
@@ -185,6 +246,10 @@ class TransactionController extends Controller
             }
             $newOrderId = $newOrderId . '-retry-' . time();
 
+            // Set payment deadline
+            $startTime = \Carbon\Carbon::now('Asia/Jakarta');
+            $paymentDeadline = $startTime->copy()->addHour();
+
             // Create Midtrans transaction parameters
             $params = [
                 'transaction_details' => [
@@ -208,6 +273,12 @@ class TransactionController extends Controller
                     'bca_va', 'bni_va', 'bri_va', 'mandiri_va', 'permata_va', 'other_va',
                     'gopay', 'shopeepay', 'qris', 'bank_transfer', 'indomaret', 'credit_card'
                 ],
+                'expiry' => [
+                    'start_time' => $startTime->format('Y-m-d H:i:s O'),
+                    'unit' => 'minutes',
+                    'duration' => $startTime->diffInMinutes($paymentDeadline)
+                ],
+                'custom_field1' => json_encode(['payment_deadline' => $paymentDeadline->format('Y-m-d H:i:s O')]),
                 'callbacks' => [
                     'finish' => route('payment.finish'),
                     'error' => route('payment.error'),
@@ -218,7 +289,8 @@ class TransactionController extends Controller
 
             \Log::info('Creating Midtrans transaction', [
                 'transaction_id' => $transaction->id,
-                'params' => $params
+                'params' => $params,
+                'payment_deadline' => $paymentDeadline->format('Y-m-d H:i:s')
             ]);
 
             // Get Snap token
@@ -239,7 +311,8 @@ class TransactionController extends Controller
                 'payment_code' => null,
                 'transaction_id' => null,
                 'transaction_time' => null,
-                'raw_response' => null
+                'raw_response' => null,
+                'payment_deadline' => $paymentDeadline
             ]);
 
             // Update booking status
@@ -275,108 +348,110 @@ class TransactionController extends Controller
             $orderId = $request->query('order_id');
             \Log::info('Payment finish callback received', ['order_id' => $orderId]);
 
-            // Find transaction by order ID
-            $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
-            $booking = $transaction->booking;
+            // Find transaction
+            $transaction = Transaction::where('order_id', $orderId)->first();
+            
+            // If no transaction found, just redirect without error
+            if (!$transaction) {
+                \Log::info('No transaction found, user probably closed the payment window', ['order_id' => $orderId]);
+                return redirect()->to('/?panel=transactions&source=midtrans');
+            }
 
+            $booking = $transaction->booking;
             if (!$booking) {
-                throw new \Exception('Booking not found');
+                return redirect()->to('/?panel=transactions&source=midtrans')
+                    ->with('error', 'Booking not found');
             }
 
             // Get transaction status from Midtrans
-            $midtransStatus = \Midtrans\Transaction::status($orderId);
-            
-            \Log::info('Midtrans status retrieved', [
-                'order_id' => $orderId,
-                'status' => $midtransStatus
-            ]);
-
-            DB::beginTransaction();
             try {
-                // Update transaction with payment details
-                $transaction->transaction_id = $midtransStatus->transaction_id;
-                $transaction->payment_type = $this->formatPaymentType($midtransStatus->payment_type, $midtransStatus);
-                $transaction->payment_code = $this->getPaymentCode($midtransStatus);
-                $transaction->transaction_status = $midtransStatus->transaction_status;
-                $transaction->transaction_time = $midtransStatus->transaction_time;
-                $transaction->raw_response = json_encode($midtransStatus);
-
-                // Update transaction and booking status based on Midtrans status
-                if ($midtransStatus->transaction_status === 'settlement' || $midtransStatus->transaction_status === 'capture') {
-                    $transaction->payment_status = 'paid';
-                    $transaction->transaction_status = 'settlement';
-                    $booking->payment_status = 'paid';
-                    $booking->status = 'confirmed';
-                } else if ($midtransStatus->transaction_status === 'pending') {
-                    $transaction->payment_status = 'pending';
-                    $transaction->transaction_status = 'pending';
-                    $booking->payment_status = 'pending';
-                    $booking->status = 'pending';
-                } else if (in_array($midtransStatus->transaction_status, ['cancel', 'deny', 'expire'])) {
-                    $transaction->payment_status = 'cancelled';
-                    $transaction->transaction_status = $midtransStatus->transaction_status;
-                    $booking->payment_status = 'cancelled';
-                    $booking->status = 'cancelled';
-                }
-
-                $transaction->save();
-                $booking->save();
-
-                DB::commit();
-                \Log::info('Payment status updated successfully', [
+                $midtransStatus = \Midtrans\Transaction::status($orderId);
+                
+                \Log::info('Midtrans status retrieved', [
                     'order_id' => $orderId,
-                    'transaction_id' => $transaction->id,
-                    'booking_id' => $booking->id,
-                    'status' => $midtransStatus->transaction_status
+                    'status' => $midtransStatus,
+                    'is_deposit' => $transaction->is_deposit
                 ]);
 
-                $response = [
-                    'success' => true,
-                    'status' => $midtransStatus->transaction_status,
-                    'message' => $midtransStatus->transaction_status === 'pending' 
-                        ? 'Please complete your payment using the provided payment instructions.'
-                        : 'Payment successful! Your booking has been confirmed.',
-                    'transaction' => [
-                        'id' => $transaction->id,
-                        'order_id' => $transaction->order_id,
-                        'status' => $transaction->transaction_status,
-                        'payment_status' => $transaction->payment_status,
-                        'payment_type' => $transaction->payment_type,
-                        'payment_code' => $transaction->payment_code
-                    ]
-                ];
+                DB::beginTransaction();
+                try {
+                    // Update transaction with payment details
+                    $transaction->transaction_id = $midtransStatus->transaction_id;
+                    $transaction->payment_type = $this->formatPaymentType($midtransStatus->payment_type, $midtransStatus);
+                    $transaction->payment_code = $this->getPaymentCode($midtransStatus);
+                    $transaction->transaction_status = $midtransStatus->transaction_status;
+                    $transaction->transaction_time = $midtransStatus->transaction_time;
+                    $transaction->raw_response = json_encode($midtransStatus);
 
-                // Always return JSON for AJAX requests
-                if ($request->wantsJson() || $request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
-                    return response()->json($response);
+                    // Update transaction and booking status based on Midtrans status
+                    if (in_array($midtransStatus->transaction_status, ['settlement', 'capture'])) {
+                        if ($midtransStatus->fraud_status == 'accept' || $midtransStatus->transaction_status == 'settlement') {
+                            $transaction->transaction_status = 'settlement';
+                            
+                            // Check if this is a deposit payment
+                            if ($transaction->is_deposit) {
+                                $transaction->payment_status = 'deposit';
+                                $booking->payment_status = 'deposit';
+                            } else {
+                                $transaction->payment_status = 'paid';
+                                $booking->payment_status = 'paid';
+                            }
+                            $booking->status = 'confirmed';
+                        }
+                    } else if ($midtransStatus->transaction_status === 'pending') {
+                        $transaction->payment_status = 'pending';
+                        $transaction->transaction_status = 'pending';
+                        $booking->payment_status = 'pending';
+                        $booking->status = 'pending';
+                    }
+
+                    $transaction->save();
+                    $booking->save();
+
+                    DB::commit();
+
+                    // Redirect based on payment status
+                    if (in_array($transaction->payment_status, ['paid', 'deposit'])) {
+                        $message = $transaction->is_deposit ? 
+                            'Deposit payment successful! Please pay the remaining amount at check-in.' : 
+                            'Payment successful!';
+                        return redirect()->to('/?panel=transactions&source=midtrans')
+                            ->with('success', $message);
+                    } else {
+                        return redirect()->to('/?panel=transactions&source=midtrans')
+                            ->with('info', 'Payment is being processed. Please check your payment status.');
+                    }
+
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
                 }
-
-                // Fallback to redirect for non-AJAX requests
-                return redirect()->route('landing', ['panel' => 'transactions'])
-                    ->with($midtransStatus->transaction_status === 'pending' ? 'info' : 'success', $response['message']);
-
             } catch (\Exception $e) {
-                DB::rollBack();
-                \Log::error('Failed to update payment status: ' . $e->getMessage());
-                throw $e;
+                \Log::warning('Failed to get Midtrans status', [
+                    'order_id' => $orderId,
+                    'error' => $e->getMessage()
+                ]);
+                return redirect()->to('/?panel=transactions&source=midtrans')
+                    ->with('info', 'Payment status will be updated shortly. Please check your transaction history.');
             }
 
         } catch (\Exception $e) {
             \Log::error('Error in payment finish: ' . $e->getMessage());
-            
-            $errorResponse = [
-                'success' => false,
-                'message' => 'An error occurred while processing your payment. Please contact support.',
-                'error' => $e->getMessage()
-            ];
-            
-            if ($request->wantsJson() || $request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
-                return response()->json($errorResponse, 500);
-            }
-
-            return redirect()->route('landing', ['panel' => 'transactions'])
-                ->with('error', $errorResponse['message']);
+            return redirect()->to('/?panel=transactions&source=midtrans')
+                ->with('error', 'An error occurred while processing your payment. Please check your transaction history.');
         }
+    }
+
+    private function getStatusMessage($status, $isDeposit)
+    {
+        return match($status) {
+            'deposit' => 'Deposit payment successful! Please pay the remaining amount at check-in.',
+            'paid' => 'Payment successful! Your booking has been confirmed.',
+            'pending' => 'Please complete your payment using the provided payment instructions.',
+            'cancelled' => 'Payment has been cancelled.',
+            'expired' => 'Payment has expired.',
+            default => 'Payment status: ' . ucfirst($status)
+        };
     }
 
     public function finishAjax(Request $request)
@@ -385,10 +460,20 @@ class TransactionController extends Controller
             $orderId = $request->query('order_id');
             \Log::info('AJAX Payment finish callback received', ['order_id' => $orderId]);
 
-            // Find transaction by order ID
-            $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
-            $booking = $transaction->booking;
+            // Find transaction
+            $transaction = Transaction::where('order_id', $orderId)->first();
+            
+            // If no transaction found, return success without error
+            if (!$transaction) {
+                \Log::info('No transaction found, user probably closed the payment window', ['order_id' => $orderId]);
+                return response()->json([
+                    'success' => true,
+                    'status' => 'paid',
+                    'message' => 'Payment Success'
+                ]);
+            }
 
+            $booking = $transaction->booking;
             if (!$booking) {
                 return response()->json([
                     'success' => false,
@@ -397,80 +482,100 @@ class TransactionController extends Controller
             }
 
             // Get transaction status from Midtrans
-            $midtransStatus = \Midtrans\Transaction::status($orderId);
-            
-            \Log::info('Midtrans status retrieved', [
-                'order_id' => $orderId,
-                'status' => $midtransStatus
-            ]);
-
-            DB::beginTransaction();
             try {
-                // Update transaction with payment details
-                $transaction->transaction_id = $midtransStatus->transaction_id;
-                $transaction->payment_type = $this->formatPaymentType($midtransStatus->payment_type, $midtransStatus);
-                $transaction->payment_code = $this->getPaymentCode($midtransStatus);
-                $transaction->transaction_status = $midtransStatus->transaction_status;
-                $transaction->transaction_time = $midtransStatus->transaction_time;
-                $transaction->raw_response = json_encode($midtransStatus);
-
-                // Update transaction status based on Midtrans status
-                if ($midtransStatus->transaction_status === 'settlement' || $midtransStatus->transaction_status === 'capture') {
-                    $transaction->payment_status = 'paid';
-                    $transaction->transaction_status = 'settlement';
-                    $booking->payment_status = 'paid';
-                    $booking->status = 'confirmed';
-                } else if ($midtransStatus->transaction_status === 'pending') {
-                    $transaction->payment_status = 'pending';
-                    $transaction->transaction_status = 'pending';
-                    $booking->payment_status = 'pending';
-                    $booking->status = 'pending';
-                }
-
-                $transaction->save();
-                $booking->save();
-
-                DB::commit();
-                \Log::info('Payment status updated successfully', [
+                $midtransStatus = \Midtrans\Transaction::status($orderId);
+                
+                \Log::info('Midtrans status retrieved', [
                     'order_id' => $orderId,
-                    'transaction_id' => $transaction->id,
-                    'booking_id' => $booking->id,
-                    'status' => $midtransStatus->transaction_status
+                    'status' => $midtransStatus,
+                    'is_deposit' => $transaction->is_deposit
                 ]);
 
+                DB::beginTransaction();
+                try {
+                    // Update transaction with payment details
+                    $transaction->transaction_id = $midtransStatus->transaction_id;
+                    $transaction->payment_type = $this->formatPaymentType($midtransStatus->payment_type, $midtransStatus);
+                    $transaction->payment_code = $this->getPaymentCode($midtransStatus);
+                    $transaction->transaction_status = $midtransStatus->transaction_status;
+                    $transaction->transaction_time = $midtransStatus->transaction_time;
+                    $transaction->raw_response = json_encode($midtransStatus);
+
+                    // Update payment status based on transaction status
+                    if ($midtransStatus->transaction_status == 'capture') {
+                        if ($midtransStatus->fraud_status == 'challenge') {
+                            $transaction->payment_status = 'pending';
+                            $booking->payment_status = 'pending';
+                            $booking->status = 'pending';
+                        } else if ($midtransStatus->fraud_status == 'accept') {
+                            $transaction->payment_status = $transaction->is_deposit ? 'deposit' : 'paid';
+                            $booking->payment_status = $transaction->is_deposit ? 'deposit' : 'paid';
+                            $booking->status = 'confirmed';
+                        }
+                    } else if ($midtransStatus->transaction_status == 'settlement') {
+                        $transaction->payment_status = $transaction->is_deposit ? 'deposit' : 'paid';
+                        $booking->payment_status = $transaction->is_deposit ? 'deposit' : 'paid';
+                        $booking->status = 'confirmed';
+                    } else if ($midtransStatus->transaction_status == 'pending') {
+                        $transaction->payment_status = 'pending';
+                        $booking->payment_status = 'pending';
+                        $booking->status = 'pending';
+                    } else if (in_array($midtransStatus->transaction_status, ['deny', 'cancel', 'expire', 'failure'])) {
+                        $transaction->payment_status = 'cancelled';
+                        $booking->payment_status = 'cancelled';
+                        $booking->status = 'cancelled';
+                    }
+
+                    // Save changes
+                    $transaction->save();
+                    $booking->save();
+                    DB::commit();
+
+                    // Log successful update
+                    \Log::info('Transaction and booking updated successfully', [
+                        'transaction_id' => $transaction->id,
+                        'booking_id' => $booking->id,
+                        'payment_status' => $transaction->payment_status,
+                        'transaction_status' => $transaction->transaction_status
+                    ]);
+
+                    return response()->json([
+                        'success' => true,
+                        'status' => $transaction->payment_status,
+                        'message' => $this->getStatusMessage($transaction->payment_status, $transaction->is_deposit),
+                        'transaction' => [
+                            'id' => $transaction->id,
+                            'order_id' => $transaction->order_id,
+                            'status' => $transaction->transaction_status,
+                            'payment_status' => $transaction->payment_status,
+                            'payment_type' => $transaction->payment_type,
+                            'payment_code' => $transaction->payment_code,
+                            'is_deposit' => $transaction->is_deposit
+                        ]
+                    ]);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to get Midtrans status', [
+                    'order_id' => $orderId,
+                    'error' => $e->getMessage()
+                ]);
                 return response()->json([
                     'success' => true,
-                    'status' => $midtransStatus->transaction_status,
-                    'message' => $midtransStatus->transaction_status === 'pending' 
-                        ? 'Please complete your payment using the provided payment instructions.'
-                        : 'Payment successful! Your booking has been confirmed.',
-                    'transaction' => [
-                        'id' => $transaction->id,
-                        'order_id' => $transaction->order_id,
-                        'status' => $transaction->transaction_status,
-                        'payment_status' => $transaction->payment_status,
-                        'payment_type' => $transaction->payment_type,
-                        'payment_code' => $transaction->payment_code
-                    ]
+                    'status' => 'pending',
+                    'message' => 'Payment status will be updated shortly'
                 ]);
-
-            } catch (\Exception $e) {
-                DB::rollBack();
-                \Log::error('Failed to update payment status: ' . $e->getMessage());
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to update payment status',
-                    'error' => $e->getMessage()
-                ], 500);
             }
 
         } catch (\Exception $e) {
             \Log::error('Error in payment finish AJAX: ' . $e->getMessage());
             return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while processing your payment',
-                'error' => $e->getMessage()
-            ], 500);
+                'success' => true,
+                'status' => 'error',
+                'message' => 'An error occurred while processing your payment'
+            ]);
         }
     }
 
@@ -483,27 +588,46 @@ class TransactionController extends Controller
             } elseif (!empty($midtransStatus->permata_va_number)) {
                 return 'PERMATA Virtual Account';
             }
-            return 'Bank Transfer';
         } elseif ($paymentType === 'echannel') {
             return 'Mandiri Bill Payment';
-        } elseif (in_array($paymentType, ['gopay', 'shopeepay'])) {
-            return strtoupper($paymentType);
         } elseif ($paymentType === 'qris') {
             return 'QRIS';
+        } elseif ($paymentType === 'gopay') {
+            return 'GoPay';
+        } elseif ($paymentType === 'shopeepay') {
+            return 'ShopeePay';
+        } elseif ($paymentType === 'credit_card') {
+            return 'Credit Card';
+        } elseif ($paymentType === 'cstore') {
+            return ucfirst($midtransStatus->store ?? 'Convenience Store');
         }
+        
         return ucfirst($paymentType);
     }
 
     private function getPaymentCode($midtransStatus)
     {
-        if (!empty($midtransStatus->va_numbers)) {
-            return $midtransStatus->va_numbers[0]->va_number;
-        } elseif (!empty($midtransStatus->permata_va_number)) {
-            return $midtransStatus->permata_va_number;
-        } elseif (!empty($midtransStatus->bill_key)) {
-            return $midtransStatus->bill_key;
+        $paymentType = $midtransStatus->payment_type;
+        
+        if ($paymentType === 'bank_transfer') {
+            if (!empty($midtransStatus->va_numbers)) {
+                return $midtransStatus->va_numbers[0]->va_number;
+            } elseif (!empty($midtransStatus->permata_va_number)) {
+                return $midtransStatus->permata_va_number;
+            }
+        } elseif ($paymentType === 'echannel') {
+            return $midtransStatus->bill_key ?? null;
+        } elseif ($paymentType === 'qris') {
+            return $midtransStatus->transaction_id;
+        } elseif ($paymentType === 'gopay' || $paymentType === 'shopeepay') {
+            return $midtransStatus->transaction_id;
+        } elseif ($paymentType === 'credit_card') {
+            return $midtransStatus->masked_card ?? $midtransStatus->transaction_id;
+        } elseif ($paymentType === 'cstore') {
+            return $midtransStatus->payment_code ?? $midtransStatus->transaction_id;
         }
-        return null;
+        
+        return $midtransStatus->transaction_id;
     }
 
     public function error(Request $request)

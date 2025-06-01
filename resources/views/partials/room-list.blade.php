@@ -1,5 +1,5 @@
 @foreach($rooms as $room)
-<div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+<div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 mb-4">
     <div class="flex">
         <!-- Room Image -->
         <div class="w-1/3">
@@ -49,6 +49,8 @@
 </div>
 @endforeach
 
-<div class="mt-6" id="pagination-links">
-    {{ $rooms->links() }}
+<div class="mt-6">
+    <div class="pagination">
+        {{ $rooms->links() }}
+    </div>
 </div> 

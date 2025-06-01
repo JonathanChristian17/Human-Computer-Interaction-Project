@@ -7,7 +7,7 @@
                         <img id="profile-photo" class="h-24 w-24 object-cover rounded-full" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
                     </div>
                     <div>
-                        <h2 id="profile-name" class="text-2xl font-semibold">{{ Auth::user()->name }}</h2>
+                        <h2 id="profile-name" class="text-2xl font-semibold" data-user-name>{{ Auth::user()->name }}</h2>
                         <p id="profile-email" class="text-gray-500">{{ Auth::user()->email }}</p>
                     </div>
                     <div class="ml-auto flex space-x-3">

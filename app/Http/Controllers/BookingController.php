@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class BookingController extends Controller
 {
@@ -33,7 +34,22 @@ class BookingController extends Controller
         // First, get ALL bookings for ALL rooms
         $allBookings = DB::table('booking_room')
             ->join('bookings', 'booking_room.booking_id', '=', 'bookings.id')
-            ->whereNotIn('bookings.status', ['cancelled', 'refunded'])
+            ->join('transactions', 'bookings.id', '=', 'transactions.booking_id')
+            ->where(function($query) {
+                $query->where(function($q) {
+                    // Include only valid bookings
+                    $q->whereNotIn('bookings.status', ['cancelled'])
+                      ->whereNotIn('bookings.payment_status', ['cancelled'])
+                      ->where(function($q) {
+                          $q->where('transactions.payment_status', '!=', 'expire')
+                            ->orWhere(function($q) {
+                                // For pending payments, check if they're not expired (within 1 hour)
+                                $q->where('transactions.payment_status', 'pending')
+                                  ->where('transactions.created_at', '>=', now()->subHour());
+                            });
+                      });
+                });
+            })
             ->where(function($query) {
                 $query->where('bookings.check_out_date', '>=', now()->format('Y-m-d'))
                     ->orWhere('bookings.check_in_date', '>=', now()->format('Y-m-d'));
@@ -56,7 +72,7 @@ class BookingController extends Controller
             $period = new \DatePeriod(
                 $startDate,
                 new \DateInterval('P1D'),
-                $endDate->modify('+1 day')
+                $endDate
             );
 
             foreach ($period as $date) {
@@ -109,6 +125,7 @@ class BookingController extends Controller
     {
         \Log::info('Booking request received', [
             'request' => $request->all(),
+            'payment_method' => $request->input('payment_method'),
             'user_id' => auth()->id(),
             'route' => $request->route()->getName(),
             'url' => $request->url(),
@@ -126,9 +143,14 @@ class BookingController extends Controller
                 'check_in_date' => 'required|date|after_or_equal:today',
                 'check_out_date' => 'required|date|after:check_in_date',
                 'special_requests' => 'nullable|string',
-                'payment_method' => 'required|in:midtrans,direct',
+                'payment_method' => 'required|in:midtrans,direct,deposit',
                 'payment_status' => 'nullable|string',
-                'order_id' => 'nullable|string'
+                'order_id' => 'nullable|string',
+                'transaction_id' => 'nullable|string',
+                'payment_type' => 'nullable|string',
+                'payment_code' => 'nullable|string',
+                'raw_payment_type' => 'nullable|string',
+                'raw_bank' => 'nullable|string'
             ]);
 
             \Log::info('Validation passed', $validated);
@@ -143,10 +165,31 @@ class BookingController extends Controller
                 ], 422);
             }
 
+            // Parse dates in Asia/Jakarta timezone
+            $jakartaTz = new \DateTimeZone('Asia/Jakarta');
+            
+            // Create DateTime objects in Jakarta timezone
+            $checkIn = \DateTime::createFromFormat('Y-m-d', $validated['check_in_date'], $jakartaTz);
+            $checkOut = \DateTime::createFromFormat('Y-m-d', $validated['check_out_date'], $jakartaTz);
+            
+            if (!$checkIn || !$checkOut) {
+                throw new \Exception('Invalid date format');
+            }
+
+            // Format dates for database (keeping the same date regardless of timezone)
+            $checkInDate = $checkIn->format('Y-m-d');
+            $checkOutDate = $checkOut->format('Y-m-d');
+            
+            \Log::info('Date processing', [
+                'original_check_in' => $validated['check_in_date'],
+                'original_check_out' => $validated['check_out_date'],
+                'formatted_check_in' => $checkInDate,
+                'formatted_check_out' => $checkOutDate,
+                'timezone' => $jakartaTz->getName()
+            ]);
+
             // Calculate nights
-            $checkIn = \Carbon\Carbon::parse($validated['check_in_date']);
-            $checkOut = \Carbon\Carbon::parse($validated['check_out_date']);
-            $nights = $checkIn->diffInDays($checkOut);
+            $nights = $checkIn->diff($checkOut)->days;
 
             // Calculate totals
             $subtotal = 0;
@@ -156,12 +199,16 @@ class BookingController extends Controller
                     throw new \Exception("Room with ID {$roomData['id']} not found.");
                 }
 
-                // Check if room is available
-                $isAvailable = $room->isAvailableForDates(
-                    $validated['check_in_date'],
-                    $validated['check_out_date']
-                );
+                \Log::info('Checking room availability for dates', [
+                    'room_id' => $room->id,
+                    'room_type' => $room->type,
+                    'check_in' => $checkInDate,
+                    'check_out' => $checkOutDate,
+                    'exclude_booking_id' => null
+                ]);
 
+                // Check if room is available
+                $isAvailable = $room->isAvailableForDates($checkInDate, $checkOutDate);
                 if (!$isAvailable) {
                     return response()->json([
                         'success' => false,
@@ -179,20 +226,47 @@ class BookingController extends Controller
             $tax = 0;
             $deposit = 0;
 
-            if ($validated['payment_method'] === 'midtrans') {
-                if (!isset($validated['payment_status'])) {
-                    // This is the initial request to get snap token
-                    $orderId = sprintf('ORDER-%d-%d', time(), auth()->id());
+            if ($validated['payment_method'] === 'midtrans' || $validated['payment_method'] === 'deposit') {
+                // If this is the initial request (no payment info yet)
+                if (!isset($validated['payment_type']) && !isset($validated['payment_status'])) {
+                    // Store booking data in session
+                    $bookingData = [
+                        'user_id' => auth()->id(),
+                        'full_name' => $validated['full_name'],
+                        'email' => $validated['email'],
+                        'phone' => $validated['phone'],
+                        'id_number' => $validated['id_number'],
+                        'check_in_date' => $checkInDate,
+                        'check_out_date' => $checkOutDate,
+                        'total_price' => $finalTotal,
+                        'special_requests' => $validated['special_requests'] ?? null,
+                        'status' => 'pending',
+                        'payment_status' => 'pending',
+                        'deposit_amount' => $validated['payment_method'] === 'deposit' ? 100000 : 0,
+                        'selected_rooms' => $selectedRooms
+                    ];
+
+                    session(['temp_booking' => $bookingData]);
 
                     // Set up Midtrans configuration
                     \Midtrans\Config::$serverKey = config('midtrans.server_key');
                     \Midtrans\Config::$isProduction = config('midtrans.is_production');
+                    \Midtrans\Config::$paymentIdempotencyKey = true;
+                    \Midtrans\Config::$overrideNotifUrl = route('midtrans.webhook');
 
-                    // Prepare Midtrans parameters
+                    $orderId = sprintf('ORDER-%d-%d', time(), auth()->id());
+                    $startTime = now('Asia/Jakarta');
+                    $paymentDeadline = $startTime->copy()->addHour();
+                    
+                    // Set payment amount based on payment method
+                    $paymentAmount = $validated['payment_method'] === 'deposit' ? 100000 : $finalTotal;
+                    $itemName = $validated['payment_method'] === 'deposit' ? 'Room Deposit' : 'Room Charge for ' . $nights . ' night(s)';
+                    $itemId = $validated['payment_method'] === 'deposit' ? 'deposit_payment' : 'room_charge';
+
                     $params = [
                         'transaction_details' => [
                             'order_id' => $orderId,
-                            'gross_amount' => (float) $finalTotal
+                            'gross_amount' => (int) $paymentAmount
                         ],
                         'customer_details' => [
                             'first_name' => $validated['full_name'],
@@ -201,10 +275,10 @@ class BookingController extends Controller
                         ],
                         'item_details' => [
                             [
-                                'id' => 'room_charge',
-                                'price' => (float) $finalTotal,
+                                'id' => $itemId,
+                                'price' => (int) $paymentAmount,
                                 'quantity' => 1,
-                                'name' => 'Room Charge for ' . $nights . ' night(s)'
+                                'name' => $itemName
                             ]
                         ],
                         'enabled_payments' => [
@@ -212,107 +286,143 @@ class BookingController extends Controller
                             'gopay', 'shopeepay', 'indomaret',
                             'bca_klikbca', 'bca_klikpay', 'cimb_clicks', 'danamon_online', 'bri_epay'
                         ],
+                        'expiry' => [
+                            'start_time' => $startTime->format('Y-m-d H:i:s O'),
+                            'unit' => 'minutes',
+                            'duration' => $startTime->diffInMinutes($paymentDeadline)
+                        ],
+                        'custom_field1' => json_encode([
+                            'payment_deadline' => $paymentDeadline->format('Y-m-d H:i:s O'),
+                            'is_deposit' => $validated['payment_method'] === 'deposit'
+                        ]),
                         'callbacks' => [
-                            'finish' => url('/payment/finish'),
-                            'error' => url('/payment/error'),
-                            'cancel' => url('/payment/cancel')
+                            'finish' => route('payment.finish'),
+                            'error' => route('payment.error'),
+                            'cancel' => route('payment.cancel')
                         ]
                     ];
 
+                    \Log::info('Sending parameters to Midtrans:', $params);
+                    $snapToken = \Midtrans\Snap::getSnapToken($params);
+                    \Log::info('Received snap token:', ['token' => $snapToken]);
+
+                    return response()->json([
+                        'success' => true,
+                        'snap_token' => $snapToken,
+                        'booking_data' => [
+                            'order_id' => $orderId,
+                            'payment_deadline' => $paymentDeadline->format('Y-m-d H:i:s')
+                        ]
+                    ]);
+                } 
+                // If payment method has been selected (callback with payment info)
+                else {
+                    DB::beginTransaction();
                     try {
-                        $snapToken = \Midtrans\Snap::getSnapToken($params);
+                        // Get booking data from session
+                        $bookingData = session('temp_booking');
+                        if (!$bookingData) {
+                            throw new \Exception('Booking data not found in session');
+                        }
+
+                        // Create booking
+                        $booking = Booking::create([
+                            'user_id' => $bookingData['user_id'],
+                            'full_name' => $bookingData['full_name'],
+                            'email' => $bookingData['email'],
+                            'phone' => $bookingData['phone'],
+                            'id_number' => $bookingData['id_number'],
+                            'check_in_date' => $bookingData['check_in_date'],
+                            'check_out_date' => $bookingData['check_out_date'],
+                            'total_price' => $bookingData['total_price'],
+                            'special_requests' => $bookingData['special_requests'],
+                            'status' => 'pending',
+                            'payment_status' => $validated['payment_status'] ?? 'pending',
+                            'deposit_amount' => $bookingData['deposit_amount']
+                        ]);
+
+                        // Attach rooms
+                        foreach ($bookingData['selected_rooms'] as $roomData) {
+                            $room = Room::find($roomData['id']);
+                            $roomSubtotal = $room->price_per_night * $nights;
+                            
+                            $booking->rooms()->attach($room->id, [
+                                'price_per_night' => $room->price_per_night,
+                                'quantity' => 1,
+                                'subtotal' => $roomSubtotal
+                            ]);
+                        }
+
+                        // Set payment code based on payment type
+                        $paymentCode = null;
+                        if ($validated['raw_payment_type'] === 'bank_transfer' && !empty($validated['raw_bank'])) {
+                            $paymentCode = $validated['payment_code'] ?? null;
+                        } elseif ($validated['raw_payment_type'] === 'qris') {
+                            $paymentCode = $validated['transaction_id'] ?? null;
+                        } elseif ($validated['raw_payment_type'] === 'gopay' || $validated['raw_payment_type'] === 'shopeepay') {
+                            $paymentCode = $validated['transaction_id'] ?? null;
+                        } else {
+                            $paymentCode = $validated['payment_code'] ?? $validated['transaction_id'] ?? null;
+                        }
+
+                        // Create transaction
+                        $transaction = Transaction::create([
+                            'booking_id' => $booking->id,
+                            'order_id' => $validated['order_id'],
+                            'gross_amount' => $validated['payment_method'] === 'deposit' ? 100000 : $bookingData['total_price'],
+                            'payment_status' => $validated['payment_status'] ?? 'pending',
+                            'transaction_status' => $validated['payment_status'] === 'paid' ? 'settlement' : 'pending',
+                            'is_deposit' => $validated['payment_method'] === 'deposit',
+                            'payment_deadline' => now()->addHour(),
+                            'transaction_id' => $validated['transaction_id'],
+                            'payment_type' => $validated['payment_type'],
+                            'payment_code' => $paymentCode,
+                            'raw_payment_type' => $validated['raw_payment_type'],
+                            'raw_bank' => $validated['raw_bank']
+                        ]);
+
+                        // If payment is successful
+                        if ($validated['payment_status'] === 'paid') {
+                            if ($validated['payment_method'] === 'deposit') {
+                                $booking->payment_status = 'deposit';
+                                $transaction->payment_status = 'deposit';
+                            } else {
+                                $booking->payment_status = 'paid';
+                                $transaction->payment_status = 'paid';
+                            }
+                            $booking->status = 'confirmed';
+                            $booking->save();
+                            $transaction->save();
+                        }
+
+                        // Clear session data
+                        session()->forget('temp_booking');
+
+                        DB::commit();
 
                         return response()->json([
                             'success' => true,
-                            'snap_token' => $snapToken,
-                            'booking_data' => [
-                                'order_id' => $orderId
-                            ]
+                            'message' => 'Booking created successfully',
+                            'booking_id' => $booking->id
                         ]);
                     } catch (\Exception $e) {
-                        \Log::error('Error getting snap token: ' . $e->getMessage());
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Failed to initialize payment'
-                        ], 500);
+                        DB::rollBack();
+                        throw $e;
                     }
                 }
             }
 
-            // At this point, we're either creating a direct payment booking
-            // or creating a Midtrans booking after payment method selection
-            DB::beginTransaction();
-            try {
-                // Create booking
-                $booking = Booking::create([
-                    'user_id' => auth()->id(),
-                    'full_name' => $validated['full_name'],
-                    'email' => $validated['email'],
-                    'phone' => $validated['phone'],
-                    'id_number' => $validated['id_number'],
-                    'check_in_date' => $validated['check_in_date'],
-                    'check_out_date' => $validated['check_out_date'],
-                    'special_requests' => $validated['special_requests'],
-                    'status' => 'pending',
-                    'payment_status' => $validated['payment_status'] ?? 'pending',
-                    'total_price' => $finalTotal,
-                    'tax' => $tax,
-                    'deposit' => $deposit
-                ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking created successfully'
+            ]);
 
-                // Attach rooms
-                foreach ($selectedRooms as $roomData) {
-                    $room = Room::find($roomData['id']);
-                    $booking->rooms()->attach($room->id, [
-                        'price_per_night' => $room->price_per_night,
-                        'subtotal' => $room->price_per_night * $nights,
-                        'quantity' => 1
-                    ]);
-                }
-
-                // Create transaction record for Midtrans payments
-                if ($validated['payment_method'] === 'midtrans' && isset($validated['order_id'])) {
-                    // Map 'success' to 'paid' for payment_status
-                    $paymentStatus = $validated['payment_status'] === 'success' ? 'paid' : $validated['payment_status'];
-                    
-                    $transaction = Transaction::create([
-                        'booking_id' => $booking->id,
-                        'order_id' => $validated['order_id'],
-                        'gross_amount' => $finalTotal,
-                        'payment_type' => $validated['payment_method'],
-                        'transaction_status' => $validated['payment_status'],
-                        'payment_status' => $paymentStatus
-                    ]);
-
-                    // Update booking payment status
-                    $booking->update([
-                        'payment_status' => $paymentStatus,
-                        'status' => $paymentStatus === 'paid' ? 'confirmed' : 'pending'
-                    ]);
-                }
-
-                DB::commit();
-
-                return response()->json([
-                    'success' => true,
-                    'booking_id' => $booking->id,
-                    'message' => 'Booking created successfully'
-                ]);
-
-            } catch (\Exception $e) {
-                DB::rollBack();
-                \Log::error('Error creating booking: ' . $e->getMessage());
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to create booking: ' . $e->getMessage()
-                ], 500);
-            }
         } catch (\Exception $e) {
             \Log::error('Error in booking process: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
-            ], 422);
+            ], 500);
         }
     }
 
@@ -335,8 +445,23 @@ class BookingController extends Controller
     {
         $bookedDates = DB::table('booking_room')
             ->join('bookings', 'booking_room.booking_id', '=', 'bookings.id')
+            ->join('transactions', 'bookings.id', '=', 'transactions.booking_id')
             ->where('booking_room.room_id', $roomId)
-            ->whereNotIn('bookings.status', ['cancelled', 'refunded']) // Exclude cancelled and refunded bookings
+            ->where(function($query) {
+                $query->where(function($q) {
+                    // Include only valid bookings
+                    $q->whereNotIn('bookings.status', ['cancelled'])
+                      ->whereNotIn('bookings.payment_status', ['cancelled'])
+                      ->where(function($q) {
+                          $q->where('transactions.payment_status', '!=', 'expire')
+                            ->orWhere(function($q) {
+                                // For pending payments, check if they're not expired (within 1 hour)
+                                $q->where('transactions.payment_status', 'pending')
+                                  ->where('transactions.created_at', '>=', now()->subHour());
+                            });
+                      });
+                });
+            })
             ->where(function($query) {
                 $query->where('bookings.check_out_date', '>=', now())
                     ->orWhere('bookings.check_in_date', '>=', now());
@@ -360,6 +485,42 @@ class BookingController extends Controller
         return response()->json(array_values(array_unique($dates)));
     }
 
+    public function getTransactionStatus($orderId)
+    {
+        try {
+            $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
+            return response()->json([
+                'success' => true,
+                'data' => $transaction
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error getting transaction status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction not found'
+            ], 404);
+        }
+    }
+
+    public function finishAjax(Request $request)
+    {
+        try {
+            $orderId = $request->input('order_id');
+            $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $transaction
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in finish-ajax: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction not found'
+            ], 404);
+        }
+    }
+
     public function finish(Request $request)
     {
         Log::info('Finish endpoint called', [
@@ -374,9 +535,24 @@ class BookingController extends Controller
                 $transaction = Transaction::where('order_id', $orderId)->first();
                 if ($transaction) {
                     Log::info('Transaction found', ['transaction_id' => $transaction->id]);
-                    // Redirect to landing page with transaction panel open
+                    
+                    // Check if this is a deposit payment
+                    $customField1 = json_decode($transaction->raw_response ?? '{}', true);
+                    $isDeposit = $customField1['is_deposit'] ?? false;
+                    
+                    if ($isDeposit) {
+                        $transaction->payment_status = 'deposit';
+                        $transaction->booking->payment_status = 'deposit';
+                        $transaction->booking->status = 'confirmed';
+                        $transaction->booking->save();
+                        $transaction->save();
+                    }
+                    
+                    // Show success message and redirect
+                    $message = $isDeposit ? 'Deposit payment successful! Please pay the remaining amount at check-in.' : 'Payment processed successfully!';
+                    
                     return redirect()->to('/?panel=transactions&source=midtrans')
-                        ->with('success', 'Payment processed successfully!');
+                        ->with('success', $message);
                 }
             }
 

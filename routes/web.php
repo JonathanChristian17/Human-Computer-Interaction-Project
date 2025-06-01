@@ -37,6 +37,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/transactions/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('transactions.cancel');
     Route::post('/transactions/{transaction}/pay', [TransactionController::class, 'pay'])->name('transactions.pay');
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+    
+    // Transaction routes
+    Route::get('/transactions/status/{orderId}', [BookingController::class, 'getTransactionStatus'])->name('transactions.status');
+    Route::get('/payment/finish-ajax', [BookingController::class, 'finishAjax'])->name('payment.finish-ajax');
 });
 
 /*

@@ -372,6 +372,27 @@
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-100">
+    <script>
+        function getStatusColor(status) {
+            const statusLower = status?.toLowerCase();
+            switch(statusLower) {
+                case 'settlement':
+                case 'capture':
+                case 'paid':
+                    return 'bg-green-100 text-green-800';
+                case 'pending':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'deposit':
+                    return 'bg-blue-100 text-blue-800';
+                case 'expired':
+                case 'cancelled':
+                case 'deny':
+                    return 'bg-red-100 text-red-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+    </script>
     <!-- Navbar -->
     <nav class="fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -388,7 +409,7 @@
                     <div class="flex items-center space-x-16" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
                         <button @click="activeTab = 'dashboard'; window.location.href = '{{ route('landing') }}'; localStorage.setItem('activeTab', 'dashboard')" 
                            class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
-                           :class="{ 'active': activeTab === 'dashboard' }">
+                           :class="{ 'active': activeTab === 'dashboard' || !activeTab }">
                             Dashboard
                         </button>
                         <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')" 
@@ -425,7 +446,7 @@
                                    onchange="handleQuickProfilePhotoUpload(this)">
                         </div>
                             @auth
-                            <span>{{ Auth::user()->name }}</span>
+                            <span data-user-name>{{ Auth::user()->name }}</span>
                             @else
                             <span>Guest</span>
                             @endauth
@@ -533,13 +554,10 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     @auth
-                                    <h2 class="text-2xl font-bold text-gray-800">{{ Auth::user()->name }}</h2>
-                                    @else
-                                    <h2 class="text-2xl font-bold text-gray-800">Guest</h2>
-                                    @endauth
-                                    @auth
+                                    <h2 class="text-2xl font-bold text-gray-800" data-user-name>{{ Auth::user()->name }}</h2>
                                     <p class="text-gray-600">{{ Auth::user()->email }}</p>
                                     @else
+                                    <h2 class="text-2xl font-bold text-gray-800">Guest</h2>
                                     <p class="text-gray-600">guest@example.com</p>
                                     @endauth
                                 </div>
@@ -672,7 +690,7 @@
                                         @else
                                         value="guest@example.com"
                                         @endauth
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500" readonly> 
                                 </div>
 
                                 <!-- Phone -->
@@ -726,6 +744,13 @@
     <div class="slide-panel rooms-panel" id="roomsPanel">
         <div class="slide-content">
             <div class="slide-content-inner" id="roomsContent">
+                <!-- Back Button -->
+                <button onclick="hidePanel(); resetActiveTab();" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Back</span>
+                </button>
                 <!-- Rooms content will be loaded here -->
                 <div class="text-center py-4">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
@@ -761,16 +786,19 @@
 
     <!-- Base Scripts -->
     <script>
-        // Initialize Pusher
-        const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
-            cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}'
-        });
+        // Initialize Pusher if not already initialized
+        if (typeof window.pusherClient === 'undefined') {
+            window.pusherClient = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
+                cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
+                forceTLS: true
+            });
+        }
 
-        // Subscribe to the payments channel
-        const channel = pusher.subscribe('payments');
+        // Subscribe to the payments channel using the global instance
+        const paymentsChannel = window.pusherClient.subscribe('payments');
         
         // Listen for payment status updates
-        channel.bind('App\\Events\\PaymentStatusUpdated', function(data) {
+        paymentsChannel.bind('App\\Events\\PaymentStatusUpdated', function(data) {
             console.log('Payment status updated:', data);
             
             // If we're on the transactions page, reload it
@@ -929,11 +957,38 @@
             };
 
             window.hidePanel = function(showPanel = null) {
-                roomsPanel.classList.remove('show');
-                bookingPanel.classList.remove('show');
-                profilePanel.classList.remove('show');
-                document.getElementById('transactionPanel').classList.remove('show');
-                document.getElementById('paymentPanel').classList.remove('show');
+                const panels = [
+                    roomsPanel,
+                    bookingPanel,
+                    profilePanel,
+                    document.getElementById('transactionPanel'),
+                    document.getElementById('paymentPanel')
+                ];
+                
+                panels.forEach(panel => {
+                    if (panel) panel.classList.remove('show');
+                });
+
+                if (!showPanel) {
+                    // Update Alpine.js state
+                    const navContainer = document.querySelector('[x-data]');
+                    if (navContainer && navContainer.__x) {
+                        navContainer.__x.$data.activeTab = 'dashboard';
+                    }
+                    
+                    // Update localStorage
+                    localStorage.setItem('activeTab', 'dashboard');
+                    
+                    // Force update UI
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        const text = item.textContent.trim();
+                        if (text === 'Dashboard') {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                }
 
                 if (showPanel === 'rooms') {
                     roomsPanel.classList.add('show');
@@ -963,6 +1018,23 @@
             // Show rooms panel
             window.showRooms = async function() {
                 try {
+                    // Update navigation state first
+                    const navContainer = document.querySelector('[x-data]');
+                    if (navContainer && navContainer.__x) {
+                        navContainer.__x.$data.activeTab = 'rooms';
+                        localStorage.setItem('activeTab', 'rooms');
+                    }
+
+                    // Force update UI for navigation
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        const text = item.textContent.trim();
+                        if (text === 'Rooms') {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+
                     const response = await fetch('{{ route("kamar.index") }}');
                     const html = await response.text();
                     const parser = new DOMParser();
@@ -970,8 +1042,16 @@
                     const mainContent = doc.querySelector('.min-h-screen');
                     
                     if (mainContent) {
-                        roomsContent.innerHTML = mainContent.innerHTML;
-                        hidePanel();
+                        roomsContent.innerHTML = `
+                            <button onclick="handleBackClick(event)" class="back-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Back</span>
+                            </button>
+                            ${mainContent.innerHTML}
+                        `;
+                        
                         roomsPanel.classList.add('show');
                         bindPanelPagination();
                     }
@@ -979,6 +1059,66 @@
                     console.error('Error loading rooms:', error);
                 }
             };
+
+            // Update handleBackClick function
+            window.handleBackClick = function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Hide panel first
+                roomsPanel.classList.remove('show');
+                
+                // Update Alpine.js state
+                const navContainer = document.querySelector('[x-data]');
+                if (navContainer && navContainer.__x) {
+                    navContainer.__x.$data.activeTab = 'dashboard';
+                    localStorage.setItem('activeTab', 'dashboard');
+                }
+                
+                // Force update UI immediately
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const text = item.textContent.trim();
+                    if (text === 'Dashboard') {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            };
+
+            // Update navigation initialization
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize navigation state
+                const activeTab = localStorage.getItem('activeTab') || 'dashboard';
+                const navContainer = document.querySelector('[x-data]');
+                if (navContainer && navContainer.__x) {
+                    navContainer.__x.$data.activeTab = activeTab;
+                }
+
+                // Force update UI for initial state
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const text = item.textContent.trim();
+                    if (text.toLowerCase() === activeTab) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            });
+
+            // Update the navigation buttons
+            document.addEventListener('DOMContentLoaded', function() {
+                const dashboardBtn = document.querySelector('button[x-data]');
+                if (dashboardBtn) {
+                    dashboardBtn.addEventListener('click', function() {
+                        const navContainer = document.querySelector('[x-data]');
+                        if (navContainer && navContainer.__x) {
+                            navContainer.__x.$data.activeTab = 'dashboard';
+                            localStorage.setItem('activeTab', 'dashboard');
+                        }
+                    });
+                }
+            });
 
             // Show booking panel
             window.showBooking = async function(roomIds) {
@@ -1184,7 +1324,7 @@
                         console.log('Upload response:', data); // Debug log
 
                         // Update profile photo if available
-                        const profileSelector = @if(Auth::check()) 'img[alt="{{ Auth::user()->name }}"]' @else 'img[alt="Guest"]' @endif;
+                        const profileSelector = @json(Auth::check() ? 'img[alt="' . Auth::user()->name . '"]' : 'img[alt="Guest"]');
                         const profilePhotos = document.querySelectorAll(profileSelector);
                         if (data.profile_photo_url && profilePhotos.length > 0) {
                             profilePhotos.forEach(photo => {
@@ -1258,7 +1398,8 @@
                         displayName: document.getElementById('display-name'),
                         displayEmail: document.getElementById('display-email'),
                         displayPhone: document.getElementById('display-phone'),
-                        headerName: document.querySelector('.dropdown-button span')
+                        headerName: document.querySelector('.dropdown-button span'),
+                        allNameElements: document.querySelectorAll('[data-user-name]')
                     };
 
                     // Update elements if they exist
@@ -1268,9 +1409,22 @@
                     if (profileElements.displayEmail) profileElements.displayEmail.value = data.user.email;
                     if (profileElements.displayPhone) profileElements.displayPhone.value = data.user.phone;
                     if (profileElements.headerName) profileElements.headerName.textContent = data.user.name;
+                    
+                    // Update all elements with data-user-name attribute
+                    if (profileElements.allNameElements) {
+                        profileElements.allNameElements.forEach(element => {
+                            element.textContent = data.user.name;
+                        });
+                    }
+
+                    // Update all img alt attributes that contain the old name
+                    const oldName = @json(Auth::check() ? Auth::user()->name : 'Guest');
+                    document.querySelectorAll('img[alt="' + oldName + '"]').forEach(img => {
+                        img.alt = data.user.name;
+                    });
 
                     // Update profile photo if available
-                    @if(Auth::check())
+                    @auth
                     const profilePhotos = document.querySelectorAll('img[alt="{{ Auth::user()->name }}"]');
                     if (data.profile_photo_url && profilePhotos.length > 0) {
                         profilePhotos.forEach(photo => {
@@ -1550,10 +1704,12 @@
                         const data = await response.json();
 
                         // Get default avatar URL
-                        const defaultAvatarUrl = @if(Auth::check()) 'https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&color=7F9CF5&background=EBF4FF' @else 'https://ui-avatars.com/api/?name=Guest&color=7F9CF5&background=EBF4FF' @endif;
+                        const defaultAvatarUrl = @json(Auth::check() 
+                            ? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=7F9CF5&background=EBF4FF'
+                            : 'https://ui-avatars.com/api/?name=Guest&color=7F9CF5&background=EBF4FF');
 
                         // Update all profile photos to default avatar
-                        const profileSelector = @if(Auth::check()) 'img[alt="{{ Auth::user()->name }}"]' @else 'img[alt="Guest"]' @endif;
+                        const profileSelector = @json(Auth::check() ? 'img[alt="' . Auth::user()->name . '"]' : 'img[alt="Guest"]');
                         const profilePhotos = document.querySelectorAll(profileSelector);
                         profilePhotos.forEach(photo => {
                             photo.src = defaultAvatarUrl;
@@ -1785,27 +1941,20 @@
 
                         const data = await response.json();
                         
-                        // Format the dates
+                        // Check if transaction is expired
+                        const now = new Date().getTime();
+                        const deadline = data.payment_deadline ? new Date(data.payment_deadline).getTime() : null;
+                        const isExpired = deadline && now > deadline;
+                        
+                        // Update payment status if expired
+                        if (data.payment_status === 'pending' && isExpired) {
+                            data.payment_status = 'Expired';
+                        }
+                        
+                        // Format dates
                         const checkIn = data.booking ? new Date(data.booking.check_in_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
                         const checkOut = data.booking ? new Date(data.booking.check_out_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
                         const createdAt = new Date(data.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-                        // Get status colors
-                        const getStatusColor = (status) => {
-                            switch(status?.toLowerCase()) {
-                                case 'pending':
-                                    return 'bg-orange-100 text-orange-800';
-                                case 'paid':
-                                case 'settlement':
-                                    return 'bg-green-100 text-green-800';
-                                case 'cancel':
-                                case 'cancelled':
-                                case 'failed':
-                                    return 'bg-red-100 text-red-800';
-                                default:
-                                    return 'bg-gray-100 text-gray-800';
-                            }
-                        };
 
                         // Show the details in a SweetAlert2 modal with fixed height
                         Swal.fire({
@@ -2196,7 +2345,66 @@
                 }
             }
         }
+
+        // Initialize navigation state
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const panel = urlParams.get('panel');
+            const path = window.location.pathname;
+            
+            if (!panel && path === '/') {
+                localStorage.setItem('activeTab', 'dashboard');
+            }
+        });
+
+        // Add back button handler for rooms panel
+        document.querySelector('#roomsPanel .back-button').addEventListener('click', function() {
+            hidePanel();
+            // Reset active tab to dashboard
+            localStorage.setItem('activeTab', 'dashboard');
+            const navContainer = document.querySelector('[x-data]');
+            if (navContainer && navContainer.__x) {
+                navContainer.__x.$data.activeTab = 'dashboard';
+            }
+        });
+
+        // Add resetActiveTab function
+        function resetActiveTab() {
+            localStorage.setItem('activeTab', 'dashboard');
+            const navContainer = document.querySelector('[x-data]');
+            if (navContainer && navContainer.__x) {
+                navContainer.__x.$data.activeTab = 'dashboard';
+            }
+        }
+
+        // Add click handler for back button
+        document.addEventListener('DOMContentLoaded', function() {
+            const backButtons = document.querySelectorAll('.back-button');
+            backButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    hidePanel();
+                    
+                    // Update navigation state immediately
+                    const navContainer = document.querySelector('[x-data]').__x.$data;
+                    navContainer.activeTab = 'dashboard';
+                    localStorage.setItem('activeTab', 'dashboard');
+                    
+                    // Force Alpine to update the UI
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        if (item.textContent.trim() === 'Dashboard') {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
     </script>
+    <!-- Add Pusher script -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    
     @stack('scripts')
 </body>
 </html>

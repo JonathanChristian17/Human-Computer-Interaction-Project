@@ -1,4 +1,5 @@
 import './bootstrap';
+import './transaction';
 
 import Alpine from 'alpinejs';
 import flatpickr from 'flatpickr';

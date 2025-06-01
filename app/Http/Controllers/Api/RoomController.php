@@ -22,9 +22,32 @@ class RoomController extends Controller
 
     public function getUnavailableDates(Room $room)
     {
-        // Get all bookings that are pending, confirmed or checked in
+        // Get all valid bookings (excluding cancelled, expired, etc.)
         $bookings = $room->bookings()
-            ->whereIn('status', ['pending', 'confirmed', 'checked_in'])
+            ->join('transactions', 'bookings.id', '=', 'transactions.booking_id')
+            ->where(function($query) {
+                $query->where(function($q) {
+                    // Include only valid bookings
+                    $q->whereNotIn('bookings.status', ['cancelled'])
+                      ->whereNotIn('bookings.payment_status', ['cancelled'])
+                      ->where(function($q) {
+                          $q->where('transactions.payment_status', '!=', 'expire')
+                            ->orWhere(function($q) {
+                                // For pending payments, check if they're not expired (within 1 hour)
+                                $q->where('transactions.payment_status', 'pending')
+                                  ->where('transactions.created_at', '>=', now()->subHour());
+                            });
+                      });
+                });
+            })
+            ->where(function($query) {
+                // Only include future dates and ongoing bookings
+                $query->where('bookings.check_out_date', '>', now())
+                    ->orWhere(function($q) {
+                        $q->where('bookings.check_in_date', '<=', now())
+                          ->where('bookings.check_out_date', '>', now());
+                    });
+            })
             ->get();
 
         $unavailableDates = [];
@@ -35,7 +58,10 @@ class RoomController extends Controller
             );
 
             foreach ($period as $date) {
-                $unavailableDates[] = $date->format('Y-m-d');
+                // Only add dates that are today or in the future
+                if ($date->startOfDay()->gte(now()->startOfDay())) {
+                    $unavailableDates[] = $date->format('Y-m-d');
+                }
             }
         }
 

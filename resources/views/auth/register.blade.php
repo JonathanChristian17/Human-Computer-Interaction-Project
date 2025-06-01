@@ -78,6 +78,32 @@
                                     d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                         </button>
+                        <div class="mt-2 space-y-1 text-xs text-gray-600">
+                            <p id="length-check" class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Minimal 8 karakter
+                            </p>
+                            <p id="uppercase-check" class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Minimal 1 huruf besar
+                            </p>
+                            <p id="lowercase-check" class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Minimal 1 huruf kecil
+                            </p>
+                            <p id="number-check" class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Minimal 1 angka
+                            </p>
+                        </div>
                     </div>
                     <div class="relative">
                         <label for="password-confirm" class="block text-xs font-medium text-gray-700 mb-1">Konfirmasi Password</label>
@@ -144,6 +170,43 @@
                 `;
             }
         }
+
+        // Password validation
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            
+            // Check minimum length
+            const lengthCheck = document.getElementById('length-check');
+            if (password.length >= 8) {
+                lengthCheck.style.display = 'none';
+            } else {
+                lengthCheck.style.display = 'flex';
+            }
+
+            // Check uppercase
+            const uppercaseCheck = document.getElementById('uppercase-check');
+            if (/[A-Z]/.test(password)) {
+                uppercaseCheck.style.display = 'none';
+            } else {
+                uppercaseCheck.style.display = 'flex';
+            }
+
+            // Check lowercase
+            const lowercaseCheck = document.getElementById('lowercase-check');
+            if (/[a-z]/.test(password)) {
+                lowercaseCheck.style.display = 'none';
+            } else {
+                lowercaseCheck.style.display = 'flex';
+            }
+
+            // Check number
+            const numberCheck = document.getElementById('number-check');
+            if (/[0-9]/.test(password)) {
+                numberCheck.style.display = 'none';
+            } else {
+                numberCheck.style.display = 'flex';
+            }
+        });
     </script>
 </body>
 </html>
