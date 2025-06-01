@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Cahaya Resort')</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -22,11 +23,176 @@
     <!-- Pusher -->
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     @yield('head')
+    <script>window.isAuthenticated = @json(Auth::check());</script>
     <style>
         body {
             overflow-x: hidden;
             margin: 0;
             padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .custom-curve {
+            position: relative;
+            background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
+            padding: 20px 40px;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+            box-shadow: 0 8px 15px -3px rgba(0,0,0,0.4);
+            transition: all 0.5s ease;
+            width: auto;
+            display: inline-block;
+            animation: narrow 0.5s ease forwards;
+            font-family: 'Poppins', sans-serif;
+        }
+        .custom-curve.scrolled {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+            background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
+            width: 100%;
+            padding: 20px 0;
+            animation: widen 0.5s ease forwards;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+        @keyframes widen {
+            from {
+                clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+                background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
+            }
+            to {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+                background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
+            }
+        }
+        @keyframes narrow {
+            from {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+                background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
+            }
+            to {
+                clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+                background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
+            }
+        }
+
+        /* Button styles */
+        .btn-signup {
+            color: #FFA040;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid #FFA040;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bolder;
+            background: transparent;
+            position: relative;
+            transition: all 1s;
+            overflow: hidden;
+            z-index: 1;
+            border-radius: 9999px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-signup:hover {
+            color: #fff;
+        }
+
+        .btn-signup::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            top: 0;
+            left: -40px;
+            transform: skewX(45deg);
+            background-color: #FFA040;
+            z-index: -1;
+            transition: all 1s;
+        }
+
+        .btn-signup:hover::before {
+            width: 160%;
+        }
+
+        .btn-login {
+            color: #FFA040;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid #FFA040;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bolder;
+            background: transparent;
+            position: relative;
+            transition: all 1s;
+            overflow: hidden;
+            z-index: 1;
+            border-radius: 9999px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-login:hover {
+            color: #fff;
+        }
+
+        .btn-login::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            top: 0;
+            left: -40px;
+            transform: skewX(45deg);
+            background-color: #FFA040;
+            z-index: -1;
+            transition: all 1s;
+        }
+
+        .btn-login:hover::before {
+            width: 160%;
+        }
+
+        @keyframes slide-in-right {
+            0% {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn-animate {
+            opacity: 0;
+            animation: slide-in-right 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .btn-login.btn-animate {
+            animation-delay: 1.5s;
+        }
+
+        .btn-signup.btn-animate {
+            animation-delay: 1.7s;
+        }
+
+        /* Navbar styles */
+        .trapezoid-small {
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+            border-radius: 0 0 32px 32px;
+            transition: width 0.5s cubic-bezier(.4,0,.2,1), height 0.5s cubic-bezier(.4,0,.2,1), background 0.5s, clip-path 0.5s;
+        }
+        .trapezoid-scroll {
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+            border-radius: 0 0 32px 32px;
+            transition: width 0.5s cubic-bezier(.4,0,.2,1), height 0.5s cubic-bezier(.4,0,.2,1), background 0.5s, clip-path 0.5s;
         }
 
         /* Scrollbar Styling */
@@ -69,36 +235,16 @@
             }
         }
 
-        .custom-curve {
-            position: relative;
-            background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
-            border-radius: 0 0 100px 100px;
-        }
-        .custom-curve::before,
-        .custom-curve::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            width: 40px;
-            height: 40px;
-            background-color: transparent;
-        }
-        .custom-curve::before {
-            left: -20px;
-            border-top-right-radius: 20px;
-            box-shadow: 10px 0 0 0 #ffffff;
-        }
-        .custom-curve::after {
-            right: -20px;
-            border-top-left-radius: 20px;
-            box-shadow: -10px 0 0 0 #ffffff;
-        }
         .dropdown-menu {
             display: none;
         }
-        .dropdown-menu.show {
-            display: block;
+        .dropdown-menu[x-show="open"] {
+            display: block !important;
         }
+        .dropdown-menu[x-cloak] {
+            display: none !important;
+        }
+
         .dropdown-item {
             display: block;
             padding: 0.5rem 1rem;
@@ -159,6 +305,7 @@
         }
 
         .slide-content-inner {
+            position: relative;
             padding: 2rem;
         }
 
@@ -368,93 +515,458 @@
         .dropdown-button.active i {
             transform: rotate(180deg);
         }
+
+        /* Custom trapezoid navbar */
+        .trapezoid-navbar {
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
+            /* Polygon membentuk trapesium terbalik */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 10;
+            position: relative;
+        }
+        .dark .trapezoid-navbar {
+            background: #1f2937;
+        }
+
+        [x-cloak] { 
+            display: none !important; 
+        }
+
+        .profile-dropdown {
+            position: relative;
+            min-width: 160px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .profile-dropdown-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 16px;
+            background: transparent;
+            color: #fff;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow: hidden;
+        }
+
+        .profile-dropdown-button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FFA040;
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            opacity: 0;
+        }
+
+        .profile-dropdown-button:hover::after,
+        .profile-dropdown-button.active::after {
+            transform: scaleX(1);
+            transform-origin: right;
+            opacity: 1;
+        }
+
+        .profile-dropdown-button:hover,
+        .profile-dropdown-button.active {
+            color: #fff;
+        }
+
+        .profile-dropdown-button i.fa-chevron-down {
+            transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .profile-dropdown-button.active i.fa-chevron-down {
+            transform: rotate(-180deg);
+        }
+
+        .profile-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 180px;
+            background: #18191c;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-12px);
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 10001;
+            pointer-events: none;
+            border: 1px solid #FFA040;
+            border-top: none;
+            overflow: hidden;
+        }
+
+        .profile-dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .profile-dropdown-menu .dropdown-item {
+            position: relative;
+            display: block;
+            padding: 12px 20px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow: hidden;
+            border-radius: 12px;
+            margin: 4px 8px;
+            width: calc(100% - 16px);
+        }
+
+        .profile-dropdown-menu .dropdown-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FFA040;
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            opacity: 0;
+        }
+
+        .profile-dropdown-menu .dropdown-item:hover::before {
+            transform: scaleX(1);
+            transform-origin: right;
+            opacity: 1;
+        }
+
+        .profile-dropdown-menu .dropdown-item:hover {
+            color: #fff;
+        }
+
+        .profile-dropdown-menu .dropdown-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 8px 16px;
+        }
+
+        .profile-dropdown-menu .dropdown-item.text-red-600 {
+            color: #ef4444;
+        }
+
+        .profile-dropdown-menu .dropdown-item.text-red-600:hover {
+            color: #fff;
+        }
+
+        .brutalist-card {
+          width: 320px;
+          border: 4px solid #000;
+          background-color: #fff;
+          padding: 1.5rem;
+          box-shadow: 10px 10px 0 #000;
+          font-family: "Arial", sans-serif;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          z-index: 9999;
+          transform: translate(-50%, -50%);
+          animation: fadeIn .2s;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translate(-50%,-60%);}
+          to   { opacity: 1; transform: translate(-50%,-50%);}
+        }
+        .brutalist-card__header {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1rem;
+          border-bottom: 2px solid #000;
+          padding-bottom: 1rem;
+        }
+        .brutalist-card__icon {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #000;
+          padding: 0.5rem;
+          border-radius: 8px;
+        }
+        .brutalist-card__icon svg {
+          height: 1.5rem;
+          width: 1.5rem;
+          fill: #fff;
+        }
+        .brutalist-card__icon.success { background: #22c55e; }
+        .brutalist-card__icon.danger  { background: #ef4444; }
+        .brutalist-card__icon.warning { background: #facc15; }
+        .brutalist-card__icon.success svg { fill: #fff; }
+        .brutalist-card__icon.danger svg  { fill: #fff; }
+        .brutalist-card__icon.warning svg { fill: #000; }
+        .brutalist-card__alert {
+          font-weight: 900;
+          color: #000;
+          font-size: 1.5rem;
+          text-transform: uppercase;
+        }
+        .brutalist-card__message {
+          margin-top: 1rem;
+          color: #000;
+          font-size: 0.9rem;
+          line-height: 1.4;
+          border-bottom: 2px solid #000;
+          padding-bottom: 1rem;
+          font-weight: 600;
+        }
+        .brutalist-card__actions {
+          margin-top: 1rem;
+        }
+        .brutalist-card__button {
+          display: block;
+          width: 100%;
+          padding: 0.75rem;
+          text-align: center;
+          font-size: 1rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          border: 3px solid #000;
+          background-color: #fff;
+          color: #000;
+          position: relative;
+          transition: all 0.2s ease;
+          box-shadow: 5px 5px 0 #000;
+          overflow: hidden;
+          text-decoration: none;
+          margin-bottom: 1rem;
+          border-radius: 8px;
+        }
+        .brutalist-card__button--read {
+          background-color: #000;
+          color: #fff;
+        }
+        .brutalist-card__button--mark:hover {
+          background-color: #296fbb;
+          border-color: #296fbb;
+          color: #fff;
+          box-shadow: 7px 7px 0 #004280;
+        }
+        .brutalist-card__button--read:hover {
+          background-color: #ff0000;
+          border-color: #ff0000;
+          color: #fff;
+          box-shadow: 7px 7px 0 #800000;
+        }
+        .brutalist-card__button:active {
+          transform: translate(5px, 5px);
+          box-shadow: none;
+        }
+        .brutalist-card__button--danger {
+          background: #ef4444;
+          color: #fff;
+          border-color: #ef4444;
+        }
+        .brutalist-card__button--danger:hover {
+          background: #fff;
+          color: #ef4444;
+        }
+        .brutalist-card__button--success {
+          background: #22c55e;
+          color: #fff;
+          border-color: #22c55e;
+        }
+        .brutalist-card__button--success:hover {
+          background: #fff;
+          color: #22c55e;
+        }
+        .brutalist-card__button--warning {
+          background: #facc15;
+          color: #000;
+          border-color: #facc15;
+        }
+        .brutalist-card__button--warning:hover {
+          background: #fff;
+          color: #facc15;
+        }
+        .brutalist-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.18);
+          z-index: 9998;
+        }
+
+        .brutalist-swal-alert {
+          width: 340px;
+          border: 4px solid #000;
+          background: #fff;
+          padding: 1.5rem;
+          box-shadow: 10px 10px 0 #000;
+          font-family: 'Arial', sans-serif;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          z-index: 99999;
+          transform: translate(-50%, -50%);
+          animation: fadeIn .2s;
+          border-radius: 12px;
+        }
+        .brutalist-swal-header {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1rem;
+          border-bottom: 2px solid #000;
+          padding-bottom: 1rem;
+        }
+        .brutalist-swal-icon {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #000;
+          padding: 0.5rem;
+          border-radius: 8px;
+        }
+        .brutalist-swal-icon.success { background: #22c55e; }
+        .brutalist-swal-icon.danger  { background: #ef4444; }
+        .brutalist-swal-icon.warning { background: #facc15; }
+        .brutalist-swal-icon.success svg { fill: #fff; }
+        .brutalist-swal-icon.danger svg  { fill: #fff; }
+        .brutalist-swal-icon.warning svg { fill: #000; }
+        .brutalist-swal-title {
+          font-weight: 900;
+          color: #000;
+          font-size: 1.3rem;
+          text-transform: uppercase;
+        }
+        .brutalist-swal-message {
+          margin-top: 1rem;
+          color: #000;
+          font-size: 1rem;
+          line-height: 1.4;
+          border-bottom: 2px solid #000;
+          padding-bottom: 1rem;
+          font-weight: 600;
+        }
+        .brutalist-swal-actions {
+          margin-top: 1rem;
+        }
+        .brutalist-swal-btn {
+          display: block;
+          width: 100%;
+          padding: 0.75rem;
+          text-align: center;
+          font-size: 1rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          border: 3px solid #000;
+          background-color: #fff;
+          color: #000;
+          position: relative;
+          transition: all 0.2s ease;
+          box-shadow: 5px 5px 0 #000;
+          overflow: hidden;
+          text-decoration: none;
+          margin-bottom: 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+        .brutalist-swal-btn--danger {
+          background: #ef4444;
+          color: #fff;
+          border-color: #ef4444;
+        }
+        .brutalist-swal-btn--success {
+          background: #22c55e;
+          color: #fff;
+          border-color: #22c55e;
+        }
+        .brutalist-swal-btn--warning {
+          background: #facc15;
+          color: #000;
+          border-color: #facc15;
+        }
+        .brutalist-swal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.18);
+          z-index: 99998;
+        }
+        .sticky-back {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: #fff;
+          margin-bottom: 1.5rem;
+        }
     </style>
     @stack('styles')
+    
 </head>
 <body class="font-sans antialiased bg-gray-100">
-    <script>
-        function getStatusColor(status) {
-            const statusLower = status?.toLowerCase();
-            switch(statusLower) {
-                case 'settlement':
-                case 'capture':
-                case 'paid':
-                    return 'bg-green-100 text-green-800';
-                case 'pending':
-                    return 'bg-yellow-100 text-yellow-800';
-                case 'deposit':
-                    return 'bg-blue-100 text-blue-800';
-                case 'expired':
-                case 'cancelled':
-                case 'deny':
-                    return 'bg-red-100 text-red-800';
-                default:
-                    return 'bg-gray-100 text-gray-800';
-            }
-        }
-    </script>
     <!-- Navbar -->
-    <nav class="fixed w-full z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Logo -->
-            <div class="flex items-center absolute left-20 top-6">
-                <button onclick="hidePanel()" class="text-white text-2xl font-semibold">
-                    Cahaya Resort
-                </button>
+    <nav x-data="{ scrolled: false }"
+         @scroll.window="scrolled = window.pageYOffset > 50"
+         class="fixed top-0 z-50 w-full bg-transparent">
+        <div class="relative flex items-center justify-between px-4 mx-auto h-14 max-w-7xl sm:px-6 lg:px-8">
+            <!-- Trapesium Background -->
+            <div
+                class="absolute top-0 transition-all duration-500 ease-in-out"
+                :style="scrolled
+                    ? 'width: 100vw; height: 56px; background: linear-gradient(to right, #3D3D3D, #2E2E2E); clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%); left: 50%; transform: translateX(-50%);'
+                    : 'width: 520px; height: 56px; background: #fff; clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%); left: calc(50% + -25px); transform: translateX(-50%);'"
+                style="z-index: 10;">
             </div>
-
+            <!-- Logo -->
+            <div class="z-20 flex items-center">
+                <a href="/" 
+                   class="text-2xl font-regular text-white font-poppins drop-shadow-md transition-all duration-300">
+                    Cahaya Resort
+                </a>
+            </div>
             <!-- Center Navigation -->
-            <div class="flex justify-center">
-                <div class="custom-curve px-32 py-5 shadow-[0_8px_15px_-3px_rgba(0,0,0,0.4)] bg-white">
-                    <div class="flex items-center space-x-16" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
-                        <button @click="activeTab = 'dashboard'; window.location.href = '{{ route('landing') }}'; localStorage.setItem('activeTab', 'dashboard')" 
-                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
-                           :class="{ 'active': activeTab === 'dashboard' || !activeTab }">
-                            Dashboard
-                        </button>
-                        <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')" 
-                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
-                           :class="{ 'active': activeTab === 'rooms' }">
-                            Rooms
-                        </button>
-                        <button @click="activeTab = 'gallery'; window.location.href = '{{ route('galeri') }}'; localStorage.setItem('activeTab', 'gallery')"
-                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
-                           :class="{ 'active': activeTab === 'gallery' || '{{ request()->routeIs('galeri') }}' === '1' }">
-                            Gallery
-                        </button>
-                    </div>
+            <div class="z-20 flex justify-center flex-1">
+                <div class="flex items-center justify-center space-x-16" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
+                    <button @click="activeTab = 'dashboard'; hidePanel(); localStorage.setItem('activeTab', 'dashboard')"
+                            class="text-base font-medium transition-all duration-300 nav-item"
+                            :class="{ 'active': activeTab === 'dashboard', 'text-white': scrolled, 'text-gray-700': !scrolled }">
+                        Dashboard
+                    </button>
+                    <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')"
+                            class="text-base font-medium transition-all duration-300 nav-item"
+                            :class="{ 'active': activeTab === 'rooms', 'text-white': scrolled, 'text-gray-700': !scrolled }">
+                        Rooms
+                    </button>
+                    <a href="{{ route('galeri') }}"
+                       @click="activeTab = 'gallery'; localStorage.setItem('activeTab', 'gallery')"
+                       class="text-base font-medium transition-all duration-300 nav-item"
+                       :class="{ 'active': activeTab === 'gallery' || '{{ request()->routeIs('galeri') }}' === '1', 'text-white': scrolled, 'text-gray-700': !scrolled }">
+                        Gallery
+                    </a>
                 </div>
             </div>
-
             <!-- Auth Buttons -->
-            <div class="absolute right-8 top-6 flex items-center space-x-4">
-@auth
-                <div class="dropdown" x-data="{ open: false }">
-                        <button type="button"
-                            @click="open = !open"
-                                class="dropdown-button text-white hover:text-gray-200 transition font-medium flex items-center">
-                        <div class="relative">
-                            <img 
-                                src="{{ Auth::check() ? Auth::user()->profile_photo_url : asset('images/default-avatar.png') }}" 
-                                alt="{{ Auth::check() ? Auth::user()->name : 'Guest' }}"
-                                class="h-8 w-8 rounded-full object-cover mr-2 cursor-pointer"
-                                onclick="event.stopPropagation(); showPhotoUploadDialog();">
-                            <input type="file" 
-                                   id="headerProfilePhoto" 
-                                   class="hidden" 
-                                   accept="image/*"
-                                   onchange="handleQuickProfilePhotoUpload(this)">
-                        </div>
-                            @auth
+            <div class="z-20 flex items-center space-x-4 navbar-auth">
+                @auth
+                    <div class="profile-dropdown">
+                        <button type="button" class="profile-dropdown-button text-white hover:text-gray-200 transition font-medium flex items-center">
+                            <div class="relative">
+                                <img src="{{ Auth::check() ? Auth::user()->profile_photo_url : asset('images/default-avatar.png') }}" 
+                                     alt="{{ Auth::check() ? Auth::user()->name : 'Guest' }}"
+                                     class="h-8 w-8 rounded-full object-cover mr-2 cursor-pointer"
+                                     onclick="event.stopPropagation(); showPhotoUploadDialog();">
+                                <input type="file" id="headerProfilePhoto" class="hidden" accept="image/*" onchange="handleQuickProfilePhotoUpload(this)">
+                            </div>
                             <span data-user-name>{{ Auth::user()->name }}</span>
-                            @else
-                            <span>Guest</span>
-                            @endauth
-                        <i class="fas fa-chevron-down text-sm ml-2"></i>
-    </button>
-    
-                    <div class="dropdown-menu" x-show="open" @click.away="open = false">
-                        <a href="#" onclick="event.preventDefault(); showProfile();" class="dropdown-item">
+                            <i class="fas fa-chevron-down text-sm ml-2"></i>
+                        </button>
+                        <div class="profile-dropdown-menu">
+                            <a href="#" onclick="event.preventDefault(); showProfile();" class="dropdown-item">
                                 <i class="fas fa-user-circle"></i>
                                 <span>Profile</span>
                             </a>
@@ -464,20 +976,18 @@
                             </a>
                             <div class="dropdown-divider"></div>
                             <form id="logout-form" method="POST" action="{{ route('logout') }}">
-            @csrf
-                                <button type="button" 
-                                        onclick="confirmLogout()" 
-                                        class="dropdown-item text-red-600">
+                                @csrf
+                                <button type="button" onclick="logoutBrutalistConfirm()" class="dropdown-item text-red-600">
                                     <i class="fas fa-sign-out-alt"></i>
                                     <span>Logout</span>
-            </button>
-        </form>
-    </div>
-</div>
-@else
-                    <a href="{{ route('login') }}" class="text-white hover:text-gray-200 transition">Login</a>
-                    <a href="{{ route('register') }}" class="text-white hover:text-gray-200 transition">Register</a>
-@endauth
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="btn-login btn-animate">Log In</a>
+                    <a href="{{ route('register') }}" class="btn-signup btn-animate">Sign Up</a>
+                @endauth
             </div>
         </div>
     </nav>
@@ -492,15 +1002,15 @@
         <div class="slide-content">
             <div class="slide-content-inner">
                 <!-- Back Button -->
-                <button onclick="hidePanel()" class="back-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Back</span>
-                </button>
+                    <button onclick="hidePanel()" class="flex items-center px-5 py-3 bg-white rounded-xl shadow border text-gray-700 font-semibold mr-4 hover:bg-gray-100 transition" style="position: absolute; top: 1rem; left: 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Back</span>
+                    </button>
 
                 <div class="mt-8">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Transaction History</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 mt-10">Transaction History</h2>
                     <div class="space-y-4" id="transactionList">
                         <!-- Transaction list will be loaded here -->
                         <div class="text-center py-4">
@@ -518,18 +1028,19 @@
         <div class="slide-content">
             <div class="slide-content-inner">
                 <!-- Back Button -->
-                <button onclick="hidePanel()" class="back-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Back</span>
-                </button>
+                <button onclick="hidePanel()" class="flex items-center px-5 py-3 bg-white rounded-xl shadow border text-gray-700 font-semibold mr-4 hover:bg-gray-100 transition" style="position: absolute; top: 1rem; left: 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Back</span>
+                    </button>
 
                 @auth
                 <div id="profileContent" class="mt-8">
                     <!-- Profile Header -->
                     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                        <div class="relative h-32 bg-gradient-to-r from-orange-500 to-orange-600">
+                        <div class="relative h-32 bg-gradient-to-r from-[#FFA040] to-[#FFA040] mt-8">
+
                             <div class="absolute -bottom-12 left-8">
                                 <div class="relative">
                                     <img 
@@ -563,7 +1074,7 @@
                                 </div>
                                 <div class="flex space-x-3">
                                     <button onclick="showEditProfileModal()" 
-                                            class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition flex items-center">
+                                            class="px-4 py-2 bg-[#FFA040] text-white rounded-lg hover:bg-[#FFA040] transition flex items-center">
                                         <i class="fas fa-edit mr-2"></i>
                                         Edit Profile
                                     </button>
@@ -632,7 +1143,7 @@
                                 onclick="showPhotoUploadDialog()">
                             <div class="flex space-x-3">
                                 <button onclick="showPhotoUploadDialog()" 
-                                        class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition flex items-center">
+                                        class="px-4 py-2 bg-[#FFA040] text-white rounded-lg hover:bg-[#FFA040] transition flex items-center">
                                     <i class="fas fa-camera mr-2"></i>
                                     <span>Change Photo</span>
                                 </button>
@@ -712,7 +1223,7 @@
                                         Cancel
                                     </button>
                                     <button type="submit" 
-                                            class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition">
+                                            class="px-4 py-2 bg-[#FFA040] text-white rounded-md hover:bg-[#FFA040] transition">
                                         Save Changes
                                     </button>
                                 </div>
@@ -745,12 +1256,13 @@
         <div class="slide-content">
             <div class="slide-content-inner" id="roomsContent">
                 <!-- Back Button -->
-                <button onclick="hidePanel(); resetActiveTab();" class="back-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Back</span>
-                </button>
+                    <button onclick="hidePanel()" class="back-button" style="position: absolute; top: 1rem; left: 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Back</span>
+                    </button>
+                    
                 <!-- Rooms content will be loaded here -->
                 <div class="text-center py-4">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
@@ -888,19 +1400,16 @@
                 hidePanel();
                 profilePanel.classList.add('show');
                 @else
-                Swal.fire({
+                showBrutalistSwalAlert({
+                    type: 'warning',
                     title: 'Please Sign In',
-                    text: 'You need to be logged in to view your profile',
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'Login',
-                    cancelButtonText: 'Register',
-                    confirmButtonColor: '#f97316',
-                    cancelButtonColor: '#6b7280'
-                }).then((result) => {
-                    if (result.isConfirmed) {
+                    message: 'You need to be logged in to view your profile',
+                    confirmText: 'Login',
+                    cancelText: 'Register',
+                    onConfirm: function() {
                         window.location.href = '{{ route('login') }}';
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    },
+                    onCancel: function() {
                         window.location.href = '{{ route('register') }}';
                     }
                 });
@@ -925,19 +1434,16 @@
                     form.elements['phone'].value = initialFormData.phone || '';
                 }
                 @else
-                Swal.fire({
+                showBrutalistSwalAlert({
+                    type: 'warning',
                     title: 'Please Sign In',
-                    text: 'You need to be logged in to edit your profile',
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'Login',
-                    cancelButtonText: 'Register',
-                    confirmButtonColor: '#f97316',
-                    cancelButtonColor: '#6b7280'
-                }).then((result) => {
-                    if (result.isConfirmed) {
+                    message: 'You need to be logged in to edit your profile',
+                    confirmText: 'Login',
+                    cancelText: 'Register',
+                    onConfirm: function() {
                         window.location.href = '{{ route('login') }}';
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    },
+                    onCancel: function() {
                         window.location.href = '{{ route('register') }}';
                     }
                 });
@@ -998,18 +1504,14 @@
             };
 
             // Logout confirmation
-            window.confirmLogout = function() {
-                Swal.fire({
+            window.logoutBrutalistConfirm = function() {
+                showBrutalistAlert({
+                    type: 'danger',
                     title: 'Logout Confirmation',
-                    text: "Are you sure you want to logout?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#EF4444',
-                    cancelButtonColor: '#6B7280',
-                    confirmButtonText: 'Yes, logout',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
+                    message: 'Are you sure you want to logout?',
+                    confirmText: 'Yes, logout',
+                    cancelText: 'Cancel',
+                    onConfirm: function() {
                         document.getElementById('logout-form').submit();
                     }
                 });
@@ -1043,12 +1545,6 @@
                     
                     if (mainContent) {
                         roomsContent.innerHTML = `
-                            <button onclick="handleBackClick(event)" class="back-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                                </svg>
-                                <span>Back</span>
-                            </button>
                             ${mainContent.innerHTML}
                         `;
                         
@@ -1240,22 +1736,20 @@
 
             // Show notifications
             @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
+                showBrutalistSwalAlert({
+                    type: 'success',
                     title: 'Success',
-                    text: '{{ session("success") }}',
-                    timer: 3000,
-                    showConfirmButton: false
+                    message: '{{ session("success") }}',
+                    timer: 3000
                 });
             @endif
 
             @if(session('error'))
-                Swal.fire({
-                    icon: 'error',
+                showBrutalistSwalAlert({
+                    type: 'danger',
                     title: 'Error',
-                    text: '{{ session("error") }}',
-                    timer: 3000,
-                    showConfirmButton: false
+                    message: '{{ session("error") }}',
+                    timer: 3000
                 });
             @endif
 
@@ -1266,34 +1760,30 @@
                     
                     // Validate file type and size
                     if (!file.type.startsWith('image/')) {
-                        Swal.fire({
-                            icon: 'error',
+                        showBrutalistSwalAlert({
+                            type: 'danger',
                             title: 'Invalid File Type',
-                            text: 'Please select an image file'
+                            message: 'Please select an image file'
                         });
                         input.value = '';
                         return;
                     }
 
                     if (file.size > 1024 * 1024) { // 1MB
-                        Swal.fire({
-                            icon: 'error',
+                        showBrutalistSwalAlert({
+                            type: 'danger',
                             title: 'File Too Large',
-                            text: 'Please select an image less than 1MB'
+                            message: 'Please select an image less than 1MB'
                         });
                         input.value = '';
                         return;
                     }
                     
                     // Show loading state
-                    Swal.fire({
+                    showBrutalistSwalAlert({
+                        type: 'warning',
                         title: 'Uploading...',
-                        text: 'Please wait while we upload your photo',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        willOpen: () => {
-                            Swal.showLoading();
-                        }
+                        message: 'Please wait while we upload your photo'
                     });
 
                     const formData = new FormData();
@@ -1333,22 +1823,21 @@
                         }
 
                         // Show success message
-                        Swal.fire({
-                            icon: 'success',
+                        showBrutalistSwalAlert({
+                            type: 'success',
                             title: 'Success!',
-                            text: 'Profile photo updated successfully',
-                            timer: 1500,
-                            showConfirmButton: false
+                            message: 'Profile photo updated successfully',
+                            timer: 1500
                         });
 
                         // Clear the file input
                         input.value = '';
                     } catch (error) {
                         console.error('Profile photo upload error:', error);
-                        Swal.fire({
-                            icon: 'error',
+                        showBrutalistSwalAlert({
+                            type: 'danger',
                             title: 'Error',
-                            text: error.message || 'Failed to upload profile photo'
+                            message: error.message || 'Failed to upload profile photo'
                         });
                         // Clear the file input on error too
                         input.value = '';
@@ -1361,11 +1850,18 @@
                 event.preventDefault();
 
                 @guest
-                    Swal.fire({
-                        icon: 'error',
+                    showBrutalistSwalAlert({
+                        type: 'error',
                         title: 'Authentication Required',
-                        text: 'Please log in to update your profile.',
-                        confirmButtonColor: '#f97316'
+                        message: 'Please log in to update your profile.',
+                        confirmText: 'Login',
+                        cancelText: 'Register',
+                        onConfirm: function() {
+                            window.location.href = '{{ route('login') }}';
+                        },
+                        onCancel: function() {
+                            window.location.href = '{{ route('register') }}';
+                        }
                     });
                     return;
                 @endguest
@@ -1437,19 +1933,18 @@
                     hideEditProfileModal();
 
                     // Show success message
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: data.message || 'Profile updated successfully',
-                        timer: 2000,
-                        showConfirmButton: false
+                    showBrutalistSwalAlert({
+                      type: 'success',
+                      title: 'Success!',
+                      message: 'Profile updated successfully',
+                      timer: 2000
                     });
                 } catch (error) {
                     console.error('Profile update error:', error);
-                    Swal.fire({
-                        icon: 'error',
+                    showBrutalistSwalAlert({
+                        type: 'error',
                         title: 'Error',
-                        text: error.message || 'Failed to update profile'
+                        message: error.message || 'Failed to update profile'
                     });
                 }
             };
@@ -1457,62 +1952,46 @@
             // Handle password update
             window.showChangePasswordModal = function() {
                 @auth
-                Swal.fire({
-                    title: 'Change Password',
-                    html: `
-                        <form id="passwordForm" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 text-left">Current Password</label>
-                                <div class="relative">
-                                    <input type="password" 
-                                           id="current_password" 
-                                           name="current_password" 
-                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                    <button type="button" 
-                                            onclick="togglePasswordVisibility('current_password')"
-                                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
+                // Show modal with form (previous style)
+                const modalId = 'changePasswordModal';
+                let modal = document.getElementById(modalId);
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = modalId;
+                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    modal.innerHTML = `
+                        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-semibold text-gray-800">Change Password</h3>
+                                <button onclick="document.getElementById('${modalId}').remove()" class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 text-left">New Password</label>
-                                <div class="relative">
-                                    <input type="password" 
-                                           id="password" 
-                                           name="password" 
-                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                    <button type="button" 
-                                            onclick="togglePasswordVisibility('password')"
-                                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
+                            <form id="passwordForm" class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                                    <input type="password" name="current_password" id="current_password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                                 </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 text-left">Confirm New Password</label>
-                                <div class="relative">
-                                    <input type="password" 
-                                           id="password_confirmation" 
-                                           name="password_confirmation" 
-                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                    <button type="button" 
-                                            onclick="togglePasswordVisibility('password_confirmation')"
-                                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                                    <input type="password" name="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                                 </div>
-                            </div>
-                        </form>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Update Password',
-                    confirmButtonColor: '#f97316',
-                    showLoaderOnConfirm: true,
-                    preConfirm: async () => {
-                        const formData = new FormData(document.getElementById('passwordForm'));
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                                    <input type="password" name="password_confirmation" id="password_confirmation" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </div>
+                                <div class="flex justify-end space-x-3 pt-4">
+                                    <button type="button" onclick="document.getElementById('${modalId}').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">Cancel</button>
+                                    <button type="submit" class="px-4 py-2 bg-[#FFA040] text-white rounded-md hover:bg-[#FFA040] transition">Update Password</button>
+                                </div>
+                            </form>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                    document.getElementById('passwordForm').onsubmit = async function(event) {
+                        event.preventDefault();
+                        const formData = new FormData(this);
                         formData.append('_token', '{{ csrf_token() }}');
-
                         try {
                             const response = await fetch('{{ route("profile.password.update") }}', {
                                 method: 'PUT',
@@ -1528,9 +2007,7 @@
                                     password_confirmation: formData.get('password_confirmation')
                                 })
                             });
-
                             const data = await response.json();
-
                             if (!response.ok) {
                                 if (data.errors) {
                                     const errorMessages = [];
@@ -1554,37 +2031,35 @@
                                 }
                                 throw new Error(data.message || 'Failed to update password');
                             }
-
-                            return data;
+                            document.getElementById(modalId).remove();
+                            showBrutalistSwalAlert({
+                                type: 'success',
+                                title: 'Success',
+                                message: 'Password updated successfully',
+                                timer: 2000
+                            });
                         } catch (error) {
-                            Swal.showValidationMessage(error.message);
+                            showBrutalistSwalAlert({
+                                type: 'danger',
+                                title: 'Error',
+                                message: error.message
+                            });
                         }
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: 'Password updated successfully',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    }
-                });
+                    };
+                } else {
+                    modal.style.display = 'flex';
+                }
                 @else
-                Swal.fire({
+                showBrutalistSwalAlert({
+                    type: 'warning',
                     title: 'Please Sign In',
-                    text: 'You need to be logged in to change your password',
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'Login',
-                    cancelButtonText: 'Register',
-                    confirmButtonColor: '#f97316',
-                    cancelButtonColor: '#6b7280'
-                }).then((result) => {
-                    if (result.isConfirmed) {
+                    message: 'You need to be logged in to change your password',
+                    confirmText: 'Login',
+                    cancelText: 'Register',
+                    onConfirm: function() {
                         window.location.href = '{{ route('login') }}';
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    },
+                    onCancel: function() {
                         window.location.href = '{{ route('register') }}';
                     }
                 });
@@ -1609,25 +2084,13 @@
 
             // Handle notification preferences
             window.showNotificationPreferences = function() {
-                Swal.fire({
+                showBrutalistSwalAlert({
+                    type: 'warning',
                     title: 'Notification Preferences',
-                    html: `
-                        <form id="notificationForm" class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <label class="text-sm font-medium text-gray-700">Email Notifications</label>
-                                <input type="checkbox" name="email_notifications" class="rounded text-orange-500">
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <label class="text-sm font-medium text-gray-700">Push Notifications</label>
-                                <input type="checkbox" name="push_notifications" class="rounded text-orange-500">
-                            </div>
-                        </form>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Save Preferences',
-                    confirmButtonColor: '#f97316',
-                    showLoaderOnConfirm: true,
-                    preConfirm: async () => {
+                    message: 'Please select your notification preferences',
+                    confirmText: 'Save Preferences',
+                    cancelText: 'Cancel',
+                    onConfirm: async function() {
                         const formData = new FormData(document.getElementById('notificationForm'));
                         formData.append('_token', '{{ csrf_token() }}');
                         formData.append('_method', 'PATCH');
@@ -1642,46 +2105,42 @@
                                 throw new Error('Failed to update notification preferences');
                             }
 
-                            return response.json();
+                            showBrutalistSwalAlert({
+                                type: 'success',
+                                title: 'Success',
+                                message: 'Notification preferences updated successfully'
+                            });
                         } catch (error) {
-                            Swal.showValidationMessage(error.message);
+                            showBrutalistSwalAlert({
+                                type: 'danger',
+                                title: 'Error',
+                                message: error.message
+                            });
                         }
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: 'Notification preferences updated successfully'
-                        });
+                    },
+                    onCancel: function() {
+                        // Cancel button logic
                     }
                 });
             };
 
             // Handle remove profile photo
             window.removeProfilePhoto = async function() {
-                const result = await Swal.fire({
+                const result = await showBrutalistSwalAlert({
+                    type: 'warning',
                     title: 'Remove Profile Photo?',
-                    text: 'Are you sure you want to remove your profile photo?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Yes, remove it',
-                    cancelButtonText: 'Cancel'
+                    message: 'Are you sure you want to remove your profile photo?',
+                    confirmText: 'Yes, remove it',
+                    cancelText: 'Cancel'
                 });
 
                 if (result.isConfirmed) {
                     try {
                         // Show loading state
-                        Swal.fire({
+                        showBrutalistSwalAlert({
+                            type: 'warning',
                             title: 'Removing...',
-                            text: 'Please wait while we remove your photo',
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                            willOpen: () => {
-                                Swal.showLoading();
-                            }
+                            message: 'Please wait while we remove your photo'
                         });
 
                         const response = await fetch('{{ route("profile.photo.destroy") }}', {
@@ -1715,19 +2174,18 @@
                             photo.src = defaultAvatarUrl;
                         });
 
-                        Swal.fire({
-                            icon: 'success',
+                        showBrutalistSwalAlert({
+                            type: 'success',
                             title: 'Success!',
-                            text: 'Profile photo removed successfully',
-                            timer: 1500,
-                            showConfirmButton: false
+                            message: 'Profile photo removed successfully',
+                            timer: 1500
                         });
                     } catch (error) {
                         console.error('Profile photo removal error:', error);
-                        Swal.fire({
-                            icon: 'error',
+                        showBrutalistSwalAlert({
+                            type: 'danger',
                             title: 'Error',
-                            text: error.message || 'Failed to remove profile photo'
+                            message: error.message || 'Failed to remove profile photo'
                         });
                     }
                 }
@@ -1741,11 +2199,18 @@
             // Handle quick profile photo upload
             window.handleQuickProfilePhotoUpload = async function(input) {
                 @guest
-                    Swal.fire({
-                        icon: 'error',
+                    showBrutalistSwalAlert({
+                        type: 'danger',
                         title: 'Authentication Required',
-                        text: 'Please log in to update your profile photo.',
-                        confirmButtonColor: '#f97316'
+                        message: 'Please log in to update your profile photo.',
+                        confirmText: 'Login',
+                        cancelText: 'Register',
+                        onConfirm: function() {
+                            window.location.href = '{{ route('login') }}';
+                        },
+                        onCancel: function() {
+                            window.location.href = '{{ route('register') }}';
+                        }
                     });
                     return;
                 @endguest
@@ -1788,22 +2253,21 @@
                     @endauth
 
                     // Show success message
-                    Swal.fire({
-                        icon: 'success',
+                    showBrutalistSwalAlert({
+                        type: 'success',
                         title: 'Success!',
-                        text: 'Profile photo updated successfully',
-                        timer: 1500,
-                        showConfirmButton: false
+                        message: 'Profile photo updated successfully',
+                        timer: 1500
                     });
 
                     // Clear the file input
                     input.value = '';
                 } catch (error) {
                     console.error('Profile photo upload error:', error);
-                    Swal.fire({
-                        icon: 'error',
+                    showBrutalistSwalAlert({
+                        type: 'danger',
                         title: 'Error',
-                        text: error.message || 'Failed to upload profile photo'
+                        message: error.message || 'Failed to upload profile photo'
                     });
                     // Clear the file input on error too
                     input.value = '';
@@ -1859,15 +2323,11 @@
                     }
                 } catch (error) {
                     console.error('Error showing payment panel:', error);
-                    Swal.fire({
-                        icon: 'error',
+                    showBrutalistSwalAlert({
+                        type: 'danger',
                         title: 'Error',
-                        text: error.message || 'Failed to load payment panel',
-                        toast: true,
-                        position: 'top',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true
+                        message: error.message || 'Failed to load payment panel',
+                        timer: 3000
                     });
                 }
             };
@@ -2103,10 +2563,10 @@
                         document.head.appendChild(style);
                     } catch (error) {
                         console.error('Error loading transaction details:', error);
-                        Swal.fire({
-                            icon: 'error',
+                        showBrutalistSwalAlert({
+                            type: 'error',
                             title: 'Error',
-                            text: 'Failed to load transaction details. Please try again.'
+                            message: 'Failed to load transaction details. Please try again.'
                         });
                     }
                 },
@@ -2144,34 +2604,29 @@
                             await this.loadTransactions();
 
                             // Show success message
-                            Swal.fire({
-                                icon: 'success',
+                            showBrutalistSwalAlert({
+                                type: 'success',
                                 title: 'Success',
-                                text: data.message || 'Transaction cancelled successfully',
-                                timer: 2000,
-                                showConfirmButton: false
+                                message: data.message || 'Transaction cancelled successfully',
+                                timer: 2000
                             });
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
+                        showBrutalistSwalAlert({
+                            type: 'error',
                             title: 'Error',
-                            text: error.message || 'Failed to cancel transaction. Please try again.'
+                            message: error.message || 'Failed to cancel transaction. Please try again.'
                         });
                     }
                 },
                 async payTransaction(id) {
                     try {
                         // Show loading state
-                        Swal.fire({
+                        showBrutalistSwalAlert({
+                            type: 'warning',
                             title: 'Processing...',
-                            text: 'Please wait while we initialize your payment',
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                            willOpen: () => {
-                                Swal.showLoading();
-                            }
+                            message: 'Please wait while we initialize your payment'
                         });
 
                         const response = await fetch(`/transactions/${id}/pay`, {
@@ -2202,14 +2657,10 @@
                             onSuccess: async function(result) {
                                 try {
                                     // Show loading state
-                                    Swal.fire({
+                                    showBrutalistSwalAlert({
+                                        type: 'warning',
                                         title: 'Completing Payment...',
-                                        text: 'Please wait while we process your payment',
-                                        allowOutsideClick: false,
-                                        showConfirmButton: false,
-                                        willOpen: () => {
-                                            Swal.showLoading();
-                                        }
+                                        message: 'Please wait while we process your payment'
                                     });
 
                                     // Call payment finish endpoint via AJAX
@@ -2233,12 +2684,11 @@
                                     }
 
                                     // Show success message
-                                    Swal.fire({
-                                        icon: 'success',
+                                    showBrutalistSwalAlert({
+                                        type: 'success',
                                         title: 'Payment Successful',
-                                        text: finishData.message || 'Your payment has been processed successfully',
-                                        showConfirmButton: true,
-                                        confirmButtonText: 'OK'
+                                        message: finishData.message || 'Your payment has been processed successfully',
+                                        confirmText: 'OK'
                                     });
 
                                     // Refresh transaction list
@@ -2247,17 +2697,11 @@
                                     }
                                 } catch (error) {
                                     console.error('Payment completion error:', error);
-                                    Swal.fire({
-                                        icon: 'error',
+                                    showBrutalistSwalAlert({
+                                        type: 'error',
                                         title: 'Error',
-                                        text: error.message || 'Failed to complete payment. Please check your transaction history.',
-                                        showConfirmButton: true,
-                                        confirmButtonText: 'OK'
-                                    }).then(() => {
-                                        // Refresh transaction list even on error to show latest status
-                                        if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
-                                            window.transactionPanel.loadTransactions();
-                                        }
+                                        message: error.message || 'Failed to complete payment. Please check your transaction history.',
+                                        confirmText: 'OK'
                                     });
                                 }
                             },
@@ -2267,29 +2711,28 @@
                                 localStorage.setItem('lastTransactionId', id);
                                 
                                 // Show pending payment instructions
-                                Swal.fire({
-                                    icon: 'info',
+                                showBrutalistSwalAlert({
+                                    type: 'warning',
                                     title: 'Complete Your Payment',
-                                    text: 'Please complete your payment using the provided payment instructions.',
-                                    showConfirmButton: true,
-                                    confirmButtonText: 'View Payment Instructions',
-                                }).then(() => {
-                                    // Show transaction panel
-                                    hidePanel();
-                                    document.getElementById('transactionPanel').classList.add('show');
-                                    if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
-                                        window.transactionPanel.loadTransactions();
+                                    message: 'Please complete your payment using the provided payment instructions.',
+                                    confirmText: 'View Payment Instructions',
+                                    onConfirm: function() {
+                                        // Show transaction panel
+                                        hidePanel();
+                                        document.getElementById('transactionPanel').classList.add('show');
+                                        if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
+                                            window.transactionPanel.loadTransactions();
+                                        }
                                     }
                                 });
                             },
                             onError: function(result) {
                                 console.error('Midtrans payment error:', result);
-                                Swal.fire({
-                                    icon: 'error',
+                                showBrutalistSwalAlert({
+                                    type: 'danger',
                                     title: 'Payment Failed',
-                                    text: 'An error occurred while processing your payment. Please try again.',
-                                    showConfirmButton: true,
-                                    confirmButtonText: 'Close',
+                                    message: 'An error occurred while processing your payment. Please try again.',
+                                    confirmText: 'Close'
                                 });
                             },
                             onClose: function() {
@@ -2299,19 +2742,19 @@
                                 
                                 if (lastPaymentMethod && lastTransactionId === id.toString()) {
                                     // If payment method was selected, show confirmation message
-                                    Swal.fire({
-                                        icon: 'info',
+                                    showBrutalistSwalAlert({
+                                        type: 'warning',
                                         title: 'Payment Method Selected',
-                                        text: 'Your order has been confirmed. Please check your transaction history to continue the payment.',
-                                        showConfirmButton: true,
-                                        confirmButtonText: 'View Transactions',
-                                    }).then(() => {
-                                        // Clear stored payment info
-                                        localStorage.removeItem('lastPaymentMethod');
-                                        localStorage.removeItem('lastTransactionId');
-                                        
-                                        // Redirect to landing page with transaction panel open
-                                        window.location.href = '{{ route("landing") }}?panel=transactions&source=midtrans';
+                                        message: 'Your order has been confirmed. Please check your transaction history to continue the payment.',
+                                        confirmText: 'View Transactions',
+                                        onConfirm: function() {
+                                            // Clear stored payment info
+                                            localStorage.removeItem('lastPaymentMethod');
+                                            localStorage.removeItem('lastTransactionId');
+                                            
+                                            // Redirect to landing page with transaction panel open
+                                            window.location.href = '{{ route("landing") }}?panel=transactions&source=midtrans';
+                                        }
                                     });
                                 } else {
                                     // If no payment method was selected, just close without saving
@@ -2321,10 +2764,10 @@
                         });
                     } catch (error) {
                         console.error('Payment initialization error:', error);
-                        Swal.fire({
-                            icon: 'error',
+                        showBrutalistSwalAlert({
+                            type: 'error',
                             title: 'Error',
-                            text: error.message || 'Failed to process payment. Please try again.'
+                            message: error.message || 'Failed to process payment. Please try again.'
                         });
                     }
                 }
@@ -2401,6 +2844,152 @@
                 });
             });
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileBtn = document.querySelector('.profile-dropdown-button');
+            const profileMenu = document.querySelector('.profile-dropdown-menu');
+            if (profileBtn && profileMenu) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileMenu.classList.toggle('show');
+                    profileBtn.classList.toggle('active');
+                });
+                document.addEventListener('click', function(event) {
+                    if (!event.target.closest('.profile-dropdown')) {
+                        profileMenu.classList.remove('show');
+                        profileBtn.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        function showBrutalistAlert({
+          type = 'warning',
+          title = '',
+          message = '',
+          confirmText = 'OK',
+          cancelText = null,
+          onConfirm = null,
+          onCancel = null
+        }) {
+          document.querySelectorAll('.brutalist-card, .brutalist-overlay').forEach(e => e.remove());
+          const overlay = document.createElement('div');
+          overlay.className = 'brutalist-overlay';
+          document.body.appendChild(overlay);
+          let iconSvg = '';
+          if (type === 'success') iconSvg = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"></path></svg>`;
+          else if (type === 'danger') iconSvg = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13l-1.41 1.41L12 13.41l-3.59 3.59L7 15l3.59-3.59L7 7.83 8.41 6.41 12 10.59l3.59-3.59L17 7.83l-3.59 3.59L17 15z"></path></svg>`;
+          else iconSvg = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>`;
+          const card = document.createElement('div');
+          card.className = 'brutalist-card';
+          card.innerHTML = `
+            <div class="brutalist-card__header">
+              <div class="brutalist-card__icon ${type}">${iconSvg}</div>
+              <div class="brutalist-card__alert">${title}</div>
+            </div>
+            <div class="brutalist-card__message">${message}</div>
+            <div class="brutalist-card__actions"></div>
+          `;
+          document.body.appendChild(card);
+          const actions = card.querySelector('.brutalist-card__actions');
+          if (confirmText) {
+            const btn = document.createElement('a');
+            btn.href = '#';
+            btn.className = `brutalist-card__button brutalist-card__button--${type}`;
+            btn.textContent = confirmText;
+            btn.onclick = (e) => {
+              e.preventDefault();
+              overlay.remove(); card.remove();
+              if (onConfirm) onConfirm();
+            };
+            actions.appendChild(btn);
+          }
+          if (cancelText) {
+            const btn = document.createElement('a');
+            btn.href = '#';
+            btn.className = 'brutalist-card__button';
+            btn.textContent = cancelText;
+            btn.onclick = (e) => {
+              e.preventDefault();
+              overlay.remove(); card.remove();
+              if (onCancel) onCancel();
+            };
+            actions.appendChild(btn);
+          }
+          overlay.onclick = () => {
+            overlay.remove(); card.remove();
+            if (onCancel) onCancel();
+          };
+        }
+
+        function showBrutalistSwalAlert({
+          type = 'warning',
+          title = '',
+          message = '',
+          confirmText = 'OK',
+          cancelText = null,
+          onConfirm = null,
+          onCancel = null,
+          timer = null
+        }) {
+          return new Promise((resolve) => {
+            document.querySelectorAll('.brutalist-swal-alert, .brutalist-swal-overlay').forEach(e => e.remove());
+            const overlay = document.createElement('div');
+            overlay.className = 'brutalist-swal-overlay';
+            document.body.appendChild(overlay);
+            let iconSvg = '';
+            if (type === 'success') iconSvg = `<svg viewBox=\"0 0 24 24\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z\"></path></svg>`;
+            else if (type === 'danger') iconSvg = `<svg viewBox=\"0 0 24 24\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13l-1.41 1.41L12 13.41l-3.59 3.59L7 15l3.59-3.59L7 7.83 8.41 6.41 12 10.59l3.59-3.59L17 7.83l-3.59 3.59L17 15z\"></path></svg>`;
+            else iconSvg = `<svg viewBox=\"0 0 24 24\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z\"></path></svg>`;
+            const card = document.createElement('div');
+            card.className = 'brutalist-swal-alert';
+            card.innerHTML = `
+              <div class=\"brutalist-swal-header\">
+                <div class=\"brutalist-swal-icon ${type}\">${iconSvg}</div>
+                <div class=\"brutalist-swal-title\">${title}</div>
+              </div>
+              <div class=\"brutalist-swal-message\">${message}</div>
+              <div class=\"brutalist-swal-actions\"></div>
+            `;
+            document.body.appendChild(card);
+            const actions = card.querySelector('.brutalist-swal-actions');
+            if (confirmText) {
+              const btn = document.createElement('button');
+              btn.className = `brutalist-swal-btn brutalist-swal-btn--${type}`;
+              btn.textContent = confirmText;
+              btn.onclick = (e) => {
+                e.preventDefault();
+                overlay.remove(); card.remove();
+                if (onConfirm) onConfirm();
+                resolve({ isConfirmed: true });
+              };
+              actions.appendChild(btn);
+            }
+            if (cancelText) {
+              const btn = document.createElement('button');
+              btn.className = 'brutalist-swal-btn';
+              btn.textContent = cancelText;
+              btn.onclick = (e) => {
+                e.preventDefault();
+                overlay.remove(); card.remove();
+                if (onCancel) onCancel();
+                resolve({ isConfirmed: false });
+              };
+              actions.appendChild(btn);
+            }
+            overlay.onclick = () => {
+              overlay.remove(); card.remove();
+              if (onCancel) onCancel();
+              resolve({ isConfirmed: false });
+            };
+            if (timer) {
+              setTimeout(() => {
+                overlay.remove(); card.remove();
+                resolve({ isConfirmed: true });
+              }, timer);
+            }
+          });
+        }
     </script>
     <!-- Add Pusher script -->
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
