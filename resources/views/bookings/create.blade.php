@@ -73,13 +73,22 @@ button {
     position: relative;
 }
 
-.date-input {
-    width: 100%;
-    padding: 0.5rem;
-    padding-right: 2.5rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    cursor: pointer;
+input.date-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 1em !important;
+    padding-right: 2.5rem !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 15px !important;
+    background-color: #ccc !important;
+    box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3) !important;
+    transition: 300ms ease-in-out !important;
+    cursor: pointer !important;
+}
+input.date-input:focus {
+    background-color: white !important;
+    transform: scale(1.05) !important;
+    box-shadow: 13px 13px 100px #969696, -13px -13px 100px #ffffff !important;
 }
 
 .calendar-icon {
@@ -130,6 +139,66 @@ button {
     text-decoration: none;
     opacity: 0.3;
 }
+
+.tombolform {
+  border: none;
+  outline: none;
+  border-radius: 15px;
+  padding: 1em;
+  background-color: #ccc;
+  box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3);
+  transition: 300ms ease-in-out;
+}
+.tombolform:focus {
+  background-color: white;
+  transform: scale(1.05);
+  box-shadow: 13px 13px 100px #969696,
+             -13px -13px 100px #ffffff;
+}
+
+.custom-alert {
+  width: 24em;
+  min-height: 4.5em;
+  background: #171717;
+  color: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  padding: 1.2em 2em;
+  position: fixed;
+  top: 2em;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.2em;
+  animation: fadeInDown 0.5s;
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30px) translateX(-50%);}
+  to { opacity: 1; transform: translateY(0) translateX(-50%);}
+}
+@keyframes fadeOutUp {
+  from { opacity: 1; transform: translateY(0) translateX(-50%);}
+  to   { opacity: 0; transform: translateY(-30px) translateX(-50%);}
+}
+.custom-alert.success {
+  border-left: 10px solid #22c55e;
+}
+.custom-alert.error {
+  border-left: 10px solid #ef4444;
+}
+.custom-alert.warning {
+  border-left: 10px solid #f59e0b;
+}
+.alert-icon {
+  font-size: 2.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 </style>
 @endsection
 
@@ -179,12 +248,7 @@ button {
                                             <input type="text" 
                                                    name="check_in_date" 
                                                    id="check_in_date" 
-                                                   class="date-input" 
-                                                   placeholder="Select check-in date"
-                                                   readonly
-                                               autocomplete="off"
-                                               data-input
-                                                   required>
+                                                   style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';" placeholder="Select check-in date" readonly autocomplete="off" data-input required>
                                             <i class="fas fa-calendar calendar-icon"></i>
                                         </div>
                                     </div>
@@ -194,12 +258,7 @@ button {
                                             <input type="text" 
                                                    name="check_out_date" 
                                                    id="check_out_date" 
-                                                   class="date-input" 
-                                                   placeholder="Select check-out date"
-                                                   readonly
-                                               autocomplete="off"
-                                               data-input
-                                                   required>
+                                                   style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';" placeholder="Select check-out date" readonly autocomplete="off" data-input required>
                                             <i class="fas fa-calendar calendar-icon"></i>
                                         </div>
                                     </div>
@@ -211,47 +270,19 @@ button {
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                            <input type="text" 
-                                                   id="full_name"
-                                                   name="full_name" 
-                                                   placeholder="Full Name as per ID Card" 
-                                                   autocomplete="name"
-                                                   required
-                                               value="{{ auth()->user()->name }}"
-                                                   class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
+                                            <input type="text" id="full_name" name="full_name" placeholder="Full Name as per ID Card" autocomplete="name" required value="{{ auth()->user()->name }}" style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';">
                                         </div>
                                         <div>
                                             <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                            <input type="email" 
-                                                   id="email"
-                                                   name="email" 
-                                                   placeholder="Email" 
-                                                   autocomplete="email"
-                                                   required
-                                               readonly
-                                               value="{{ auth()->user()->email }}"
-                                               class="w-full border-gray-300 rounded-lg shadow-sm bg-gray-100 cursor-not-allowed">
+                                            <input type="email" id="email" name="email" placeholder="Email" autocomplete="email" required readonly value="{{ auth()->user()->email }}" style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;cursor:not-allowed;">
                                         </div>
                                         <div>
                                             <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                            <input type="tel" 
-                                                   id="phone"
-                                                   name="phone" 
-                                                   placeholder="Phone Number" 
-                                                   autocomplete="tel"
-                                                   required
-                                               value="{{ auth()->user()->phone }}"
-                                                   class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
+                                            <input type="tel" id="phone" name="phone" placeholder="Phone Number" autocomplete="tel" required value="{{ auth()->user()->phone }}" style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';">
                                         </div>
                                         <div>
                                             <label for="id_number" class="block text-sm font-medium text-gray-700 mb-1">ID Number</label>
-                                            <input type="text" 
-                                                   id="id_number"
-                                                   name="id_number" 
-                                                   placeholder="NIK/Passport Number" 
-                                                   autocomplete="off"
-                                                   required
-                                                   class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
+                                            <input type="text" id="id_number" name="id_number" placeholder="NIK/Passport Number" autocomplete="off" required style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';">
                                         </div>
                                     </div>
                                 </div>
@@ -259,11 +290,7 @@ button {
                                 <!-- Special Request -->
                                 <div class="mb-6">
                                     <label for="special_requests" class="block text-sm font-medium text-gray-700 mb-1">Special Request (Optional)</label>
-                                    <textarea id="special_requests"
-                                            name="special_requests" 
-                                            rows="3" 
-                                            placeholder="Any special requests?" 
-                                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"></textarea>
+                                    <textarea id="special_requests" name="special_requests" rows="3" placeholder="Any special requests?" style="width:100%;box-sizing:border-box;min-height:90px;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';"></textarea>
                                 </div>
 
                                 <!-- Important Information -->
@@ -406,7 +433,10 @@ button {
 
                                 <!-- Complete Booking Button -->
                                 <button type="submit" 
-                                        class="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition font-semibold">
+                                        class="w-full py-3 rounded-lg transition font-bold"
+                                        style="background:#FFA040; color:#fff; border:2px solid #FFA040;"
+                                        onmouseover="this.style.backgroundColor='#ff8800'" 
+                                        onmouseout="this.style.backgroundColor='#FFA040'">
                                     COMPLETE BOOKING
                                 </button>
                             </div>
@@ -1824,17 +1854,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!e.target.classList.contains('flatpickr-input')) {
                 if (!checkInPicker.selectedDates[0]) {
                     checkInPicker.open();
-                    // Optional: Show a gentle reminder
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Pilih Tanggal Check-in',
-                        text: 'Silakan pilih tanggal check-in terlebih dahulu',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
+                    // Ganti alert ke showCustomAlert
+                    showCustomAlert('Silakan pilih tanggal check-in terlebih dahulu', 'warning');
                 } else {
                     checkOutPicker.open();
                 }
@@ -1842,6 +1863,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function showCustomAlert(message, type = 'error') {
+  const alertBox = document.getElementById('customAlert');
+  const alertIcon = document.getElementById('alertIcon');
+  const alertMessage = document.getElementById('alertMessage');
+  alertBox.className = 'custom-alert ' + type;
+  alertMessage.textContent = message;
+  if (type === 'success') {
+    alertIcon.innerHTML = '<span style="color:#22c55e;">&#10003;</span>';
+  } else if (type === 'warning') {
+    alertIcon.innerHTML = '<span style="color:#f59e0b;">&#33;</span>';
+  } else {
+    alertIcon.innerHTML = '<span style="color:#ef4444;">&#10006;</span>';
+  }
+  alertBox.style.display = 'flex';
+  alertBox.style.animation = 'fadeInDown 0.5s';
+  setTimeout(() => {
+    alertBox.style.animation = 'fadeOutUp 0.5s';
+    setTimeout(() => {
+      alertBox.style.display = 'none';
+    }, 500);
+  }, 3000);
+}
 </script>
 @endpush
 @endsection

@@ -96,3 +96,15 @@
     }
 }
 
+/* Custom trapezoid navbar */
+.trapezoid-navbar {
+    clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
+    /* Polygon membentuk trapesium terbalik */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    z-index: 10;
+    position: relative;
+}
+.dark .trapezoid-navbar {
+    background: #1f2937;
+}
+

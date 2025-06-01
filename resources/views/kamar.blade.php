@@ -149,8 +149,8 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <!-- Room Booking Content -->
-    <div x-data="{ 
-        selectedRooms: [], 
+    <div x-data="{
+        selectedRooms: [],
         totalPrice: 0,
         addRoom(room) {
             if (!this.selectedRooms.find(r => r.id === room.id)) {
@@ -173,24 +173,22 @@
             return this.selectedRooms.some(r => r.id === roomId);
         },
         checkAuthAndShowBooking(roomIds) {
-            @auth
+            // Fungsi ini akan memanggil window.showBooking(roomIds) jika sudah login,
+            // atau menampilkan SweetAlert jika belum login. Jangan gunakan interpolasi Blade di sini.
+            if (window.isAuthenticated) {
                 window.showBooking(roomIds);
-            @else
-                Swal.fire({
+            } else {
+                showBrutalistSwalAlert({
                     title: 'Login Required',
-                    text: 'Please login first to complete your booking',
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonColor: '#f59e0b',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Login Now',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '{{ route("login") }}';
+                    message: 'Please login first to complete your booking',
+                    type: 'info',
+                    confirmText: 'Login Now',
+                    cancelText: 'Cancel',
+                    onConfirm: function() {
+                        window.location.href = '/login';
                     }
                 });
-            @endauth
+            }
         },
         init() {
             // Load selected rooms from localStorage on page load
@@ -199,23 +197,19 @@
                 this.selectedRooms = JSON.parse(stored);
                 this.calculateTotal();
             }
-
             // Handle pagination clicks
             document.addEventListener('click', (e) => {
                 const paginationLink = e.target.closest('.pagination a');
                 if (paginationLink) {
                     e.preventDefault();
                     const url = new URL(paginationLink.href);
-                    
                     // Add current search parameters
                     const checkIn = window.selectedStartDate ? formatDateForSubmit(window.selectedStartDate) : document.getElementById('search_check_in').value;
                     const checkOut = window.selectedEndDate ? formatDateForSubmit(window.selectedEndDate) : document.getElementById('search_check_out').value;
                     const guests = document.getElementById('search_guests').value;
-                    
                     url.searchParams.set('check_in', checkIn);
                     url.searchParams.set('check_out', checkOut);
                     url.searchParams.set('guests', guests);
-                    
                     fetch(url)
                         .then(response => response.text())
                         .then(html => {
@@ -229,11 +223,11 @@
                         })
                         .catch(error => {
                             console.error('Error fetching page:', error);
-                            Swal.fire({
-                                icon: 'error',
+                            showBrutalistSwalAlert({
+                                type: 'error',
                                 title: 'Error',
-                                text: 'Failed to load the next page. Please try again.',
-                                confirmButtonColor: '#f59e0b'
+                                message: 'Failed to load the next page. Please try again.',
+                                confirmText: 'OK',
                             });
                         });
                 }
@@ -242,17 +236,18 @@
     }" x-init="init()">
 
         <!-- Top Booking Bar -->
-        <div class="bg-white border-b sticky top-0 z-20">
+        <div class="bg-white border-b fixed top-0 left-0 w-full z-30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex items-center justify-between gap-4">
-
-                    <button onclick="hidePanel()" class="back-button mt-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <div class="flex items-center gap-4">
+                    <!-- Tombol Back di kiri -->
+                    <button onclick="handleBackClick(event)" class="back-button" style="position: static; margin-right: 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                         </svg>
-                    Back
-                </button>
-
+                        <span>Back</span>
+                    </button>
+                    <!-- Filter Booking (Check in, Checkout, Guests, Search) -->
+                    <div class="flex-1 flex gap-4">
                     <!-- Check-in -->
                     <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border cursor-pointer" onclick="openCalendar('check_in')">
                         <i class="fas fa-calendar text-gray-400"></i>
@@ -289,15 +284,16 @@
                     </div>
                     
                     <!-- Search Button -->
-                    <button onclick="searchRooms()" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition text-sm">
+                    <button onclick="searchRooms()" class="bg-[#FFA040] text-white px-6 py-2 rounded-lg hover:bg-[#FFB040] transition text-sm">
                         Search
                     </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Booking content -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
             <h2 class="text-2xl font-bold mb-8">Reservation Cahaya Resort</h2>
 
             <!-- Room listings -->
@@ -311,12 +307,12 @@
 
                 <!-- Right side - Booking Details -->
                 <div class="col-span-4">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
-                        <h3 class="font-bold text-lg mb-4">BOOKING DETAILS</h3>
+                    <div class="bg-white rounded-xl shadow-sm border-2 border-gray-200 p-6 sticky top-24">
+                        <h3 class="font-bold text-lg mb-4 pb-3 border-b border-gray-200">BOOKING DETAILS</h3>
                         <div class="space-y-4">
                             <!-- Selected Rooms List -->
                             <template x-if="selectedRooms.length === 0">
-                                <div class="text-gray-500 text-center py-4">
+                                <div class="text-gray-500 text-center py-4 border-2 border-dashed border-gray-200 rounded-lg">
                                     No rooms selected
                                 </div>
                             </template>
@@ -325,7 +321,7 @@
                             <div class="max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
                                 <div class="space-y-3">
                                     <template x-for="room in selectedRooms" :key="room.id">
-                                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
                                             <div class="flex items-center gap-3">
                                                 <img :src="'/storage/images/' + room.image" class="w-12 h-12 object-cover rounded">
                                                 <div>
@@ -341,7 +337,7 @@
                                 </div>
                             </div>
 
-                            <div class="border-t pt-4">
+                            <div class="border-t-2 border-gray-200 pt-4">
                                 <div class="flex justify-between items-center">
                                     <span class="text-gray-600">Total</span>
                                     <span class="font-bold text-xl" x-text="'IDR ' + totalPrice.toLocaleString()"></span>
@@ -350,7 +346,7 @@
 
                             <div x-show="selectedRooms.length > 0">
                                 <button @click="checkAuthAndShowBooking(selectedRooms.map(room => room.id))" 
-                                    class="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition text-sm font-semibold">
+                                    class="w-full bg-[#FFA040] text-white py-3 rounded-lg hover:bg-[#FFB040] transition text-sm font-semibold">
                                     COMPLETE BOOKING
                                 </button>
                             </div>
@@ -383,17 +379,13 @@ window.checkAuthAndShowBooking = function(roomIds) {
     @auth
         showBooking(roomIds);
     @else
-        Swal.fire({
+        showBrutalistSwalAlert({
             title: 'Login Required',
-            text: 'Please login first to complete your booking',
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#f59e0b',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Login Now',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
+            message: 'Please login first to complete your booking',
+            type: 'info',
+            confirmText: 'Login Now',
+            cancelText: 'Cancel',
+            onConfirm: function() {
                 window.location.href = '{{ route("login") }}';
             }
         });
@@ -407,7 +399,7 @@ window.searchRooms = async function() {
     const guests = document.getElementById('search_guests').value;
 
     if (!checkIn || !checkOut) {
-        Swal.fire({
+        showBrutalistSwalAlert({
             icon: 'warning',
             title: 'Please Select Dates',
             text: 'You must select both check-in and check-out dates.',
@@ -447,7 +439,7 @@ window.searchRooms = async function() {
             }
 
             // Show success message
-            Swal.fire({
+            showBrutalistSwalAlert({
                 icon: 'success',
                 title: 'Rooms Updated',
                 text: 'Showing available rooms for selected dates',
@@ -460,8 +452,8 @@ window.searchRooms = async function() {
         }
     } catch (error) {
         console.error('Error loading rooms:', error);
-        Swal.fire({
-            icon: 'error',
+        showBrutalistSwalAlert({
+            type: 'error',
             title: 'Error',
             text: 'Failed to load available rooms. Please try again.',
             confirmButtonColor: '#f59e0b'
@@ -538,8 +530,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(error => {
                     console.error('Error fetching page:', error);
-                    Swal.fire({
-                        icon: 'error',
+                    showBrutalistSwalAlert({
+                        type: 'error',
                         title: 'Error',
                         text: 'Failed to load the next page. Please try again.',
                         confirmButtonColor: '#f59e0b'
@@ -611,7 +603,7 @@ window.handleDateClick = function(info) {
         highlightDates();
     } else if (window.currentInputType === 'check_out') {
         if (!window.selectedStartDate) {
-            Swal.fire({
+            showBrutalistSwalAlert({
                 icon: 'warning',
                 title: 'Select Check-in First',
                 text: 'Please select a check-in date before selecting check-out date.',
@@ -622,7 +614,7 @@ window.handleDateClick = function(info) {
             return;
         }
         if (clickedDate <= window.selectedStartDate) {
-            Swal.fire({
+            showBrutalistSwalAlert({
                 icon: 'warning',
                 title: 'Invalid Date',
                 text: 'Check-out date must be after check-in date.',
@@ -667,6 +659,35 @@ window.formatDateForSubmit = function(date) {
 
 // Add event listener for calendar overlay
 document.querySelector('.calendar-overlay')?.addEventListener('click', closeCalendar);
+
+// Tambahkan fungsi handleBackClick agar tombol back sama dengan app.blade
+window.handleBackClick = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    // Coba sembunyikan panel jika ada (untuk konsistensi)
+    var roomsPanel = document.getElementById('roomsPanel');
+    if (roomsPanel) {
+        roomsPanel.classList.remove('show');
+        // Update Alpine.js state jika ada
+        var navContainer = document.querySelector('[x-data]');
+        if (navContainer && navContainer.__x) {
+            navContainer.__x.$data.activeTab = 'dashboard';
+            localStorage.setItem('activeTab', 'dashboard');
+        }
+        // Update UI nav-item jika ada
+        document.querySelectorAll('.nav-item').forEach(function(item) {
+            var text = item.textContent.trim();
+            if (text === 'Dashboard') {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    } else {
+        // Fallback: kembali ke halaman sebelumnya
+        window.history.back();
+    }
+};
 </script>
 @endpush
 
@@ -683,13 +704,45 @@ document.querySelector('.calendar-overlay')?.addEventListener('click', closeCale
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #f59e0b;
+        background: #FFA040;
         border-radius: 4px;
         border: 2px solid #f1f1f1;
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #e67e22;
+        background: #FFB040;
+    }
+    /* Sembunyikan tombol back otomatis panel jika ada di halaman kamar */
+    .back-button.sticky-back {
+        display: none !important;
+    }
+    /* Back button styling */
+    .back-button {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem;
+        color: #4B5563;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-radius: 0.375rem;
+        background: white;
+        border: 1px solid #E5E7EB;
+        cursor: pointer;
+    }
+
+    .back-button:hover {
+        color: #1F2937;
+        transform: translateX(-2px);
+    }
+
+    .back-button svg {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
     }
 </style>
 @endpush

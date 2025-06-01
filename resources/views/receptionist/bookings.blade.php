@@ -41,7 +41,39 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <style>
+                            .booking-table {
+                                width: 100%;
+                                border-collapse: separate;
+                                border-spacing: 0;
+                                border-radius: 15px;
+                                overflow: hidden;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                                border: 2px solid #FFA040;
+                            }
+                            .booking-table th {
+                                background: #FFA040;
+                                color: #222;
+                                border-bottom: 2px solid #FFA040;
+                                padding: 1em;
+                                font-weight: bold;
+                            }
+                            .booking-table td {
+                                background: #fff7e6;
+                                border-bottom: 1.5px solid #FFA040;
+                                padding: 1em;
+                            }
+                            .booking-table tr:last-child td {
+                                border-bottom: none;
+                            }
+                            .booking-table th, .booking-table td {
+                                border-right: 1.5px solid #FFA040;
+                            }
+                            .booking-table th:last-child, .booking-table td:last-child {
+                                border-right: none;
+                            }
+                        </style>
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 booking-table">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">

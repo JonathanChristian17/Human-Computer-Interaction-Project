@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const isSelected = selectedRooms.some(room => room.id === roomId);
                 
                 if (isSelected) {
-                    button.classList.remove('bg-amber-500/10', 'hover:bg-amber-500/20', 'text-amber-500');
+                    button.classList.remove('bg-[#FFA040]/10', 'hover:bg-[#FFA040]/20', 'text-[#FFA040]');
                     button.classList.add('bg-gray-500/10', 'text-gray-400', 'cursor-not-allowed');
                     button.innerHTML = `
                         <span>Sudah Dipilih</span>
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.disabled = true;
                 } else {
                     button.classList.remove('bg-gray-500/10', 'text-gray-400', 'cursor-not-allowed');
-                    button.classList.add('bg-amber-500/10', 'hover:bg-amber-500/20', 'text-amber-500');
+                    button.classList.add('bg-[#FFA040]/10', 'hover:bg-[#FFA040]/20', 'text-[#FFA040]');
                     button.innerHTML = `
                         <span>Tambahkan</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="text-xs text-gray-400">${room.capacity} orang</p>
                     </div>
                     <div class="mt-auto">
-                        <p class="text-amber-400 font-semibold text-sm">Rp${parseInt(room.price_per_night).toLocaleString('id-ID')}</p>
+                        <p class="text-[#FFA040] font-semibold text-sm">Rp${parseInt(room.price_per_night).toLocaleString('id-ID')}</p>
                     </div>
                 `;
                 selectedRoomsContainer.appendChild(roomElement);
@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const button = document.getElementById(`add-btn-${roomId}`);
             if (button) {
                 button.classList.remove('bg-gray-500/10', 'text-gray-400', 'cursor-not-allowed');
-                button.classList.add('bg-amber-500/10', 'hover:bg-amber-500/20', 'text-amber-500');
+                button.classList.add('bg-[#FFA040]/10', 'hover:bg-[#FFA040]/20', 'text-[#FFA040]');
                 button.innerHTML = `
                     <span>Tambahkan</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
