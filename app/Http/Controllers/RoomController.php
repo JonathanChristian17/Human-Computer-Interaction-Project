@@ -10,12 +10,44 @@ class RoomController extends Controller
 {
     public function index(Request $request)
     {
-        $rooms = Room::where('status', 'available')
-                    ->select('id', 'name', 'price_per_night', 'capacity', 'description', 'image')
-                    ->paginate(6);
+        $query = Room::where('status', 'available')
+                    ->select('id', 'name', 'price_per_night', 'capacity', 'description', 'image');
+
+        // If check-in and check-out dates are provided, filter available rooms
+        if ($request->filled(['check_in', 'check_out'])) {
+            $checkIn = $request->check_in;
+            $checkOut = $request->check_out;
+
+            // Get rooms that are not booked for these dates
+            $query->whereDoesntHave('bookings', function($query) use ($checkIn, $checkOut) {
+                $query->join('transactions', 'bookings.id', '=', 'transactions.booking_id')
+                    ->where(function($q) {
+                        // Include only valid bookings
+                        $q->whereNotIn('bookings.status', ['cancelled'])
+                          ->whereNotIn('bookings.payment_status', ['cancelled'])
+                          ->where(function($q) {
+                              $q->where('transactions.payment_status', '!=', 'expire')
+                                ->orWhere(function($q) {
+                                    // For pending payments, check if they're not expired (within 1 hour)
+                                    $q->where('transactions.payment_status', 'pending')
+                                      ->where('transactions.created_at', '>=', now()->subHour());
+                                });
+                          });
+                    })
+                    ->where(function($q) use ($checkIn, $checkOut) {
+                        // Check for any date overlap scenarios
+                        $q->where(function($q) use ($checkIn, $checkOut) {
+                            $q->where('check_in_date', '<=', $checkOut)
+                              ->where('check_out_date', '>=', $checkIn);
+                        });
+                    });
+            });
+        }
+
+        $rooms = $query->paginate(6)->withQueryString();
 
         if ($request->ajax()) {
-            return view('partials.room-list', compact('rooms'))->render();
+            return view('partials.room-list', compact('rooms'));
         }
 
         return view('kamar', compact('rooms'));

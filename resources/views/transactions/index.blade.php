@@ -35,30 +35,40 @@
                     <div class="border rounded-lg p-4 hover:shadow-md transition">
                         <div class="flex justify-between items-start">
                             <div>
-                                <h3 class="text-lg font-semibold">Room {{ $transaction->room_number }}</h3>
-                                <p class="text-gray-600">{{ $transaction->check_in }} - {{ $transaction->check_out }}</p>
-                                <p class="text-sm text-gray-500 mt-1">{{ $transaction->nights }} night(s)</p>
+                                <h3 class="text-lg font-semibold">Room {{ $transaction['room_number'] }}</h3>
+                                <p class="text-gray-600">{{ $transaction['check_in'] }} - {{ $transaction['check_out'] }}</p>
+                                <p class="text-sm text-gray-500 mt-1">{{ $transaction['nights'] }} night(s)</p>
                             </div>
-                            <p class="text-lg font-bold">IDR {{ number_format($transaction->total, 0, ',', '.') }}</p>
+                            <p class="text-lg font-bold">IDR {{ number_format($transaction['total'], 0, ',', '.') }}</p>
                         </div>
                         <div class="flex justify-between items-center mt-4">
-                            <span class="px-3 py-1 rounded-full text-sm font-medium
-                                @if($transaction->status === 'Unpaid') bg-yellow-100 text-yellow-800
-                                @elseif($transaction->status === 'Paid') bg-green-100 text-green-800
-                                @elseif($transaction->status === 'Refund') bg-blue-100 text-blue-800
-                                @else bg-red-100 text-red-800
-                                @endif">
-                                {{ $transaction->status }}
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 rounded-full text-sm font-medium
+                                    @if($transaction['status'] === 'Unpaid') bg-yellow-100 text-yellow-800
+                                    @elseif($transaction['status'] === 'Paid') bg-green-100 text-green-800
+                                    @elseif($transaction['status'] === 'Refund') bg-blue-100 text-blue-800
+                                    @else bg-red-100 text-red-800
+                                    @endif">
+                                    {{ $transaction['status'] }}
+                                </span>
+                                @if($transaction['status'] === 'Unpaid' && isset($transaction['payment_deadline']))
+                                    <span class="text-sm text-gray-500" 
+                                          x-data="countdown('{{ $transaction['payment_deadline'] }}')"
+                                          x-init="init()"
+                                          x-show="remaining > 0">
+                                        Time remaining: <span x-text="formattedTime" class="font-medium text-orange-600"></span>
+                                    </span>
+                                @endif
+                            </div>
                             <div class="flex space-x-2">
-                                @if($transaction->status === 'Unpaid')
-                                    <button onclick="payTransaction({{ $transaction->id }})" 
+                                @if($transaction['status'] === 'Unpaid')
+                                    <button onclick="payTransaction({{ $transaction['id'] }})" 
                                             class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
                                         Pay Now
                                     </button>
                                 @endif
-                                @if(in_array($transaction->status, ['Unpaid', 'Paid']))
-                                    <button onclick="cancelTransaction({{ $transaction->id }})"
+                                @if(in_array($transaction['status'], ['Unpaid', 'Paid']))
+                                    <button onclick="cancelTransaction({{ $transaction['id'] }})"
                                             class="px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition">
                                         Cancel
                                     </button>
@@ -79,6 +89,36 @@
 
 @push('scripts')
 <script>
+function countdown(deadline) {
+    return {
+        deadline: new Date(deadline).getTime(),
+        remaining: 0,
+        formattedTime: '',
+        timer: null,
+        
+        init() {
+            this.updateRemaining();
+            this.timer = setInterval(() => this.updateRemaining(), 1000);
+        },
+
+        updateRemaining() {
+            const now = new Date().getTime();
+            this.remaining = Math.max(0, this.deadline - now);
+            
+            if (this.remaining === 0) {
+                clearInterval(this.timer);
+                window.location.reload();
+                return;
+            }
+
+            const minutes = Math.floor((this.remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((this.remaining % (1000 * 60)) / 1000);
+            
+            this.formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+}
+
 async function payTransaction(id) {
     try {
         const response = await fetch(`/transactions/${id}/pay`, {

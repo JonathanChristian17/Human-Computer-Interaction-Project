@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('payment_code')->nullable(); // For VA numbers
             $table->string('pdf_url')->nullable();
             $table->json('raw_response')->nullable();
+            $table->boolean('is_deposit')->default(false);
             $table->timestamps();
         });
     }

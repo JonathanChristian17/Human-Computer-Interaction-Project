@@ -10,6 +10,7 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -20,6 +21,8 @@ class PaymentController extends Controller
         Config::$isProduction = config('midtrans.is_production');
         Config::$isSanitized = true;
         Config::$is3ds = true;
+        Config::$paymentIdempotencyKey = true;
+        Config::$overrideNotifUrl = route('midtrans.webhook');
 
         // Validate Midtrans configuration
         if (empty(config('midtrans.server_key'))) {
@@ -156,7 +159,13 @@ class PaymentController extends Controller
                     'phone' => $booking->phone,
                 ],
                 'item_details' => $itemDetails,
-                'enabled_payments' => $enabledPayments
+                'enabled_payments' => $enabledPayments,
+                'expiry' => [
+                    'start_time' => $startTime->format('Y-m-d H:i:s O'),
+                    'unit' => 'minutes',
+                    'duration' => $startTime->diffInMinutes($paymentDeadline)
+                ],
+                'custom_field1' => json_encode(['payment_deadline' => $paymentDeadline->format('Y-m-d H:i:s O')])
             ];
 
             Log::info('Midtrans parameters:', $params);
@@ -165,6 +174,10 @@ class PaymentController extends Controller
                 // Create Snap token
                 $snapToken = Snap::getSnapToken($params);
                 
+                // Set payment deadline
+                $startTime = Carbon::now('Asia/Jakarta');
+                $paymentDeadline = $startTime->copy()->addHour();
+
                 // Create transaction record
                 $transaction = Transaction::create([
                     'booking_id' => $booking->id,
@@ -172,7 +185,8 @@ class PaymentController extends Controller
                     'gross_amount' => $booking->total_price,
                     'payment_type' => $validated['payment_method'],
                     'transaction_status' => 'pending',
-                    'snap_token' => $snapToken
+                    'snap_token' => $snapToken,
+                    'payment_deadline' => $paymentDeadline
                 ]);
 
                 // Update booking status
@@ -263,6 +277,15 @@ class PaymentController extends Controller
             
             DB::commit();
             
+            // Emit payment status updated event
+            event(new \App\Events\PaymentStatusUpdated([
+                'transaction_id' => $transaction->id,
+                'order_id' => $transaction->order_id,
+                'transaction_status' => $transaction->transaction_status,
+                'payment_status' => $transaction->payment_status,
+                'booking_id' => $booking->id
+            ]));
+            
             Log::info('Payment completed successfully', [
                 'transaction_id' => $transaction->id,
                 'booking_id' => $booking->id
@@ -280,56 +303,76 @@ class PaymentController extends Controller
 
     public function finish(Request $request)
     {
-        Log::info('Payment finish callback received', $request->all());
-
         try {
-            $orderId = $request->order_id;
-            
-            // Find transaction
-            $transaction = Transaction::where('order_id', $orderId)->first();
-            if (!$transaction) {
-                Log::error('Transaction not found for order_id: ' . $orderId);
-                return redirect()->route('landing', ['panel' => 'transactions'])
-                    ->with('error', 'Transaksi tidak ditemukan. Silakan hubungi admin.');
-            }
+            $orderId = $request->query('order_id');
+            Log::info('Payment finish callback received', ['order_id' => $orderId]);
 
-            // Find booking
-            $booking = Booking::find($transaction->booking_id);
+            $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
+            $booking = $transaction->booking;
+
             if (!$booking) {
-                Log::error('Booking not found for transaction_id: ' . $transaction->id);
-                return redirect()->route('landing', ['panel' => 'transactions'])
-                    ->with('error', 'Booking tidak ditemukan. Silakan hubungi admin.');
+                throw new \Exception('Booking not found');
             }
 
-            // Update status jika belum settlement
-            if ($transaction->payment_status !== 'paid') {
-                DB::beginTransaction();
-                try {
-                    // Update transaction status
+            // Get transaction status from Midtrans
+            $midtransStatus = \Midtrans\Transaction::status($orderId);
+            
+            Log::info('Midtrans status retrieved', [
+                'order_id' => $orderId,
+                'status' => $midtransStatus
+            ]);
+
+            // Update transaction status based on Midtrans response
+            switch ($midtransStatus->transaction_status) {
+                case 'capture':
+                    if ($midtransStatus->fraud_status == 'challenge') {
+                        $transaction->payment_status = 'pending';
+                        $transaction->transaction_status = 'challenge';
+                        $booking->payment_status = 'pending';
+                        $booking->status = 'pending';
+                    } else if ($midtransStatus->fraud_status == 'accept') {
+                        $transaction->payment_status = 'paid';
+                        $transaction->transaction_status = 'success';
+                        $booking->payment_status = 'paid';
+                        $booking->status = 'confirmed';
+                    }
+                    break;
+                case 'settlement':
                     $transaction->payment_status = 'paid';
                     $transaction->transaction_status = 'settlement';
-                    $transaction->save();
-
-                    // Update booking status
                     $booking->payment_status = 'paid';
                     $booking->status = 'confirmed';
-                    $booking->save();
-
-                    DB::commit();
-                    Log::info('Payment status updated successfully', [
-                        'order_id' => $orderId,
-                        'transaction_id' => $transaction->id,
-                        'booking_id' => $booking->id
-                    ]);
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    Log::error('Failed to update payment status: ' . $e->getMessage());
-                    throw $e;
-                }
+                    break;
+                case 'pending':
+                    $transaction->payment_status = 'pending';
+                    $transaction->transaction_status = 'pending';
+                    $booking->payment_status = 'pending';
+                    $booking->status = 'pending';
+                    break;
+                case 'deny':
+                case 'cancel':
+                case 'expire':
+                    $transaction->payment_status = 'cancelled';
+                    $transaction->transaction_status = $midtransStatus->transaction_status;
+                    $booking->payment_status = 'cancelled';
+                    $booking->status = 'cancelled';
+                    break;
             }
 
-            return redirect()->route('landing', ['panel' => 'transactions', 'source' => 'payment'])
-                ->with('success', 'Pembayaran berhasil! Pesanan Anda telah dikonfirmasi.');
+            // Save the changes
+            $transaction->save();
+            $booking->save();
+
+            if ($transaction->payment_status === 'paid') {
+                return redirect()->route('landing', ['panel' => 'transactions'])
+                    ->with('success', 'Pembayaran berhasil! Pesanan Anda telah dikonfirmasi.');
+            } else if ($transaction->payment_status === 'pending') {
+                return redirect()->route('landing', ['panel' => 'transactions'])
+                    ->with('info', 'Pembayaran sedang diproses. Silakan selesaikan pembayaran sesuai instruksi.');
+            } else {
+                return redirect()->route('landing', ['panel' => 'transactions'])
+                    ->with('error', 'Pembayaran dibatalkan atau ditolak.');
+            }
 
         } catch (\Exception $e) {
             Log::error('Error in payment finish: ' . $e->getMessage());

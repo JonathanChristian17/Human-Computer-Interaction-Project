@@ -45,17 +45,14 @@
                             @forelse ($bookings as $booking)
                                 <tr>
                                     <td class="py-2 px-4 border">{{ $booking->id }}</td>
-                                    <td class="py-2 px-4 border">
-                                        <div class="text-sm font-medium">{{ $booking->full_name }}</div>
-                                        <div class="text-sm text-gray-500">{{ $booking->email }}</div>
-                                    </td>
+                                    <td class="py-2 px-4 border">{{ $booking->user->name }}</td>
                                     <td class="py-2 px-4 border">
                                         @foreach($booking->rooms as $room)
                                             Room {{ $room->room_number }} ({{ $room->type }})<br>
                                         @endforeach
                                     </td>
-                                    <td class="py-2 px-4 border">{{ $booking->check_in_date->format('M d, Y') }}</td>
-                                    <td class="py-2 px-4 border">{{ $booking->check_out_date->format('M d, Y') }}</td>
+                                    <td class="py-2 px-4 border">{{ $booking->check_in_date }}</td>
+                                    <td class="py-2 px-4 border">{{ $booking->check_out_date }}</td>
                                     <td class="py-2 px-4 border">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</td>
                                     <td class="py-2 px-4 border">
                                         <span class="px-2 py-1 rounded text-sm

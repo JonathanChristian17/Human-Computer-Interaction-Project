@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Cahaya Resort')</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -28,57 +27,74 @@
             overflow-x: hidden;
             margin: 0;
             padding: 0;
-            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Scrollbar Styling */
+        * {
+            scrollbar-width: thin;  /* For Firefox */
+            scrollbar-color: rgba(75, 85, 99, 0.6) transparent;  /* For Firefox - dark gray with transparency */
+        }
+
+        /* Chrome, Safari, Edge Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background-color: transparent;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.6); /* Dark gray with 60% opacity */
+            border-radius: 3px;
+            transition: background-color 0.2s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(75, 85, 99, 0.8); /* Darker on hover */
+        }
+
+        /* Make scrollbars overlay content */
+        .overlay-scrollbar {
+            overflow: overlay !important;  /* Modern browsers */
+            -ms-overflow-style: -ms-autohiding-scrollbar;  /* IE/Edge */
+        }
+
+        /* Fallback for browsers that don't support overlay */
+        @supports not (overflow: overlay) {
+            .overlay-scrollbar {
+                overflow: auto !important;
+            }
         }
 
         .custom-curve {
             position: relative;
             background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
-            padding: 20px 40px;
-            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
-            box-shadow: 0 8px 15px -3px rgba(0,0,0,0.4);
-            transition: all 0.5s ease;
-            width: auto;
-            display: inline-block;
-            animation: narrow 0.5s ease forwards;
-            font-family: 'Poppins', sans-serif;
+            border-radius: 0 0 100px 100px;
         }
-        .custom-curve.scrolled {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
-            background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
-            width: 100%;
-            padding: 20px 0;
-            animation: widen 0.5s ease forwards;
+        .custom-curve::before,
+        .custom-curve::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background-color: transparent;
         }
-        .nav-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            font-family: 'Poppins', sans-serif;
+        .custom-curve::before {
+            left: -20px;
+            border-top-right-radius: 20px;
+            box-shadow: 10px 0 0 0 #ffffff;
         }
-        @keyframes widen {
-            from {
-                clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
-                background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
-            }
-            to {
-                clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
-                background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
-            }
-        }
-        @keyframes narrow {
-            from {
-                clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
-                background: linear-gradient(to bottom, #FFD700 0%, #FFC300 100%);
-            }
-            to {
-                clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
-                background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 100%);
-            }
+        .custom-curve::after {
+            right: -20px;
+            border-top-left-radius: 20px;
+            box-shadow: -10px 0 0 0 #ffffff;
         }
         .dropdown-menu {
             display: none;
-            font-family: 'Poppins', sans-serif;
         }
         .dropdown-menu.show {
             display: block;
@@ -88,7 +104,6 @@
             padding: 0.5rem 1rem;
             color: #374151;
             transition: all 0.2s ease;
-            font-family: 'Poppins', sans-serif;
         }
         .dropdown-item:hover {
             background-color: #F3F4F6;
@@ -111,7 +126,6 @@
         /* Main Content */
         .main-content {
             min-height: 100vh;
-            font-family: 'Poppins', sans-serif;
         }
 
         /* Shared Panel Styles */
@@ -126,7 +140,6 @@
             background-color: rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 0.4s ease;
-            font-family: 'Poppins', sans-serif;
         }
 
         .slide-content {
@@ -143,12 +156,10 @@
             border-top-left-radius: 30px;
             border-top-right-radius: 30px;
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
-            font-family: 'Poppins', sans-serif;
         }
 
         .slide-content-inner {
             padding: 2rem;
-            font-family: 'Poppins', sans-serif;
         }
 
         .slide-panel.show {
@@ -176,7 +187,6 @@
             background: white;
             border: 1px solid #E5E7EB;
             cursor: pointer;
-            font-family: 'Poppins', sans-serif;
         }
 
         .back-button:hover {
@@ -194,7 +204,6 @@
         .nav-item {
             position: relative;
             padding-bottom: 2px;
-            font-family: 'Poppins', sans-serif;
         }
 
         .nav-item::after {
@@ -228,7 +237,6 @@
             display: flex;
             justify-content: center;
             pointer-events: none;
-            font-family: 'Poppins', sans-serif;
         }
 
         .notification {
@@ -243,7 +251,6 @@
             opacity: 0;
             transition: all 0.3s ease-in-out;
             pointer-events: auto;
-            font-family: 'Poppins', sans-serif;
         }
 
         .notification.show {
@@ -267,7 +274,6 @@
 
         .notification-message {
             font-weight: 500;
-            font-family: 'Poppins', sans-serif;
         }
 
         /* Animation for notifications */
@@ -290,7 +296,6 @@
         .dropdown {
             position: relative;
             display: inline-block;
-            font-family: 'Poppins', sans-serif;
         }
 
         .dropdown-menu {
@@ -332,7 +337,6 @@
             cursor: pointer;
             width: 100%;
             text-align: left;
-            font-family: 'Poppins', sans-serif;
         }
 
         .dropdown-item:hover {
@@ -364,225 +368,93 @@
         .dropdown-button.active i {
             transform: rotate(180deg);
         }
-
-        .trapezoid-small {
-            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
-            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
-            border-radius: 0 0 32px 32px;
-            transition: width 0.5s cubic-bezier(.4,0,.2,1), height 0.5s cubic-bezier(.4,0,.2,1), background 0.5s, clip-path 0.5s;
-        }
-        .trapezoid-scroll {
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
-            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
-            border-radius: 0 0 32px 32px;
-            transition: width 0.5s cubic-bezier(.4,0,.2,1), height 0.5s cubic-bezier(.4,0,.2,1), background 0.5s, clip-path 0.5s;
-        }
-
-        /* Button styles */
-        .btn-signup {
-            color: #FFA040;
-            text-transform: uppercase;
-            text-decoration: none;
-            border: 2px solid #FFA040;
-            padding: 8px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            font-weight: bolder;
-            background: transparent;
-            position: relative;
-            transition: all 1s;
-            overflow: hidden;
-            z-index: 1;
-            border-radius: 9999px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .btn-signup:hover {
-            color: #fff;
-        }
-
-        .btn-signup::before {
-            content: "";
-            position: absolute;
-            height: 100%;
-            width: 0%;
-            top: 0;
-            left: -40px;
-            transform: skewX(45deg);
-            background-color: #FFA040;
-            z-index: -1;
-            transition: all 1s;
-        }
-
-        .btn-signup:hover::before {
-            width: 160%;
-        }
-
-        .btn-login {
-            color: #FFA040;
-            text-transform: uppercase;
-            text-decoration: none;
-            border: 2px solid #FFA040;
-            padding: 8px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            font-weight: bolder;
-            background: transparent;
-            position: relative;
-            transition: all 1s;
-            overflow: hidden;
-            z-index: 1;
-            border-radius: 9999px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .btn-login:hover {
-            color: #fff;
-        }
-
-        .btn-login::before {
-            content: "";
-            position: absolute;
-            height: 100%;
-            width: 0%;
-            top: 0;
-            left: -40px;
-            transform: skewX(45deg);
-            background-color: #FFA040;
-            z-index: -1;
-            transition: all 1s;
-        }
-
-        .btn-login:hover::before {
-            width: 160%;
-        }
-
-        @keyframes slide-in-right {
-            0% {
-                opacity: 0;
-                transform: translateX(60px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .btn-animate {
-            opacity: 0;
-            animation: slide-in-right 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-        }
-
-        .btn-login.btn-animate {
-            animation-delay: 1.5s;
-        }
-
-        .btn-signup.btn-animate {
-            animation-delay: 1.7s;
-        }
     </style>
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-100">
+    <script>
+        function getStatusColor(status) {
+            const statusLower = status?.toLowerCase();
+            switch(statusLower) {
+                case 'settlement':
+                case 'capture':
+                case 'paid':
+                    return 'bg-green-100 text-green-800';
+                case 'pending':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'deposit':
+                    return 'bg-blue-100 text-blue-800';
+                case 'expired':
+                case 'cancelled':
+                case 'deny':
+                    return 'bg-red-100 text-red-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+    </script>
     <!-- Navbar -->
-    <nav x-data="{ scrolled: false }"
-     @scroll.window="scrolled = window.pageYOffset > 50"
-     class="fixed top-0 z-50 w-full bg-transparent">
-    <div class="relative flex items-center justify-between px-4 mx-auto h-14 max-w-7xl sm:px-6 lg:px-8">
-            <!-- Trapesium Background -->
-            <div
-            class="absolute top-0 transition-all duration-500 ease-in-out"
-            :style="scrolled
-                ? 'width: 100vw; height: 56px; background: linear-gradient(to right, #3D3D3D, #2E2E2E); clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%); left: 50%; transform: translateX(-50%);'
-                : 'width: 520px; height: 56px; background: #fff; clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%); left: calc(50% + -7px); transform: translateX(-50%);'"
-            style="z-index: 10;">
-        </div>
+    <nav class="fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Logo -->
-            <div class="z-20 flex items-center">
-                <a href="/" 
-                class="text-2xl font-regular text-white font-poppins drop-shadow-md transition-all duration-300">
+            <div class="flex items-center absolute left-20 top-6">
+                <button onclick="hidePanel()" class="text-white text-2xl font-semibold">
                     Cahaya Resort
-                </a>
+                </button>
             </div>
+
             <!-- Center Navigation -->
-<div class="z-20 flex justify-center flex-1">
-    <div class="custom-curve px-32 py-5 shadow-[0_8px_15px_-3px_rgba(0,0,0,0.4)] bg-white rounded-lg">
-        <div class="flex items-center space-x-16"
-             x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard', scrolled: false }"
-             x-init="
-                window.addEventListener('scroll', () => {
-                    scrolled = window.scrollY > 50;
-                });
-             ">
-
-            <!-- Dashboard Tab -->
-            <button @click="activeTab = 'dashboard'; hidePanel(); localStorage.setItem('activeTab', 'dashboard')"
-                    class="text-base font-medium transition-all duration-300 nav-item"
-                    :class="{ 'active': activeTab === 'dashboard', 'text-white': scrolled, 'text-gray-700': !scrolled }">
-                Dashboard
-            </button>
-
-            <!-- Rooms Tab -->
-            <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')"
-                    class="text-base font-medium transition-all duration-300 nav-item"
-                    :class="{ 'active': activeTab === 'rooms', 'text-white': scrolled, 'text-gray-700': !scrolled }">
-                Rooms
-            </button>
-
-            <!-- Gallery Tab -->
-            <a href="{{ route('galeri') }}"
-               @click="activeTab = 'gallery'; localStorage.setItem('activeTab', 'gallery')"
-               class="text-base font-medium transition-all duration-300 nav-item"
-               :class="{ 'active': activeTab === 'gallery' || '{{ request()->routeIs('galeri') }}' === '1', 'text-white': scrolled, 'text-gray-700': !scrolled }">
-                Gallery
-            </a>
-        </div>
-    </div>
-</div>
-
+            <div class="flex justify-center">
+                <div class="custom-curve px-32 py-5 shadow-[0_8px_15px_-3px_rgba(0,0,0,0.4)] bg-white">
+                    <div class="flex items-center space-x-16" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
+                        <button @click="activeTab = 'dashboard'; window.location.href = '{{ route('landing') }}'; localStorage.setItem('activeTab', 'dashboard')" 
+                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
+                           :class="{ 'active': activeTab === 'dashboard' || !activeTab }">
+                            Dashboard
+                        </button>
+                        <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')" 
+                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
+                           :class="{ 'active': activeTab === 'rooms' }">
+                            Rooms
+                        </button>
+                        <button @click="activeTab = 'gallery'; window.location.href = '{{ route('galeri') }}'; localStorage.setItem('activeTab', 'gallery')"
+                           class="nav-item text-gray-700 hover:text-gray-900 transition font-medium"
+                           :class="{ 'active': activeTab === 'gallery' || '{{ request()->routeIs('galeri') }}' === '1' }">
+                            Gallery
+                        </button>
+                    </div>
                 </div>
             </div>
+
             <!-- Auth Buttons -->
-<div class="absolute right-8 top-6 flex items-center space-x-4" x-data="{ open: false }">
-    @auth
-        <!-- Dropdown Toggle -->
-        <div class="relative">
-            <button @click="open = !open"
-                    class="flex items-center font-medium text-white hover:text-gray-200 transition">
-                <img 
-                    src="{{ Auth::user()->profile_photo_url ?? asset('images/default-avatar.png') }}" 
-                    alt="{{ Auth::user()->name }}"
-                    class="h-8 w-8 rounded-full object-cover mr-2 cursor-pointer"
-                    onclick="event.stopPropagation(); showPhotoUploadDialog();">
-                <input type="file" 
-                       id="headerProfilePhoto" 
-                       class="hidden" 
-                       accept="image/*"
-                       onchange="handleQuickProfilePhotoUpload(this)">
-                <span>{{ Auth::user()->name }}</span>
-                <i class="fas fa-chevron-down text-sm ml-2"></i>
-            </button>
-
-            <!-- Dropdown Menu -->
-            <div x-show="open" @click.away="open = false"
-                 class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Profile
-                </a>
-                <a href="#" onclick="event.preventDefault(); showProfile();" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    My Dashboard
-                </a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        Logout
-                    </button>
-                </form>
-            </div>
-        </div>
-    @endauth
-</div>
-
+            <div class="absolute right-8 top-6 flex items-center space-x-4">
+@auth
+                <div class="dropdown" x-data="{ open: false }">
+                        <button type="button"
+                            @click="open = !open"
+                                class="dropdown-button text-white hover:text-gray-200 transition font-medium flex items-center">
+                        <div class="relative">
+                            <img 
+                                src="{{ Auth::check() ? Auth::user()->profile_photo_url : asset('images/default-avatar.png') }}" 
+                                alt="{{ Auth::check() ? Auth::user()->name : 'Guest' }}"
+                                class="h-8 w-8 rounded-full object-cover mr-2 cursor-pointer"
+                                onclick="event.stopPropagation(); showPhotoUploadDialog();">
+                            <input type="file" 
+                                   id="headerProfilePhoto" 
+                                   class="hidden" 
+                                   accept="image/*"
+                                   onchange="handleQuickProfilePhotoUpload(this)">
+                        </div>
+                            @auth
+                            <span data-user-name>{{ Auth::user()->name }}</span>
+                            @else
+                            <span>Guest</span>
+                            @endauth
+                        <i class="fas fa-chevron-down text-sm ml-2"></i>
+    </button>
+    
+                    <div class="dropdown-menu" x-show="open" @click.away="open = false">
+                        <a href="#" onclick="event.preventDefault(); showProfile();" class="dropdown-item">
                                 <i class="fas fa-user-circle"></i>
                                 <span>Profile</span>
                             </a>
@@ -592,18 +464,20 @@
                             </a>
                             <div class="dropdown-divider"></div>
                             <form id="logout-form" method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="button" onclick="confirmLogout()" class="text-red-600 dropdown-item">
+            @csrf
+                                <button type="button" 
+                                        onclick="confirmLogout()" 
+                                        class="dropdown-item text-red-600">
                                     <i class="fas fa-sign-out-alt"></i>
                                     <span>Logout</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @else
-                    <a href="{{ route('login') }}" class="btn-login btn-animate">Log In</a>
-                    <a href="{{ route('register') }}" class="btn-signup btn-animate">Sign Up</a>
-                @endauth
+            </button>
+        </form>
+    </div>
+</div>
+@else
+                    <a href="{{ route('login') }}" class="text-white hover:text-gray-200 transition">Login</a>
+                    <a href="{{ route('register') }}" class="text-white hover:text-gray-200 transition">Register</a>
+@endauth
             </div>
         </div>
     </nav>
@@ -680,13 +554,10 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     @auth
-                                    <h2 class="text-2xl font-bold text-gray-800">{{ Auth::user()->name }}</h2>
-                                    @else
-                                    <h2 class="text-2xl font-bold text-gray-800">Guest</h2>
-                                    @endauth
-                                    @auth
+                                    <h2 class="text-2xl font-bold text-gray-800" data-user-name>{{ Auth::user()->name }}</h2>
                                     <p class="text-gray-600">{{ Auth::user()->email }}</p>
                                     @else
+                                    <h2 class="text-2xl font-bold text-gray-800">Guest</h2>
                                     <p class="text-gray-600">guest@example.com</p>
                                     @endauth
                                 </div>
@@ -819,7 +690,7 @@
                                         @else
                                         value="guest@example.com"
                                         @endauth
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500" readonly> 
                                 </div>
 
                                 <!-- Phone -->
@@ -873,6 +744,13 @@
     <div class="slide-panel rooms-panel" id="roomsPanel">
         <div class="slide-content">
             <div class="slide-content-inner" id="roomsContent">
+                <!-- Back Button -->
+                <button onclick="hidePanel(); resetActiveTab();" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Back</span>
+                </button>
                 <!-- Rooms content will be loaded here -->
                 <div class="text-center py-4">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
@@ -908,16 +786,19 @@
 
     <!-- Base Scripts -->
     <script>
-        // Initialize Pusher
-        const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
-            cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}'
-        });
+        // Initialize Pusher if not already initialized
+        if (typeof window.pusherClient === 'undefined') {
+            window.pusherClient = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
+                cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
+                forceTLS: true
+            });
+        }
 
-        // Subscribe to the payments channel
-        const channel = pusher.subscribe('payments');
+        // Subscribe to the payments channel using the global instance
+        const paymentsChannel = window.pusherClient.subscribe('payments');
         
         // Listen for payment status updates
-        channel.bind('App\\Events\\PaymentStatusUpdated', function(data) {
+        paymentsChannel.bind('App\\Events\\PaymentStatusUpdated', function(data) {
             console.log('Payment status updated:', data);
             
             // If we're on the transactions page, reload it
@@ -954,13 +835,7 @@
                         window.history.replaceState({}, document.title, newUrl);
 
                         // Show success message
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Payment Processed',
-                            text: 'Your payment has been processed. Please check your transaction status below.',
-                            timer: 3000,
-                            showConfirmButton: false
-                        });
+                        
                     }
                 }, 300);
             }
@@ -1082,11 +957,38 @@
             };
 
             window.hidePanel = function(showPanel = null) {
-                roomsPanel.classList.remove('show');
-                bookingPanel.classList.remove('show');
-                profilePanel.classList.remove('show');
-                document.getElementById('transactionPanel').classList.remove('show');
-                document.getElementById('paymentPanel').classList.remove('show');
+                const panels = [
+                    roomsPanel,
+                    bookingPanel,
+                    profilePanel,
+                    document.getElementById('transactionPanel'),
+                    document.getElementById('paymentPanel')
+                ];
+                
+                panels.forEach(panel => {
+                    if (panel) panel.classList.remove('show');
+                });
+
+                if (!showPanel) {
+                    // Update Alpine.js state
+                    const navContainer = document.querySelector('[x-data]');
+                    if (navContainer && navContainer.__x) {
+                        navContainer.__x.$data.activeTab = 'dashboard';
+                    }
+                    
+                    // Update localStorage
+                    localStorage.setItem('activeTab', 'dashboard');
+                    
+                    // Force update UI
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        const text = item.textContent.trim();
+                        if (text === 'Dashboard') {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                }
 
                 if (showPanel === 'rooms') {
                     roomsPanel.classList.add('show');
@@ -1116,6 +1018,23 @@
             // Show rooms panel
             window.showRooms = async function() {
                 try {
+                    // Update navigation state first
+                    const navContainer = document.querySelector('[x-data]');
+                    if (navContainer && navContainer.__x) {
+                        navContainer.__x.$data.activeTab = 'rooms';
+                        localStorage.setItem('activeTab', 'rooms');
+                    }
+
+                    // Force update UI for navigation
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        const text = item.textContent.trim();
+                        if (text === 'Rooms') {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+
                     const response = await fetch('{{ route("kamar.index") }}');
                     const html = await response.text();
                     const parser = new DOMParser();
@@ -1123,8 +1042,16 @@
                     const mainContent = doc.querySelector('.min-h-screen');
                     
                     if (mainContent) {
-                        roomsContent.innerHTML = mainContent.innerHTML;
-                        hidePanel();
+                        roomsContent.innerHTML = `
+                            <button onclick="handleBackClick(event)" class="back-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Back</span>
+                            </button>
+                            ${mainContent.innerHTML}
+                        `;
+                        
                         roomsPanel.classList.add('show');
                         bindPanelPagination();
                     }
@@ -1132,6 +1059,66 @@
                     console.error('Error loading rooms:', error);
                 }
             };
+
+            // Update handleBackClick function
+            window.handleBackClick = function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Hide panel first
+                roomsPanel.classList.remove('show');
+                
+                // Update Alpine.js state
+                const navContainer = document.querySelector('[x-data]');
+                if (navContainer && navContainer.__x) {
+                    navContainer.__x.$data.activeTab = 'dashboard';
+                    localStorage.setItem('activeTab', 'dashboard');
+                }
+                
+                // Force update UI immediately
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const text = item.textContent.trim();
+                    if (text === 'Dashboard') {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            };
+
+            // Update navigation initialization
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize navigation state
+                const activeTab = localStorage.getItem('activeTab') || 'dashboard';
+                const navContainer = document.querySelector('[x-data]');
+                if (navContainer && navContainer.__x) {
+                    navContainer.__x.$data.activeTab = activeTab;
+                }
+
+                // Force update UI for initial state
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const text = item.textContent.trim();
+                    if (text.toLowerCase() === activeTab) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            });
+
+            // Update the navigation buttons
+            document.addEventListener('DOMContentLoaded', function() {
+                const dashboardBtn = document.querySelector('button[x-data]');
+                if (dashboardBtn) {
+                    dashboardBtn.addEventListener('click', function() {
+                        const navContainer = document.querySelector('[x-data]');
+                        if (navContainer && navContainer.__x) {
+                            navContainer.__x.$data.activeTab = 'dashboard';
+                            localStorage.setItem('activeTab', 'dashboard');
+                        }
+                    });
+                }
+            });
 
             // Show booking panel
             window.showBooking = async function(roomIds) {
@@ -1337,7 +1324,7 @@
                         console.log('Upload response:', data); // Debug log
 
                         // Update profile photo if available
-                        const profileSelector = @if(Auth::check()) 'img[alt="{{ Auth::user()->name }}"]' @else 'img[alt="Guest"]' @endif;
+                        const profileSelector = @json(Auth::check() ? 'img[alt="' . Auth::user()->name . '"]' : 'img[alt="Guest"]');
                         const profilePhotos = document.querySelectorAll(profileSelector);
                         if (data.profile_photo_url && profilePhotos.length > 0) {
                             profilePhotos.forEach(photo => {
@@ -1411,7 +1398,8 @@
                         displayName: document.getElementById('display-name'),
                         displayEmail: document.getElementById('display-email'),
                         displayPhone: document.getElementById('display-phone'),
-                        headerName: document.querySelector('.dropdown-button span')
+                        headerName: document.querySelector('.dropdown-button span'),
+                        allNameElements: document.querySelectorAll('[data-user-name]')
                     };
 
                     // Update elements if they exist
@@ -1421,9 +1409,22 @@
                     if (profileElements.displayEmail) profileElements.displayEmail.value = data.user.email;
                     if (profileElements.displayPhone) profileElements.displayPhone.value = data.user.phone;
                     if (profileElements.headerName) profileElements.headerName.textContent = data.user.name;
+                    
+                    // Update all elements with data-user-name attribute
+                    if (profileElements.allNameElements) {
+                        profileElements.allNameElements.forEach(element => {
+                            element.textContent = data.user.name;
+                        });
+                    }
+
+                    // Update all img alt attributes that contain the old name
+                    const oldName = @json(Auth::check() ? Auth::user()->name : 'Guest');
+                    document.querySelectorAll('img[alt="' + oldName + '"]').forEach(img => {
+                        img.alt = data.user.name;
+                    });
 
                     // Update profile photo if available
-                    @if(Auth::check())
+                    @auth
                     const profilePhotos = document.querySelectorAll('img[alt="{{ Auth::user()->name }}"]');
                     if (data.profile_photo_url && profilePhotos.length > 0) {
                         profilePhotos.forEach(photo => {
@@ -1703,10 +1704,12 @@
                         const data = await response.json();
 
                         // Get default avatar URL
-                        const defaultAvatarUrl = @if(Auth::check()) 'https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&color=7F9CF5&background=EBF4FF' @else 'https://ui-avatars.com/api/?name=Guest&color=7F9CF5&background=EBF4FF' @endif;
+                        const defaultAvatarUrl = @json(Auth::check() 
+                            ? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=7F9CF5&background=EBF4FF'
+                            : 'https://ui-avatars.com/api/?name=Guest&color=7F9CF5&background=EBF4FF');
 
                         // Update all profile photos to default avatar
-                        const profileSelector = @if(Auth::check()) 'img[alt="{{ Auth::user()->name }}"]' @else 'img[alt="Guest"]' @endif;
+                        const profileSelector = @json(Auth::check() ? 'img[alt="' . Auth::user()->name . '"]' : 'img[alt="Guest"]');
                         const profilePhotos = document.querySelectorAll(profileSelector);
                         profilePhotos.forEach(photo => {
                             photo.src = defaultAvatarUrl;
@@ -1826,7 +1829,6 @@
                 }
             });
 
-
             // Show payment panel
             window.showPaymentPanel = async function(bookingId) {
                 try {
@@ -1889,32 +1891,223 @@
                         const response = await fetch('{{ route("transactions.index") }}', {
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             }
                         });
                         
                         if (!response.ok) {
-                            throw new Error('Failed to load transactions');
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to load transactions');
                         }
                         
                         const data = await response.json();
                         if (data.html) {
                             document.getElementById('transactionList').innerHTML = data.html;
+                        } else {
+                            throw new Error('Invalid response format');
                         }
                     } catch (error) {
                         console.error('Error loading transactions:', error);
                         document.getElementById('transactionList').innerHTML = `
-                            <div class="text-center py-4">
-                                <svg class="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <div class="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg">
+                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <h3 class="mt-2 text-base font-medium text-gray-900">Error</h3>
-                                <p class="mt-1 text-sm text-gray-500">Failed to load transactions. Please try again.</p>
-                                <button onclick="window.transactionPanel.loadTransactions()" class="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+                                <h3 class="mt-4 text-lg font-medium text-gray-900">Failed to Load Transactions</h3>
+                                <p class="mt-1 text-sm text-gray-500">There was an error loading your transactions. Please try again.</p>
+                                <button onclick="window.transactionPanel.loadTransactions()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                    <svg class="mr-2 -ml-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
                                     Retry
                                 </button>
                             </div>
                         `;
+                    }
+                },
+                async showDetails(id) {
+                    try {
+                        const response = await fetch(`/transactions/${id}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to load transaction details');
+                        }
+
+                        const data = await response.json();
+                        
+                        // Check if transaction is expired
+                        const now = new Date().getTime();
+                        const deadline = data.payment_deadline ? new Date(data.payment_deadline).getTime() : null;
+                        const isExpired = deadline && now > deadline;
+                        
+                        // Update payment status if expired
+                        if (data.payment_status === 'pending' && isExpired) {
+                            data.payment_status = 'Expired';
+                        }
+                        
+                        // Format dates
+                        const checkIn = data.booking ? new Date(data.booking.check_in_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+                        const checkOut = data.booking ? new Date(data.booking.check_out_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+                        const createdAt = new Date(data.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                        // Show the details in a SweetAlert2 modal with fixed height
+                        Swal.fire({
+                            title: `<div class="flex items-center">
+                                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-orange-100 text-orange-600 mr-4">
+                                    <i class="fas fa-receipt text-2xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-gray-900">Order #${data.order_id}</h3>
+                                    <p class="text-sm text-gray-500">${createdAt}</p>
+                                </div>
+                            </div>`,
+                            html: `
+                                <div class="text-left">
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        <!-- Left Column -->
+                                        <div class="space-y-3">
+                                            <!-- Order Information -->
+                                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div class="flex items-center mb-2">
+                                                    <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                                                    <h3 class="font-bold text-gray-900">Order Information</h3>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                                    <div class="text-gray-600">Transaction ID:</div>
+                                                    <div class="font-medium">${data.transaction_id || '-'}</div>
+                                                    <div class="text-gray-600">Status:</div>
+                                                    <div class="font-medium">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(data.transaction_status)}">
+                                                            ${data.transaction_status ? data.transaction_status.charAt(0).toUpperCase() + data.transaction_status.slice(1) : '-'}
+                                                        </span>
+                                                    </div>
+                                                    <div class="text-gray-600">Payment Type:</div>
+                                                    <div class="font-medium capitalize">${data.payment_type || '-'}</div>
+                                                    <div class="text-gray-600">Payment Code:</div>
+                                                    <div class="font-medium">${data.payment_code || '-'}</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Booking Details -->
+                                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div class="flex items-center mb-2">
+                                                    <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
+                                                    <h3 class="font-bold text-gray-900">Booking Details</h3>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                                    <div class="text-gray-600">Check-in:</div>
+                                                    <div class="font-medium">${checkIn}</div>
+                                                    <div class="text-gray-600">Check-out:</div>
+                                                    <div class="font-medium">${checkOut}</div>
+                                                    <div class="text-gray-600">Duration:</div>
+                                                    <div class="font-medium">${data.booking ? data.booking.duration + ' night(s)' : '-'}</div>
+                                                    <div class="text-gray-600">Guest Name:</div>
+                                                    <div class="font-medium">${data.booking ? data.booking.guest_name : '-'}</div>
+                                                    <div class="text-gray-600">Phone:</div>
+                                                    <div class="font-medium">${data.booking ? data.booking.phone : '-'}</div>
+                                                    <div class="text-gray-600">Email:</div>
+                                                    <div class="font-medium">${data.booking ? data.booking.email : '-'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Column -->
+                                        <div class="space-y-3">
+                                            <!-- Room Details -->
+                                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <div class="flex items-center">
+                                                        <i class="fas fa-bed text-green-500 mr-2"></i>
+                                                        <h3 class="font-bold text-gray-900">Room Details</h3>
+                                                    </div>
+                                                    <span class="text-sm text-gray-500">${data.booking?.rooms?.length || 0} room(s)</span>
+                                                </div>
+                                                ${data.booking && data.booking.rooms ? `
+                                                    <div class="space-y-2 max-h-[200px] overlay-scrollbar pr-2">
+                                                        ${data.booking.rooms.map(room => `
+                                                            <div class="p-2 bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow">
+                                                                <div class="flex items-center justify-between mb-1.5">
+                                                                    <h4 class="font-semibold text-gray-900">Room ${room.room_number}</h4>
+                                                                    <span class="text-sm px-2 py-0.5 bg-blue-50 text-blue-700 rounded">${room.type}</span>
+                                                                </div>
+                                                                <div class="grid grid-cols-2 gap-1 text-sm">
+                                                                    <div class="text-gray-600">Price/Night:</div>
+                                                                    <div class="font-medium">Rp ${new Intl.NumberFormat('id-ID').format(room.pivot.price_per_night)}</div>
+                                                                    <div class="text-gray-600">Nights:</div>
+                                                                    <div class="font-medium">${data.booking.duration} night(s)</div>
+                                                                    <div class="text-gray-600">Subtotal:</div>
+                                                                    <div class="font-medium text-green-600">Rp ${new Intl.NumberFormat('id-ID').format(room.pivot.subtotal)}</div>
+                                                                </div>
+                                                            </div>
+                                                        `).join('')}
+                                                    </div>
+                                                ` : '<p class="text-gray-500 text-sm">No room details available</p>'}
+                                            </div>
+
+                                            <!-- Payment Details -->
+                                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                <div class="flex items-center mb-2">
+                                                    <i class="fas fa-credit-card text-indigo-500 mr-2"></i>
+                                                    <h3 class="font-bold text-gray-900">Payment Details</h3>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                                    <div class="text-gray-600">Amount:</div>
+                                                    <div class="font-medium text-lg text-green-600">Rp ${new Intl.NumberFormat('id-ID').format(data.gross_amount)}</div>
+                                                    <div class="text-gray-600">Payment Status:</div>
+                                                    <div class="font-medium">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(data.payment_status)}">
+                                                            ${data.payment_status ? data.payment_status.charAt(0).toUpperCase() + data.payment_status.slice(1) : '-'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `,
+                            width: '75%',
+                            showCloseButton: true,
+                            showConfirmButton: false,
+                            customClass: {
+                                container: 'transaction-detail-modal',
+                                popup: 'rounded-xl',
+                                closeButton: 'focus:outline-none hover:text-gray-700',
+                                htmlContainer: 'overflow-visible'
+                            }
+                        });
+
+                        // Add custom scrollbar styles
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .scrollbar-thin::-webkit-scrollbar {
+                                width: 6px;
+                            }
+                            .scrollbar-thin::-webkit-scrollbar-track {
+                                background: #f1f1f1;
+                                border-radius: 3px;
+                            }
+                            .scrollbar-thin::-webkit-scrollbar-thumb {
+                                background: #cbd5e0;
+                                border-radius: 3px;
+                            }
+                            .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                                background: #a0aec0;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    } catch (error) {
+                        console.error('Error loading transaction details:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to load transaction details. Please try again.'
+                        });
                     }
                 },
                 async cancelTransaction(id) {
@@ -1970,6 +2163,17 @@
                 },
                 async payTransaction(id) {
                     try {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we initialize your payment',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
                         const response = await fetch(`/transactions/${id}/pay`, {
                             method: 'POST',
                             headers: {
@@ -1980,56 +2184,143 @@
                             }
                         });
 
+                        const data = await response.json();
+
                         if (!response.ok) {
-                            throw new Error('Failed to process payment');
+                            throw new Error(data.message || 'Failed to process payment');
                         }
 
-                        const data = await response.json();
+                        if (!data.success || !data.snap_token) {
+                            throw new Error('Failed to initialize payment');
+                        }
+
+                        // Close loading dialog
+                        Swal.close();
                         
-                        if (data.success && data.snap_token) {
-                            // Open Midtrans Snap popup
-                            window.snap.pay(data.snap_token, {
-                                onSuccess: function(result) {
+                        // Open Midtrans Snap popup
+                        window.snap.pay(data.snap_token, {
+                            onSuccess: async function(result) {
+                                try {
+                                    // Show loading state
+                                    Swal.fire({
+                                        title: 'Completing Payment...',
+                                        text: 'Please wait while we process your payment',
+                                        allowOutsideClick: false,
+                                        showConfirmButton: false,
+                                        willOpen: () => {
+                                            Swal.showLoading();
+                                        }
+                                    });
+
+                                    // Call payment finish endpoint via AJAX
+                                    const finishResponse = await fetch(`/payment/finish/ajax?order_id=${result.order_id}`, {
+                                        headers: {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'Accept': 'application/json'
+                                        }
+                                    });
+
+                                    let finishData;
+                                    try {
+                                        finishData = await finishResponse.json();
+                                    } catch (parseError) {
+                                        console.error('Failed to parse response as JSON:', parseError);
+                                        throw new Error('Server returned an invalid response format');
+                                    }
+
+                                    if (!finishResponse.ok || !finishData.success) {
+                                        throw new Error(finishData.message || 'Failed to complete payment');
+                                    }
+
+                                    // Show success message
                                     Swal.fire({
                                         icon: 'success',
                                         title: 'Payment Successful',
-                                        text: 'Your payment has been processed successfully.',
-                                        timer: 2000,
-                                        showConfirmButton: false
-                                    }).then(() => {
-                                        window.location.reload();
+                                        text: finishData.message || 'Your payment has been processed successfully',
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'OK'
                                     });
-                                },
-                                onPending: function(result) {
-                                    Swal.fire({
-                                        icon: 'info',
-                                        title: 'Payment Pending',
-                                        text: 'Please complete your payment using the provided instructions.',
-                                        timer: 2000,
-                                        showConfirmButton: false
-                                    }).then(() => {
-                                        window.location.reload();
-                                    });
-                                },
-                                onError: function(result) {
+
+                                    // Refresh transaction list
+                                    if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
+                                        window.transactionPanel.loadTransactions();
+                                    }
+                                } catch (error) {
+                                    console.error('Payment completion error:', error);
                                     Swal.fire({
                                         icon: 'error',
-                                        title: 'Payment Failed',
-                                        text: 'An error occurred during payment. Please try again.',
-                                        timer: 2000,
-                                        showConfirmButton: false
+                                        title: 'Error',
+                                        text: error.message || 'Failed to complete payment. Please check your transaction history.',
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        // Refresh transaction list even on error to show latest status
+                                        if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
+                                            window.transactionPanel.loadTransactions();
+                                        }
                                     });
-                                },
-                                onClose: function() {
-                                    // Redirect to landing page with transaction panel and source
-                                    window.location.href = '/?panel=transactions&source=midtrans';
                                 }
-                            });
-                        } else {
-                            throw new Error(data.message || 'Failed to initialize payment');
-                        }
+                            },
+                            onPending: function(result) {
+                                // Save payment details to localStorage
+                                localStorage.setItem('lastPaymentMethod', result.payment_type);
+                                localStorage.setItem('lastTransactionId', id);
+                                
+                                // Show pending payment instructions
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Complete Your Payment',
+                                    text: 'Please complete your payment using the provided payment instructions.',
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'View Payment Instructions',
+                                }).then(() => {
+                                    // Show transaction panel
+                                    hidePanel();
+                                    document.getElementById('transactionPanel').classList.add('show');
+                                    if (window.transactionPanel && typeof window.transactionPanel.loadTransactions === 'function') {
+                                        window.transactionPanel.loadTransactions();
+                                    }
+                                });
+                            },
+                            onError: function(result) {
+                                console.error('Midtrans payment error:', result);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Payment Failed',
+                                    text: 'An error occurred while processing your payment. Please try again.',
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'Close',
+                                });
+                            },
+                            onClose: function() {
+                                // Check if payment method was selected
+                                const lastPaymentMethod = localStorage.getItem('lastPaymentMethod');
+                                const lastTransactionId = localStorage.getItem('lastTransactionId');
+                                
+                                if (lastPaymentMethod && lastTransactionId === id.toString()) {
+                                    // If payment method was selected, show confirmation message
+                                    Swal.fire({
+                                        icon: 'info',
+                                        title: 'Payment Method Selected',
+                                        text: 'Your order has been confirmed. Please check your transaction history to continue the payment.',
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'View Transactions',
+                                    }).then(() => {
+                                        // Clear stored payment info
+                                        localStorage.removeItem('lastPaymentMethod');
+                                        localStorage.removeItem('lastTransactionId');
+                                        
+                                        // Redirect to landing page with transaction panel open
+                                        window.location.href = '{{ route("landing") }}?panel=transactions&source=midtrans';
+                                    });
+                                } else {
+                                    // If no payment method was selected, just close without saving
+                                    console.log('Popup closed without selecting payment method');
+                                }
+                            }
+                        });
                     } catch (error) {
-                        console.error('Error:', error);
+                        console.error('Payment initialization error:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
@@ -2055,38 +2346,65 @@
             }
         }
 
-        // Initialize dropdown
-        initializeDropdown();
-
-        const customCurve = document.querySelector('.custom-curve.scroll-trigger');
-        // Set initial state
-        let isScrolled = false;
-        window.addEventListener('scroll', function() {
-            const scrollThreshold = 100;
-            if (window.scrollY > scrollThreshold && !isScrolled) {
-                customCurve.classList.add('scrolled');
-                isScrolled = true;
-            } else if (window.scrollY <= scrollThreshold && isScrolled) {
-                customCurve.classList.remove('scrolled');
-                isScrolled = false;
+        // Initialize navigation state
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const panel = urlParams.get('panel');
+            const path = window.location.pathname;
+            
+            if (!panel && path === '/') {
+                localStorage.setItem('activeTab', 'dashboard');
             }
         });
-        function handleResize() {
-            if (window.innerWidth < 768) {
-                customCurve.classList.add('scrolled');
-            } else {
-                if (window.scrollY > 100) {
-                    customCurve.classList.add('scrolled');
-                } else {
-                    customCurve.classList.remove('scrolled');
-                }
+
+        // Add back button handler for rooms panel
+        document.querySelector('#roomsPanel .back-button').addEventListener('click', function() {
+            hidePanel();
+            // Reset active tab to dashboard
+            localStorage.setItem('activeTab', 'dashboard');
+            const navContainer = document.querySelector('[x-data]');
+            if (navContainer && navContainer.__x) {
+                navContainer.__x.$data.activeTab = 'dashboard';
+            }
+        });
+
+        // Add resetActiveTab function
+        function resetActiveTab() {
+            localStorage.setItem('activeTab', 'dashboard');
+            const navContainer = document.querySelector('[x-data]');
+            if (navContainer && navContainer.__x) {
+                navContainer.__x.$data.activeTab = 'dashboard';
             }
         }
-        handleResize();
-        window.addEventListener('resize', handleResize);
-    });
 
+        // Add click handler for back button
+        document.addEventListener('DOMContentLoaded', function() {
+            const backButtons = document.querySelectorAll('.back-button');
+            backButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    hidePanel();
+                    
+                    // Update navigation state immediately
+                    const navContainer = document.querySelector('[x-data]').__x.$data;
+                    navContainer.activeTab = 'dashboard';
+                    localStorage.setItem('activeTab', 'dashboard');
+                    
+                    // Force Alpine to update the UI
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        if (item.textContent.trim() === 'Dashboard') {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
     </script>
+    <!-- Add Pusher script -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    
     @stack('scripts')
 </body>
 </html>

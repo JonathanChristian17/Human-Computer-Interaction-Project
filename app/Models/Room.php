@@ -85,17 +85,18 @@ class Room extends Model
         };
     }
 
-    public function isAvailableForDates($checkIn, $checkOut)
+    public function isAvailableForDates($checkIn, $checkOut, $excludeBookingId = null)
     {
         // Convert dates to Carbon instances for comparison
         $checkIn = \Carbon\Carbon::parse($checkIn)->startOfDay();
-        $checkOut = \Carbon\Carbon::parse($checkOut)->endOfDay();
+        $checkOut = \Carbon\Carbon::parse($checkOut)->startOfDay();
 
         \Log::info('Checking room availability for dates', [
             'room_id' => $this->id,
             'room_type' => $this->type,
             'check_in' => $checkIn->toDateString(),
-            'check_out' => $checkOut->toDateString()
+            'check_out' => $checkOut->toDateString(),
+            'exclude_booking_id' => $excludeBookingId
         ]);
 
         // First check if room status allows booking
@@ -109,35 +110,44 @@ class Room extends Model
 
         // Check for any overlapping bookings (including pending)
         $conflictingBookings = $this->bookings()
-            ->where(function($query) use ($checkIn, $checkOut) {
-                $query->whereNotIn('status', ['cancelled', 'refunded']) // Exclude cancelled and refunded bookings
-                    ->where(function($q) use ($checkIn, $checkOut) {
-                        // Check for any date overlap scenarios:
-                        // 1. New booking's check-in date falls between existing booking
-                        // 2. New booking's check-out date falls between existing booking
-                        // 3. New booking completely encompasses an existing booking
-                        // 4. Existing booking completely encompasses the new booking
-                        $q->where(function($q) use ($checkIn, $checkOut) {
-                            $q->where('check_in_date', '<=', $checkOut)
-                              ->where('check_out_date', '>=', $checkIn);
-                        });
+            ->join('transactions', 'bookings.id', '=', 'transactions.booking_id')
+            ->where(function($query) use ($checkIn, $checkOut, $excludeBookingId) {
+                $query->where(function($q) {
+                    // Include only valid bookings
+                    $q->whereNotIn('bookings.status', ['cancelled'])
+                      ->whereNotIn('bookings.payment_status', ['cancelled'])
+                      ->where(function($q) {
+                          $q->where('transactions.payment_status', '!=', 'expire')
+                            ->orWhere(function($q) {
+                                // For pending payments, check if they're not expired (within 1 hour)
+                                $q->where('transactions.payment_status', 'pending')
+                                  ->where('transactions.created_at', '>=', now()->subHour());
+                            });
+                      });
+                })
+                ->where(function($q) use ($checkIn, $checkOut) {
+                    // New booking starts before existing booking ends AND
+                    // New booking ends after existing booking starts
+                    // BUT exclude case where new booking starts on existing booking's check-out date
+                    $q->where(function($q) use ($checkIn, $checkOut) {
+                        $q->where('check_in_date', '<', $checkOut)
+                          ->where('check_out_date', '>', $checkIn);
                     });
-            })
-            ->get();
+                });
 
-        if ($conflictingBookings->isNotEmpty()) {
+                // Exclude the specified booking ID if provided
+                if ($excludeBookingId) {
+                    $query->where('bookings.id', '!=', $excludeBookingId);
+                }
+            })
+            ->exists();
+
+        if ($conflictingBookings) {
             \Log::info('Room not available - conflicting bookings found', [
                 'room_id' => $this->id,
                 'check_in' => $checkIn->toDateString(),
                 'check_out' => $checkOut->toDateString(),
-                'conflicts' => $conflictingBookings->map(function($booking) {
-                    return [
-                        'booking_id' => $booking->id,
-                        'check_in' => $booking->check_in_date,
-                        'check_out' => $booking->check_out_date,
-                        'status' => $booking->status
-                    ];
-                })
+                'exclude_booking_id' => $excludeBookingId
             ]);
             return false;
         }

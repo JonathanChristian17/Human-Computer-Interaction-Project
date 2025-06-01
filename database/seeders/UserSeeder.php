@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Sarah Resepsionis',
             'email' => 'sarah@penginapancahaya.com',
-            'password' => Hash::make(value: 'sarah123'),
+            'password' => Hash::make('sarah123'),
             'role' => 'receptionist',
             'phone' => '081234567891',
             'address' => 'Jl. Danau Toba No. 123, Samosir',
