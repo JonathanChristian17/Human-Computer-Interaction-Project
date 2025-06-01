@@ -22,8 +22,6 @@ class ReportController extends Controller
         
         $bookings = Booking::whereDate('created_at', $date)
             ->with(['user', 'rooms', 'receptionist'])
-            ->orderBy('created_at', 'desc')
-            ->orderBy('check_in_date', 'desc')
             ->get();
             
         $totalRevenue = $bookings->sum('total_price');
