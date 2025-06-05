@@ -908,62 +908,62 @@
     @stack('styles')
     
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-gray-100" x-data="{ open: false }">
     <!-- Navbar -->
     <nav x-data="{ scrolled: false }"
          @scroll.window="scrolled = window.pageYOffset > 50"
          class="fixed top-0 z-50 w-full bg-transparent">
         <div class="relative flex items-center justify-between px-4 mx-auto h-14 max-w-7xl sm:px-6 lg:px-8">
-            <!-- Trapesium Background -->
+            <!-- Trapesium Background with Navigation -->
             <div
-                class="absolute top-0 transition-all duration-500 ease-in-out"
+                class="absolute top-0 transition-all duration-500 ease-in-out flex items-center justify-center"
                 :style="scrolled
                     ? 'width: 100vw; height: 56px; background: linear-gradient(to right, #3D3D3D, #2E2E2E); clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%); left: 50%; transform: translateX(-50%);'
-                    : 'width: 520px; height: 56px; background: #fff; clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%); left: calc(50% + -25px); transform: translateX(-50%);'"
+                    : `width: ${Math.min(window.innerWidth * 0.8, 520)}px; height: 56px; background: #fff; clip-path: polygon(0 0, 100% 0, ${100 - (window.innerWidth < 640 ? 20 : window.innerWidth < 768 ? 15 : 10)}% 100%, ${window.innerWidth < 640 ? 20 : window.innerWidth < 768 ? 15 : 10}% 100%); left: 50%; transform: translateX(-50%);`"
                 style="z-index: 10;">
-            </div>
-            <!-- Logo -->
-            <div class="z-20 flex items-center">
-                <a href="/" 
-                   class="text-2xl font-regular text-white font-poppins drop-shadow-md transition-all duration-300">
-                    Cahaya Resort
-                </a>
-            </div>
-            <!-- Center Navigation -->
-            <div class="z-20 flex justify-center flex-1">
-                <div class="flex items-center justify-center space-x-16" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
-                    <button @click="activeTab = 'dashboard'; hidePanel(); localStorage.setItem('activeTab', 'dashboard')"
-                            class="text-base font-medium transition-all duration-300 nav-item"
-                            :class="{ 'active': activeTab === 'dashboard', 'text-white': scrolled, 'text-gray-700': !scrolled }">
-                        Dashboard
-                    </button>
+                <!-- Center Navigation -->
+                <div class="flex items-center justify-center space-x-4 sm:space-x-8" x-data="{ activeTab: localStorage.getItem('activeTab') || 'dashboard' }">
+                    <a href="/" @click="activeTab = 'dashboard'; localStorage.setItem('activeTab', 'dashboard')"
+                             class="text-xs sm:text-sm md:text-base font-medium transition-all duration-300 nav-item"
+                             :class="{ 'active': activeTab === 'dashboard', 'text-white': scrolled, 'text-gray-700': !scrolled }">
+                         Dashboard
+                    </a>
                     <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')"
-                            class="text-base font-medium transition-all duration-300 nav-item"
+                            class="text-xs sm:text-sm md:text-base font-medium transition-all duration-300 nav-item"
                             :class="{ 'active': activeTab === 'rooms', 'text-white': scrolled, 'text-gray-700': !scrolled }">
                         Rooms
                     </button>
                     <a href="{{ route('galeri') }}"
                        @click="activeTab = 'gallery'; localStorage.setItem('activeTab', 'gallery')"
-                       class="text-base font-medium transition-all duration-300 nav-item"
+                       class="text-xs sm:text-sm md:text-base font-medium transition-all duration-300 nav-item"
                        :class="{ 'active': activeTab === 'gallery' || '{{ request()->routeIs('galeri') }}' === '1', 'text-white': scrolled, 'text-gray-700': !scrolled }">
                         Gallery
                     </a>
                 </div>
             </div>
+
+            <!-- Logo -->
+            <div class="z-20 flex items-center">
+                <a href="/" 
+                   class="text-xl sm:text-2xl font-regular text-white font-poppins drop-shadow-md transition-all duration-300">
+                    Cahaya Resort
+                </a>
+            </div>
+
             <!-- Auth Buttons -->
-            <div class="z-20 flex items-center space-x-4 navbar-auth">
+            <div class="z-20 flex items-center space-x-2 sm:space-x-4 navbar-auth">
                 @auth
                     <div class="profile-dropdown">
-                        <button type="button" class="profile-dropdown-button text-white hover:text-gray-200 transition font-medium flex items-center">
+                        <button type="button" class="profile-dropdown-button text-white hover:text-gray-200 transition font-medium flex items-center text-sm">
                             <div class="relative">
                                 <img src="{{ Auth::check() ? Auth::user()->profile_photo_url : asset('images/default-avatar.png') }}" 
                                      alt="{{ Auth::check() ? Auth::user()->name : 'Guest' }}"
-                                     class="h-8 w-8 rounded-full object-cover mr-2 cursor-pointer"
+                                     class="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover mr-1 sm:mr-2 cursor-pointer"
                                      onclick="event.stopPropagation(); showPhotoUploadDialog();">
                                 <input type="file" id="headerProfilePhoto" class="hidden" accept="image/*" onchange="handleQuickProfilePhotoUpload(this)">
                             </div>
-                            <span data-user-name>{{ Auth::user()->name }}</span>
-                            <i class="fas fa-chevron-down text-sm ml-2"></i>
+                            <span class="hidden sm:inline" data-user-name>{{ Auth::user()->name }}</span>
+                            <i class="fas fa-chevron-down text-sm ml-1 sm:ml-2"></i>
                         </button>
                         <div class="profile-dropdown-menu">
                             <a href="#" onclick="event.preventDefault(); showProfile();" class="dropdown-item">
@@ -985,8 +985,8 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="btn-login btn-animate">Log In</a>
-                    <a href="{{ route('register') }}" class="btn-signup btn-animate">Sign Up</a>
+                    <a href="{{ route('login') }}" class="btn-login btn-animate text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">Log In</a>
+                    <a href="{{ route('register') }}" class="btn-signup btn-animate text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">Sign Up</a>
                 @endauth
             </div>
         </div>
@@ -2388,15 +2388,26 @@
                 },
                 async showDetails(id) {
                     try {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Loading...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
                         const response = await fetch(`/transactions/${id}`, {
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             }
                         });
 
                         if (!response.ok) {
-                            throw new Error('Failed to load transaction details');
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to load transaction details');
                         }
 
                         const data = await response.json();
@@ -2408,7 +2419,7 @@
                         
                         // Update payment status if expired
                         if (data.payment_status === 'pending' && isExpired) {
-                            data.payment_status = 'Expired';
+                            data.payment_status = 'expired';
                         }
                         
                         // Format dates
@@ -2416,7 +2427,10 @@
                         const checkOut = data.booking ? new Date(data.booking.check_out_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
                         const createdAt = new Date(data.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-                        // Show the details in a SweetAlert2 modal with fixed height
+                        // Close loading state
+                        Swal.close();
+
+                        // Show the details in a SweetAlert2 modal
                         Swal.fire({
                             title: `<div class="flex items-center">
                                 <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-orange-100 text-orange-600 mr-4">
@@ -2541,32 +2555,13 @@
                                 htmlContainer: 'overflow-visible'
                             }
                         });
-
-                        // Add custom scrollbar styles
-                        const style = document.createElement('style');
-                        style.textContent = `
-                            .scrollbar-thin::-webkit-scrollbar {
-                                width: 6px;
-                            }
-                            .scrollbar-thin::-webkit-scrollbar-track {
-                                background: #f1f1f1;
-                                border-radius: 3px;
-                            }
-                            .scrollbar-thin::-webkit-scrollbar-thumb {
-                                background: #cbd5e0;
-                                border-radius: 3px;
-                            }
-                            .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-                                background: #a0aec0;
-                            }
-                        `;
-                        document.head.appendChild(style);
                     } catch (error) {
                         console.error('Error loading transaction details:', error);
+                        Swal.close(); // Close loading state
                         showBrutalistSwalAlert({
                             type: 'error',
                             title: 'Error',
-                            message: 'Failed to load transaction details. Please try again.'
+                            message: error.message || 'Failed to load transaction details. Please try again.'
                         });
                     }
                 },
@@ -2989,6 +2984,25 @@
               }, timer);
             }
           });
+        }
+
+        function getStatusColor(status) {
+            if (!status) return 'bg-gray-100 text-gray-800';
+            
+            status = status.toLowerCase();
+            switch (status) {
+                case 'success':
+                case 'paid':
+                    return 'bg-green-100 text-green-800';
+                case 'pending':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'failed':
+                case 'expired':
+                case 'cancelled':
+                    return 'bg-red-100 text-red-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
         }
     </script>
     <!-- Add Pusher script -->

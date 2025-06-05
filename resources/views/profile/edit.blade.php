@@ -2,11 +2,11 @@
     <div x-data="profileForm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="flex items-center space-x-6 mb-8">
+                <div class="flex flex-col items-center space-y-6 mb-8 md:flex-row md:space-y-0 md:space-x-6">
                     <div class="shrink-0">
                         <img id="profile-photo" class="h-24 w-24 object-cover rounded-full" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
                     </div>
-                    <div>
+                    <div class="text-center md:text-left">
                         <h2 id="profile-name" class="text-2xl font-semibold" data-user-name>{{ Auth::user()->name }}</h2>
                         <p id="profile-email" class="text-gray-500">{{ Auth::user()->email }}</p>
                     </div>
@@ -23,7 +23,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                         <input type="text" id="display-name" value="{{ Auth::user()->name }}" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly>
