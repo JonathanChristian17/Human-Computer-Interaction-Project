@@ -203,13 +203,18 @@
                 if (paginationLink) {
                     e.preventDefault();
                     const url = new URL(paginationLink.href);
-                    // Add current search parameters
-                    const checkIn = window.selectedStartDate ? formatDateForSubmit(window.selectedStartDate) : document.getElementById('search_check_in').value;
-                    const checkOut = window.selectedEndDate ? formatDateForSubmit(window.selectedEndDate) : document.getElementById('search_check_out').value;
-                    const guests = document.getElementById('search_guests').value;
-                    url.searchParams.set('check_in', checkIn);
-                    url.searchParams.set('check_out', checkOut);
-                    url.searchParams.set('guests', guests);
+                    
+                    // Get search parameters from URL if they exist
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const checkIn = urlParams.get('check_in') || '';
+                    const checkOut = urlParams.get('check_out') || '';
+                    const guests = urlParams.get('guests') || '';
+                    
+                    // Only add parameters if they exist
+                    if (checkIn) url.searchParams.set('check_in', checkIn);
+                    if (checkOut) url.searchParams.set('check_out', checkOut);
+                    if (guests) url.searchParams.set('guests', guests);
+
                     fetch(url)
                         .then(response => response.text())
                         .then(html => {
@@ -238,7 +243,7 @@
         <!-- Top Booking Bar -->
         <div class="bg-white border-b fixed top-0 left-0 w-full z-30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex items-center gap-4">
+                <div class="flex flex-col items-start gap-4 md:flex-row md:items-center md:gap-4">
                     <!-- Tombol Back di kiri -->
                     <button onclick="handleBackClick(event)" class="back-button" style="position: static; margin-right: 1rem;">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -246,48 +251,6 @@
                         </svg>
                         <span>Back</span>
                     </button>
-                    <!-- Filter Booking (Check in, Checkout, Guests, Search) -->
-                    <div class="flex-1 flex gap-4">
-                    <!-- Check-in -->
-                    <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border cursor-pointer" onclick="openCalendar('check_in')">
-                        <i class="fas fa-calendar text-gray-400"></i>
-                        <input type="text" 
-                               id="search_check_in"
-                               name="search_check_in"
-                               class="bg-transparent border-none focus:outline-none text-sm cursor-pointer" 
-                               value="{{ request('check_in') }}"
-                               placeholder="Check in"
-                               readonly>
-                    </div>
-                    
-                    <!-- Check-out -->
-                    <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border cursor-pointer" onclick="openCalendar('check_out')">
-                        <i class="fas fa-calendar text-gray-400"></i>
-                        <input type="text" 
-                               id="search_check_out"
-                               name="search_check_out"
-                               class="bg-transparent border-none focus:outline-none text-sm cursor-pointer" 
-                               value="{{ request('check_out') }}"
-                               placeholder="Checkout"
-                               readonly>
-                    </div>
-                    
-                    <!-- Room & Guests -->
-                    <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border">
-                        <i class="fas fa-user-friends text-gray-400"></i>
-                        <select id="search_guests"
-                                name="search_guests"
-                                class="bg-transparent border-none focus:outline-none text-sm">
-                            <option value="1-2" {{ request('guests') == '1-2' ? 'selected' : '' }}>1 Room, 2 guest</option>
-                            <option value="2-4" {{ request('guests') == '2-4' ? 'selected' : '' }}>2 Rooms, 4 guests</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Search Button -->
-                    <button onclick="searchRooms()" class="bg-[#FFA040] text-white px-6 py-2 rounded-lg hover:bg-[#FFB040] transition text-sm">
-                        Search
-                    </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -296,17 +259,17 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
             <h2 class="text-2xl font-bold mb-8">Reservation Cahaya Resort</h2>
 
-            <!-- Room listings -->
-            <div class="grid grid-cols-12 gap-6">
+            <!-- Room listings and Booking Details -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                 <!-- Left side - Room listings -->
-                <div class="col-span-8">
+                <div class="col-span-1 md:col-span-8">
                     <div class="space-y-6 pr-2" id="rooms-container">
                         @include('partials.room-list')
                     </div>
                 </div>
 
                 <!-- Right side - Booking Details -->
-                <div class="col-span-4">
+                <div class="col-span-1 md:col-span-4">
                     <div class="bg-white rounded-xl shadow-sm border-2 border-gray-200 p-6 sticky top-24">
                         <h3 class="font-bold text-lg mb-4 pb-3 border-b border-gray-200">BOOKING DETAILS</h3>
                         <div class="space-y-4">

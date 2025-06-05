@@ -16,18 +16,18 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Order Details</th>
-                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Booking Period</th>
-                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                    <th scope="col" class="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider">Amount</th>
-                    <th scope="col" class="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
-                    <th scope="col" class="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider">Details</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-6 sm:py-4">Order Details</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-6 sm:py-4">Booking Period</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-6 sm:py-4">Status</th>
+                    <th scope="col" class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider sm:px-6 sm:py-4">Amount</th>
+                    <th scope="col" class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider sm:px-6 sm:py-4">Actions</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider sm:px-6 sm:py-4">Details</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 @foreach($transactions as $transaction)
                     <tr class="@if($loop->even) bg-gray-10 @else bg-white @endif hover:bg-orange-50/50 transition-colors duration-150">
-                        <td class="px-6 py-5">
+                        <td class="px-4 py-4 sm:px-6 sm:py-5">
                             <div class="flex flex-col">
                                 <div class="text-sm font-semibold text-gray-900">Order #{{ $transaction['order_id'] }}</div>
                                 @if($transaction['transaction_id'])
@@ -44,7 +44,7 @@
                                 @endif
                             </div>
                         </td>
-                        <td class="px-6 py-5">
+                        <td class="px-4 py-4 sm:px-6 sm:py-5">
                             <div class="text-sm text-gray-900">
                                 {{ \Carbon\Carbon::parse($transaction['booking']['check_in_date'])->timezone('Asia/Jakarta')->locale('id')->isoFormat('D MMMM Y') }} - 
                                 {{ \Carbon\Carbon::parse($transaction['booking']['check_out_date'])->timezone('Asia/Jakarta')->locale('id')->isoFormat('D MMMM Y') }}
@@ -53,7 +53,7 @@
                                 {{ $transaction['booking']['room_number'] ? 'Room ' . $transaction['booking']['room_number'] : '' }}
                             </div>
                         </td>
-                        <td class="px-6 py-5">
+                        <td class="px-4 py-4 sm:px-6 sm:py-5">
                             <div class="flex flex-col">
                                 <div>
                                     @php
@@ -108,12 +108,12 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-5 text-right">
+                        <td class="px-4 py-4 sm:px-6 sm:py-5 text-right">
                             <span class="text-sm font-semibold text-gray-900">
                                 Rp {{ number_format($transaction['gross_amount'], 0, ',', '.') }}
                             </span>
                         </td>
-                        <td class="px-6 py-5 text-right">
+                        <td class="px-4 py-4 sm:px-6 sm:py-5 text-right">
                             <div class="flex justify-end space-x-2">
                                 @php
                                     $isDisabled = in_array($transaction['status'], ['Paid', 'Settlement', 'Capture', 'Deposit', 'Cancelled', 'Expired', 'Deny']);
@@ -131,7 +131,7 @@
                                         @if(!$isDisabled)
                                             @click="payTransaction({{ $transaction['id'] }})"
                                         @endif
-                                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded text-white transition-colors {{ $payButtonClass }}"
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-white transition-colors sm:px-3 sm:py-1.5 sm:text-sm {{ $payButtonClass }}"
                                         @if($isDisabled)
                                             disabled
                                         @endif
@@ -144,7 +144,7 @@
                                         @if(!$isDisabled)
                                             @click="cancelTransaction({{ $transaction['id'] }})"
                                         @endif
-                                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded text-white transition-colors {{ $cancelButtonClass }}"
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-white transition-colors sm:px-3 sm:py-1.5 sm:text-sm {{ $cancelButtonClass }}"
                                         @if($isDisabled)
                                             disabled
                                         @endif
@@ -155,7 +155,7 @@
                                     <button 
                                         type="button"
                                         disabled
-                                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded text-white bg-gray-500 cursor-not-allowed opacity-75 hover:bg-gray-500"
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-white bg-gray-500 cursor-not-allowed opacity-75 hover:bg-gray-500 sm:px-3 sm:py-1.5 sm:text-sm"
                                     >
                                         Pay Now
                                     </button>
@@ -163,18 +163,18 @@
                                     <button 
                                         type="button"
                                         disabled
-                                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded text-white bg-gray-500 cursor-not-allowed opacity-75 hover:bg-gray-500"
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-white bg-gray-500 cursor-not-allowed opacity-75 hover:bg-gray-500 sm:px-3 sm:py-1.5 sm:text-sm"
                                     >
                                         Cancel
                                     </button>
                                 @endif
                             </div>
                         </td>
-                        <td class="px-6 py-5 text-center">
+                        <td class="px-4 py-4 sm:px-6 sm:py-5 text-center">
                             <button 
                                 type="button"
                                 @click="showDetails({{ $transaction['id'] }})"
-                                class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors">
+                                class="inline-flex items-center px-2 py-1.5 text-sm font-medium rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors sm:px-3 sm:py-1.5">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />

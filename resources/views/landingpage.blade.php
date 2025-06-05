@@ -375,7 +375,7 @@ use Illuminate\Support\Facades\Storage;
 
 @section('content')
     <!-- Hero Section -->
-    <section class="relative h-screen">
+    <section class="relative h-auto pb-32 sm:pb-40 md:pb-48 lg:h-screen lg:pb-0">
         <!-- Hero Background Image -->
         <div class="absolute inset-0">
             <img src="{{ asset('storage/images/header.png') }}" alt="Resort View" class="object-cover w-full h-full">
@@ -383,23 +383,23 @@ use Illuminate\Support\Facades\Storage;
         </div>
 
         <!-- Hero Content -->
-        <div class="relative flex items-center h-full">
+        <div class="relative flex items-center h-full pt-64 md:pt-48 sm:pt-56 lg:pt-0 xl:pt-0">
             <div class="w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="max-w-3xl -mt-40 ml-0">
-                    <h1 class="mb-6 text-5xl font-medium tracking-wider text-white md:text-7xl drop-shadow-lg" style="font-family:'Poppins',sans-serif; font-weight:500;">
+                <div class="max-w-3xl ml-0 -mt-40 lg:-mt-0 lg:ml-0">
+                    <h1 class="mb-6 text-3xl font-medium tracking-wider text-white md:text-5xl lg:text-6xl drop-shadow-lg" style="font-family:'Poppins',sans-serif; font-weight:500;">
                         CAHAYA RESORT<br>
                         PANGURUAN
                     </h1>
 
                     <!-- Description Box -->
-                    <div class="absolute right-20 max-w-lg bottom-32">
+                    <div class="absolute max-w-xs right-4 bottom-4 md:max-w-lg md:right-20 md:bottom-32">
                         <div class="flex gap-4">
                             <div class="w-1 bg-orange-500"></div>
                             <div>
-                                <p class="mb-2 text-2xl font-semibold text-white">
+                                <p class="mb-2 text-base font-semibold text-white md:text-xl">
                                     We provide a variety of the best lodging accommodations for those of you who need it.
                                 </p>
-                                <p class="text-sm text-white/80">
+                                <p class="text-xs text-white/80 md:text-sm">
                                     Don't worry about the quality of the service.
                                 </p>
                             </div>
@@ -408,34 +408,34 @@ use Illuminate\Support\Facades\Storage;
                 </div>
             
                 <!-- Booking Form -->
-                <form id="searchForm" class="inline-flex items-center gap-4 p-4 mt-10 bg-black/40 backdrop-blur-md rounded-xl" style="overflow:visible; z-index:9999;">
+                <form id="searchForm" action="{{ route('kamar.index') }}" method="GET" class="flex flex-col items-stretch gap-4 p-4 mt-10 bg-black/40 backdrop-blur-md rounded-xl md:inline-flex md:flex-row md::items-center md::gap-4" style="overflow:visible; z-index:9999;">
                     <!-- Check-in -->
-                    <div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/30 cursor-pointer" onclick="openCalendar('check_in')">
+                    <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-black/30 w-full md:w-auto" onclick="openCalendar('check_in')">
                         <i class="text-white fas fa-calendar"></i>
                         <input type="text" 
                                id="landing_check_in"
                                name="check_in"
-                               class="text-white placeholder-white bg-transparent border-none focus:outline-none w-32" 
+                               class="w-full text-white placeholder-white bg-transparent border-none focus:outline-none md:w-32" 
                                placeholder="Check in"
                                readonly>
                     </div>
                             
                     <!-- Check-out -->
-                    <div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/30 cursor-pointer" onclick="openCalendar('check_out')">
+                    <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-black/30 w-full md:w-auto" onclick="openCalendar('check_out')">
                         <i class="text-white fas fa-calendar"></i>
                         <input type="text" 
                                id="landing_check_out"
                                name="check_out"
-                               class="text-white placeholder-white bg-transparent border-none focus:outline-none w-32" 
+                               class="w-full text-white placeholder-white bg-transparent border-none focus:outline-none md:w-32" 
                                placeholder="Check out"
                                readonly>
                     </div>
             
                     <!-- Room & Guests -->
-                    <div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/30" style="height:48px;">
+                    <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-black/30 w-full md:w-auto" style="height:48px;">
                       <div class="select" style="width:100%;">
                         <div
-                          class="selected"
+                          class="selected w-full"
                           data-default="1 Room, 2 guest"
                           data-one="2 Rooms, 4 guests"
                           data-two="3 Rooms, 6 guests"
@@ -468,7 +468,7 @@ use Illuminate\Support\Facades\Storage;
                     </div>
                 
                     <!-- Search Button -->
-                    <button type="submit" class="px-6 py-3 font-semibold text-white transition-all rounded-lg" style="background:#FFA040; font-family:'Poppins',sans-serif; font-weight:600;" onmouseover="this.style.background='#ff8c1a'" onmouseout="this.style.background='#FFA040'">
+                    <button type="submit" class="px-6 py-3 font-semibold text-white transition-all rounded-lg w-full md:w-auto" style="background:#FFA040; font-family:'Poppins',sans-serif; font-weight:600;" onmouseover="this.style.background='#ff8c1a'" onmouseout="this.style.background='#FFA040'">
                         Search
                     </button>
                 </form>
@@ -477,31 +477,31 @@ use Illuminate\Support\Facades\Storage;
     </section>
 
     <!-- Room Choice Section -->
-    <section class="relative bg-white">
+    <section class="relative bg-white pt-20 pb-20">
         <!-- Curved Welcome Section -->
-        <div class="absolute left-0 right-0 -top-12">
+        <div class="absolute left-0 right-0 -top-12 sm:-top-16 md:-top-20 lg:-top-12">
             <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="flex justify-center">
-                    <div class="px-32 py-3 -mt-2" style="background:#fff; clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%); box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);">
-                        <h2 class="text-2xl font-bold tracking-wider text-gray-800" style="font-family:'Poppins',sans-serif;">WELCOME TO CAHAYA RESORT</h2>
+                    <div class="px-10 py-3 -mt-2 text-center sm:px-16 md:px-32" style="background:#fff; clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%); box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);">
+                        <h2 class="text-xl font-bold tracking-wider text-gray-800 md:text-2xl" style="font-family:'Poppins',sans-serif;">WELCOME TO CAHAYA RESORT</h2>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Content -->
-        <div class="px-4 pt-20 pb-20 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <p class="mb-12 text-2xl font-bold text-center text-black-600">Room Choice in Cahaya Resort</p>
+        <div class="px-4 pt-20 pb-20 mx-auto max-w-7xl sm:px-6 lg:px-8 mt-48 sm:mt-56 md:mt-64 lg:mt-0">
+            <p class="mb-12 text-xl font-bold text-center text-black-600 md:text-2xl">Room Choice in Cahaya Resort</p>
 
             <!-- Room Carousel -->
-            <div class="relative px-12">
+            <div class="relative px-4 sm:px-6 md:px-12">
                 <!-- Previous Button -->
-                <button class="absolute left-0 z-10 flex items-center justify-center w-10 h-10 -translate-y-1/2 bg-white rounded-full shadow-lg top-1/2 group carousel-prev">
+                <button class="absolute left-0 z-10 flex items-center justify-center w-8 h-8 -translate-y-1/2 bg-white rounded-full shadow-lg top-1/2 group carousel-prev md:w-10 md:h-10">
                     <i class="text-gray-400 fas fa-chevron-left group-hover:text-gray-600"></i>
                 </button>
 
                 <!-- Next Button -->
-                <button class="absolute right-0 z-10 flex items-center justify-center w-10 h-10 -translate-y-1/2 bg-white rounded-full shadow-lg top-1/2 group carousel-next">
+                <button class="absolute right-0 z-10 flex items-center justify-center w-8 h-8 -translate-y-1/2 bg-white rounded-full shadow-lg top-1/2 group carousel-next md:w-10 md:h-10">
                     <i class="text-gray-400 fas fa-chevron-right group-hover:text-gray-600"></i>
                 </button>
 
@@ -510,17 +510,17 @@ use Illuminate\Support\Facades\Storage;
                     <div class="flex transition-transform duration-500" id="roomSlider">
                         <!-- Original items -->
                         @foreach($rooms as $index => $room)
-                        <div class="flex-none w-[300px] mx-3" data-index="{{ $index }}">
+                        <div class="flex-none w-[280px] mx-2 sm:w-[300px] sm:mx-3" data-index="{{ $index }}">
                             <div class="overflow-hidden transition-all duration-500 transform bg-white shadow-lg rounded-xl">
                                 <div class="relative">
-                                    <img src="{{ asset('storage/images/' . $room->image) }}" alt="{{ $room->name }}" class="object-cover w-full h-48">
+                                    <img src="{{ asset('storage/images/' . $room->image) }}" alt="{{ $room->name }}" class="object-cover w-full h-40 sm:h-48">
                                 </div>
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-2">
-                                        <h3 class="text-lg font-semibold">{{ $room->name }}</h3>
-                                        <p class="font-medium text-orange-500">Rp. {{ number_format($room->price_per_night, 0, ',', '.') }}</p>
+                                        <h3 class="text-base font-semibold sm:text-lg">{{ $room->name }}</h3>
+                                        <p class="font-medium text-orange-500 text-sm sm:text-base">Rp. {{ number_format($room->price_per_night, 0, ',', '.') }}</p>
                                     </div>
-                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 sm:text-sm">
                                         <i class="fas fa-map-marker-alt"></i>
                                         <span>Pangururan</span>
                                         <span class="text-gray-300">•</span>
@@ -549,18 +549,21 @@ use Illuminate\Support\Facades\Storage;
                     const dots = Array.from(document.querySelectorAll('#carouselDots button'));
                     const totalCards = cards.length;
                     let currentIndex = 0;
-                    const cardWidth = 300;
-                    const cardGap = 24;
+                    // Use a function to get dynamic card width based on screen size if needed
+                    // For now, rely on CSS classes for width and adjust centering logic
+                    const cardWidth = 300; // Base width, adjust or make dynamic if CSS w-[...] isn't enough
+                    const cardGap = 24; // Base gap
                     let autoSlideInterval;
 
                     function updateSlider() {
                         const containerWidth = slider.parentElement.offsetWidth;
-                        const centerPosition = (containerWidth - cardWidth) / 2;
-                        const offset = centerPosition - (currentIndex * (cardWidth + cardGap));
-                        
+                        // Adjust centering logic to account for responsive card width and gap
+                        const currentCardWidth = cards[0].offsetWidth + (parseFloat(window.getComputedStyle(cards[0]).marginLeft) + parseFloat(window.getComputedStyle(cards[0]).marginRight));
+                        const offset = (containerWidth / 2) - (currentCardWidth / 2) - (currentIndex * currentCardWidth);
+
                         slider.style.transform = `translateX(${offset}px)`;
                         
-                        // Update cards appearance
+                        // Update cards appearance (scaling/opacity) - this logic is less dependent on fixed pixels
                         cards.forEach((card, index) => {
                             const distance = Math.abs(index - currentIndex);
                             const cardElement = card.querySelector('.bg-white');
@@ -571,12 +574,12 @@ use Illuminate\Support\Facades\Storage;
                                 card.style.zIndex = '20';
                             } else if (distance === 1) {
                                 const direction = index > currentIndex ? 1 : -1;
-                                cardElement.style.transform = `scale(0.9) translateX(${direction * 20}px)`;
+                                cardElement.style.transform = `scale(0.9) translateX(${direction * 20}px)`
                                 card.style.opacity = '0.7';
                                 card.style.zIndex = '10';
                             } else {
                                 const direction = index > currentIndex ? 1 : -1;
-                                cardElement.style.transform = `scale(0.8) translateX(${direction * 40}px)`;
+                                cardElement.style.transform = `scale(0.8) translateX(${direction * 40}px)`
                                 card.style.opacity = '0.5';
                                 card.style.zIndex = '1';
                             }
@@ -657,19 +660,28 @@ use Illuminate\Support\Facades\Storage;
     <!-- Why Choose Us Section -->
     <section class="py-20 text-white" style="background:#1D1D1D;">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <h2 class="mb-12 text-center font-bold" style="font-size:2.5rem; letter-spacing:0.10em; font-family:'Poppins',sans-serif;">Why Cahaya Resort ?</h2>
-            <div class="grid grid-cols-1 gap-12 text-center md:grid-cols-3">
-                <div>
-                    <h3 class="mb-4 text-xl font-bold" style="font-family:'Poppins',sans-serif;">Traditional</h3>
-                    <p class="text-gray-400">From local hotels to grand resorts, discover folklore of hotels all around the world.</p>
+            <h2 class="mb-12 text-2xl font-bold text-center md:text-3xl lg:text-4xl" style="font-family:'Poppins',sans-serif; letter-spacing:0.10em;">Why Cahaya Resort ?</h2>
+            <div class="grid grid-cols-1 gap-8 px-4 text-center sm:px-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-12">
+                <div class="p-6 transition-transform duration-300 transform bg-white/5 rounded-xl hover:scale-105">
+                    <div class="flex flex-col items-center">
+                        <i class="mb-4 text-4xl text-[#FFA040] fas fa-home"></i>
+                        <h3 class="mb-4 text-xl font-bold" style="font-family:'Poppins',sans-serif;">Traditional</h3>
+                        <p class="text-sm text-gray-400 md:text-base">From local hotels to grand resorts, discover folklore of hotels all around the world.</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="mb-4 text-xl font-bold" style="font-family:'Poppins',sans-serif;">Modern</h3>
-                    <p class="text-gray-400">No need to search anywhere else. The biggest names in hotels are right here.</p>
+                <div class="p-6 transition-transform duration-300 transform bg-white/5 rounded-xl hover:scale-105">
+                    <div class="flex flex-col items-center">
+                        <i class="mb-4 text-4xl text-[#FFA040] fas fa-building"></i>
+                        <h3 class="mb-4 text-xl font-bold" style="font-family:'Poppins',sans-serif;">Modern</h3>
+                        <p class="text-sm text-gray-400 md:text-base">No need to search anywhere else. The biggest names in hotels are right here.</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="mb-4 text-xl font-bold" style="font-family:'Poppins',sans-serif;">Affordable</h3>
-                    <p class="text-gray-400">We've scored deals with the world's leading hotels and we share savings with you.</p>
+                <div class="p-6 transition-transform duration-300 transform bg-white/5 rounded-xl hover:scale-105">
+                    <div class="flex flex-col items-center">
+                        <i class="mb-4 text-4xl text-[#FFA040] fas fa-tags"></i>
+                        <h3 class="mb-4 text-xl font-bold" style="font-family:'Poppins',sans-serif;">Affordable</h3>
+                        <p class="text-sm text-gray-400 md:text-base">We've scored deals with the world's leading hotels and we share savings with you.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -678,19 +690,19 @@ use Illuminate\Support\Facades\Storage;
     <!-- Dream in Serene Luxury Section -->
     <section class="py-20 bg-white">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="relative">
+            <div class="relative flex flex-col lg:flex-row lg:items-center lg:gap-12">
                 <!-- Left Content -->
-                <div class="max-w-xl">
-                    <h2 class="flex items-center gap-3 mb-6 text-3xl font-semibold text-gray-800">
+                <div class="max-w-xl lg:w-1/2">
+                    <h2 class="flex flex-col items-start gap-1 mb-6 text-2xl font-semibold text-gray-800 sm:flex-row sm:items-center sm:gap-3 md:text-3xl">
                         Dream In <span class="text-gray-600">Serene Luxury</span>
                     </h2>
-                    <p class="mb-8 leading-relaxed text-gray-600">
+                    <p class="mb-8 leading-relaxed text-gray-600 text-sm md:text-base">
                         Cahaya Pangururan Inn, comfortable with local nuances and natural panorama of Samosir. Wake up with cool air, calming lake views, and a calm atmosphere that refreshes the soul. Enjoy the hospitality of the host, complete facilities, and comfort like at home.
                     </p>
                 </div>
 
                 <!-- Stay & Relax Text -->
-                <div class="absolute top-0 right-0 pb-20">
+                <div class="absolute top-0 right-0 pb-20 hidden lg:block">
                     <h3 class="text-6xl font-bold leading-tight"
                         style="color: #080808;
                             text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25) inset;
@@ -702,54 +714,54 @@ use Illuminate\Support\Facades\Storage;
                 </div>
 
                 <!-- Facility Gallery -->
-                <div class="relative mt-16">
+                <div class="relative mt-8 lg:mt-0 lg:w-1/2">
                     <!-- Gallery Container -->
-                    <div class="overflow-hidden">
-                        <div class="flex gap-6" id="facilitySlider">
+                    <div class="overflow-x-auto">
+                        <div class="flex gap-4 pb-4 lg:gap-6" id="facilitySlider">
                             <!-- Facility Items -->
-                            <div class="flex gap-6">
+                            <div class="flex gap-4 lg:gap-6">
                                 <!-- Rooms -->
-                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                <div class="relative group w-[180px] flex-none overflow-hidden rounded-xl sm:w-[220px]">
                                     <img src="{{ asset('storage/images/facility-1.jpg') }}" alt="Rooms" 
-                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-                                        <span class="text-white text-lg font-bold" style="font-family:'Poppins',sans-serif;">Pangururan</span>
+                                         class="w-full h-[300px] object-cover transition-transform duration-500 group-hover:scale-110 sm:h-[400px]">
+                                    <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-black/40 backdrop-blur-sm">
+                                        <span class="text-base font-bold text-white sm:text-lg" style="font-family:'Poppins',sans-serif;">Pangururan</span>
                                     </div>
                                 </div>
 
                                 <!-- Parking Area -->
-                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                <div class="relative group w-[180px] flex-none overflow-hidden rounded-xl sm:w-[220px]">
                                     <img src="{{ asset('storage/images/facility-2.jpg') }}" alt="Parking Area" 
-                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110 grayscale">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-                                        <span class="text-white text-lg font-bold" style="font-family:'Poppins',sans-serif;">Pangururan</span>
+                                         class="w-full h-[300px] object-cover transition-transform duration-500 group-hover:scale-110 grayscale sm:h-[400px]">
+                                    <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-black/40 backdrop-blur-sm">
+                                        <span class="text-base font-bold text-white sm:text-lg" style="font-family:'Poppins',sans-serif;">Pangururan</span>
                                     </div>
                                 </div>
 
                                 <!-- Mini Park -->
-                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                <div class="relative group w-[180px] flex-none overflow-hidden rounded-xl sm:w-[220px]">
                                     <img src="{{ asset('storage/images/facility-3.jpg') }}" alt="Mini Park" 
-                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-                                        <span class="text-white text-lg font-bold" style="font-family:'Poppins',sans-serif;">Pangururan</span>
+                                         class="w-full h-[300px] object-cover transition-transform duration-500 group-hover:scale-110 sm:h-[400px]">
+                                    <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-black/40 backdrop-blur-sm">
+                                        <span class="text-base font-bold text-white sm:text-lg" style="font-family:'Poppins',sans-serif;">Pangururan</span>
                                     </div>
                                 </div>
 
                                 <!-- Loby -->
-                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                <div class="relative group w-[180px] flex-none overflow-hidden rounded-xl sm:w-[220px]">
                                     <img src="{{ asset('storage/images/facility-4.jpg') }}" alt="Loby" 
-                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-                                        <span class="text-white text-lg font-bold" style="font-family:'Poppins',sans-serif;">Pangururan</span>
+                                         class="w-full h-[300px] object-cover transition-transform duration-500 group-hover:scale-110 sm:h-[400px]">
+                                    <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-black/40 backdrop-blur-sm">
+                                        <span class="text-base font-bold text-white sm:text-lg" style="font-family:'Poppins',sans-serif;">Pangururan</span>
                                     </div>
                                 </div>
                                 
                                 <!-- View -->
-                                <div class="relative group w-[220px] flex-none overflow-hidden rounded-2xl">
+                                <div class="relative group w-[180px] flex-none overflow-hidden rounded-xl sm:w-[220px]">
                                     <img src="{{ asset('storage/images/facility-5.jpg') }}" alt="View" 
-                                         class="w-full h-[400px] object-cover transition-transform duration-500 group-hover:scale-110">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-                                        <span class="text-white text-lg font-bold" style="font-family:'Poppins',sans-serif;">Pangururan</span>
+                                         class="w-full h-[300px] object-cover transition-transform duration-500 group-hover:scale-110 sm:h-[400px]">
+                                    <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-black/40 backdrop-blur-sm">
+                                        <span class="text-base font-bold text-white sm:text-lg" style="font-family:'Poppins',sans-serif;">Waterfall Pangururan</span>
                                     </div>
                                 </div>
                             </div>
@@ -761,23 +773,23 @@ use Illuminate\Support\Facades\Storage;
     </section>
 
     <!-- Stay in the know Section -->
-    <section class="py-20 text-white" style="background:#252525; font-family:'Poppins',sans-serif;">
+    <section class="py-16 md:py-20 text-white" style="background:#252525; font-family:'Poppins',sans-serif;">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-12 md:grid-cols-2">
-                <div class="bg-white/5 rounded-xl p-8 md:p-10 shadow-sm">
-                    <h2 class="mb-4 text-2xl font-bold" style="font-family:'Poppins',sans-serif; font-weight:700;">Stay in the know</h2>
-                    <p class="mb-6 text-[1.1rem] font-normal" style="font-family:'Poppins',sans-serif; font-weight:400;">Sign up to get marketing emails from Cahaya Resort, including promotions, rewards, and information about Cahaya Resort services.</p>
-                    <div class="flex gap-2">
-                        <input type="email" placeholder="Your email" class="flex-1 px-5 py-2 rounded-lg bg-white text-gray-800 focus:outline-none font-normal" style="font-family:'Poppins',sans-serif; font-weight:400; font-size:1rem;" required>
-                        <button class="px-6 py-2 text-white transition rounded-lg font-semibold" style="background:#FFA040; font-family:'Poppins',sans-serif; font-weight:500; font-size:1rem;" onmouseover="this.style.background='#ff8c1a'" onmouseout="this.style.background='#FFA040'">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 lg:gap-16">
+                <div class="p-6 shadow-sm bg-white/5 rounded-xl md:p-8 lg:p-10">
+                    <h2 class="mb-4 text-xl font-bold md:text-2xl" style="font-family:'Poppins',sans-serif; font-weight:700;">Stay in the know</h2>
+                    <p class="mb-6 text-sm md:text-base font-normal" style="font-family:'Poppins',sans-serif; font-weight:400;">Sign up to get marketing emails from Cahaya Resort, including promotions, rewards, and information about Cahaya Resort services.</p>
+                    <div class="flex flex-col gap-2 sm:flex-row">
+                        <input type="email" placeholder="Your email" class="flex-1 px-4 py-2 font-normal text-gray-800 bg-white rounded-lg focus:outline-none text-sm md:text-base" style="font-family:'Poppins',sans-serif; font-weight:400;" required>
+                        <button class="px-6 py-2 font-semibold text-white transition rounded-lg text-sm md:text-base" style="background:#FFA040; font-family:'Poppins',sans-serif; font-weight:500;" onmouseover="this.style.background='#ff8c1a'" onmouseout="this.style.background='#FFA040'">
                             Send it
                         </button>
                     </div>
                 </div>
-                <div class="relative bg-white/5 rounded-xl p-8 md:p-10 shadow-sm md:border-l md:pl-12 border-gray-400/20 flex flex-col justify-center">
+                <div class="relative flex flex-col justify-center p-6 shadow-sm bg-white/5 rounded-xl md:p-8 md:border-l md:pl-10 lg:p-10 lg:pl-12 border-gray-400/20">
                     <span class="absolute top-8 left-0 hidden md:block w-0.5 h-[80%] bg-gradient-to-b from-transparent via-gray-400/20 to-transparent rounded-full"></span>
-                    <h3 class="mb-6 text-2xl font-bold" style="font-family:'Poppins',sans-serif; font-weight:700;">Location</h3>
-                    <div class="w-full h-[300px] rounded-lg overflow-hidden">
+                    <h3 class="mb-6 text-xl font-bold md:text-2xl" style="font-family:'Poppins',sans-serif; font-weight:700;">Location</h3>
+                    <div class="w-full h-[250px] md:h-[300px] rounded-lg overflow-hidden">
                         <iframe 
                             src="https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d31885.646008294185!2d98.701418!3d2.6016867!3m2!1i1024!2i768!4f13.1!2m1!1spenginapan%20cahaya%20pangururan!5e0!3m2!1sid!2sid!4v1748025674249!5m2!1sid!2sid"
                             width="100%" 
@@ -795,37 +807,37 @@ use Illuminate\Support\Facades\Storage;
     </section>
 
     <!-- Parallax Section -->
-    <section class="relative h-[500px] flex items-center justify-center" style="background-image: url('{{ asset('storage/images/bg_fixed.jpg') }}'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <section class="relative h-[400px] md:h-[500px] flex items-center justify-center" style="background-image: url('{{ asset('storage/images/bg_fixed.jpg') }}'); background-size: cover; background-position: center; background-attachment: fixed;">
         <div class="absolute inset-0 bg-black/40"></div>
         <div class="relative z-10 flex flex-col items-center justify-center w-full h-full px-4">
-            <h2 class="text-white text-2xl md:text-4xl lg:text-3xl xl:text-4xl font-semibold tracking-widest text-center uppercase mb-8" style="font-family:'Poppins',sans-serif; letter-spacing:0.15em;">
+            <h2 class="mb-8 text-xl font-semibold tracking-widest text-center text-white uppercase md:text-2xl lg:text-3xl xl:text-4xl" style="font-family:'Poppins',sans-serif; letter-spacing:0.15em;">
             "UNWIND BY THE WATER. A LAKESIDE ESCAPE CRAFTED FOR TIMELESS MOMENTS."
             </h2>
-            <button class="mt-2 px-10 py-3 rounded-md bg-gray-300/70 text-gray-700 font-semibold tracking-widest uppercase text-base md:text-lg transition hover:bg-gray-400/80" style="font-family:'Poppins',sans-serif;">
+            <button class="px-8 py-3 mt-2 text-sm font-semibold tracking-widest text-gray-700 uppercase transition rounded-md bg-gray-300/70 md:px-10 md:text-base lg:text-lg hover:bg-gray-400/80" style="font-family:'Poppins',sans-serif;">
                 CHECK RATE
             </button>
         </div>
     </section>
 
     <!-- Footer Section -->
-    <section class="pt-16 pb-8 text-white" style="background:#1D1D1D;">
+    <section class="pt-12 pb-8 md:pt-16 text-white" style="background:#1D1D1D;">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <h2 class="text-5xl font-semibold text-center mb-8" style="font-family:'Poppins',sans-serif;">Cahaya Resort</h2>
-            <hr class="border-t border-gray-700 mb-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <h2 class="mb-8 text-3xl font-semibold text-center md:text-4xl lg:text-5xl" style="font-family:'Poppins',sans-serif;">Cahaya Resort</h2>
+            <hr class="mb-8 md:mb-12 border-t border-gray-700">
+            <div class="grid grid-cols-1 gap-8 mb-12 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
                 <!-- Newsletter -->
-                <div>
-                    <h3 class="mb-4 text-xl font-medium" style="font-family:'Poppins',sans-serif;">Ready to get started?</h3>
-                    <div class="flex items-center mt-8">
-                        <button type="button" class="w-full md:w-auto px-10 py-3 bg-[#D2A06E] text-white rounded-lg font-semibold text-xl flex items-center justify-center" style="font-family:'Poppins',sans-serif;">
+                <div class="text-center md:text-left">
+                    <h3 class="mb-4 text-lg font-medium md:text-xl" style="font-family:'Poppins',sans-serif;">Ready to get started?</h3>
+                    <div class="flex items-center justify-center md:justify-start mt-8">
+                        <button type="button" class="w-full md:w-auto px-8 py-3 bg-[#D2A06E] text-white rounded-lg font-semibold text-lg flex items-center justify-center" style="font-family:'Poppins',sans-serif;">
                             Get Started
                         </button>
                     </div>
                 </div>
                 <!-- Services -->
-                <div>
-                    <h4 class="mb-2 text-lg font-semibold text-[#FFA040]" style="font-family:'Poppins',sans-serif;">Services</h4>
-                    <ul class="space-y-2 text-base">
+                <div class="text-center md:text-left">
+                    <h4 class="mb-2 text-base font-semibold text-[#FFA040] md:text-lg" style="font-family:'Poppins',sans-serif;">Services</h4>
+                    <ul class="space-y-2 text-sm md:text-base">
                         <li>Email Marketing</li>
                         <li>Campaigns</li>
                         <li>Branding</li>
@@ -833,9 +845,9 @@ use Illuminate\Support\Facades\Storage;
                     </ul>
                 </div>
                 <!-- About -->
-                <div>
-                    <h4 class="mb-2 text-lg font-semibold text-[#FFA040]" style="font-family:'Poppins',sans-serif;">About</h4>
-                    <ul class="space-y-2 text-base">
+                <div class="text-center md:text-left">
+                    <h4 class="mb-2 text-base font-semibold text-[#FFA040] md:text-lg" style="font-family:'Poppins',sans-serif;">About</h4>
+                    <ul class="space-y-2 text-sm md:text-base">
                         <li>Our Story</li>
                         <li>Benefits</li>
                         <li>Team</li>
@@ -843,23 +855,23 @@ use Illuminate\Support\Facades\Storage;
                     </ul>
                 </div>
                 <!-- Help -->
-                <div>
-                    <h4 class="mb-2 text-lg font-semibold text-[#FFA040]" style="font-family:'Poppins',sans-serif;">Help</h4>
-                    <ul class="space-y-2 text-base">
+                <div class="text-center md:text-left">
+                    <h4 class="mb-2 text-base font-semibold text-[#FFA040] md:text-lg" style="font-family:'Poppins',sans-serif;">Help</h4>
+                    <ul class="space-y-2 text-sm md:text-base">
                         <li>FAQs</li>
                         <li>Contact Us</li>
                     </ul>
                 </div>
             </div>
-            <div class="flex flex-col md:flex-row items-center justify-between border-t border-gray-700 pt-8">
-                <div class="flex flex-col md:flex-row items-center gap-8 w-full md:w-auto">
-                    <span class="text-sm">Terms & Conditions</span>
-                    <span class="text-sm">Privacy Policy</span>
+            <div class="flex flex-col items-center justify-between pt-6 border-t border-gray-700 md:flex-row md:pt-8">
+                <div class="flex flex-col items-center w-full gap-4 mb-6 md:flex-row md:w-auto md:mb-0">
+                    <span class="text-xs md:text-sm">Terms & Conditions</span>
+                    <span class="text-xs md:text-sm">Privacy Policy</span>
                 </div>
-                <div class="flex items-center gap-6 mt-6 md:mt-0">
-                    <a href="#" class="text-2xl"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="text-2xl"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-2xl"><i class="fab fa-instagram"></i></a>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="text-xl md:text-2xl"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-xl md:text-2xl"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-xl md:text-2xl"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </div>
@@ -954,12 +966,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 dropdown.classList.toggle('open');
             });
             items.forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    this.classList.add('hover');
-                });
-                item.addEventListener('mouseleave', function() {
-                    this.classList.remove('hover');
-                });
                 item.addEventListener('click', function() {
                     items.forEach(i => i.classList.remove('selected'));
                     this.classList.add('selected');
@@ -991,7 +997,7 @@ window.openCalendar = function(type) {
             });
         } else {
             window.calendar.setOption('validRange', {
-                start: new Date()
+                start: new Date() // Use current date/time, FullCalendar handles start of day
             });
         }
     }
@@ -1028,14 +1034,18 @@ window.formatDateForDisplay = function(date) {
 
 // Add a new function to format date for form submission
 window.formatDateForSubmit = function(date) {
-    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+    // Use UTC methods to get YYYY-MM-DD string without timezone issues
+    const year = date.getUTCFullYear();
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 // Add form submit handler
 document.addEventListener('DOMContentLoaded', function() {
     const searchForm = document.getElementById('searchForm');
     if (searchForm) {
-        searchForm.addEventListener('submit', async function(e) {
+        searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
             // Get the dates
@@ -1043,59 +1053,33 @@ document.addEventListener('DOMContentLoaded', function() {
             const checkOut = window.selectedEndDate;
             
             if (!checkIn || !checkOut) {
-                showCustomAlert('You must select both check-in and check-out dates!', 'warning');
+                showCustomAlert('Please select both check-in and check-out dates!', 'warning');
+                e.preventDefault(); // Prevent submission if dates are missing
                 return;
             }
             
-            // Format dates for the request
-            const formattedCheckIn = formatDateForSubmit(checkIn);
-            const formattedCheckOut = formatDateForSubmit(checkOut);
-            const guests = document.getElementById('roomGuestInput').value;
-            
-            try {
-                const response = await fetch(`{{ route('kamar.index') }}?check_in=${formattedCheckIn}&check_out=${formattedCheckOut}&guests=${guests}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const roomsContainer = doc.querySelector('#rooms-container');
-                
-                if (roomsContainer) {
-                    const roomsContent = document.getElementById('roomsContent');
-                    if (roomsContent) {
-                        roomsContent.innerHTML = doc.querySelector('.min-h-screen').innerHTML;
-                        hidePanel();
-                        document.getElementById('roomsPanel').classList.add('show');
-                        
-                        // Update search inputs in the panel
-                        const searchCheckIn = roomsContent.querySelector('#search_check_in');
-                        const searchCheckOut = roomsContent.querySelector('#search_check_out');
-                        const searchGuests = roomsContent.querySelector('#search_guests');
-                        
-                        if (searchCheckIn) searchCheckIn.value = formattedCheckIn;
-                        if (searchCheckOut) searchCheckOut.value = formattedCheckOut;
-                        if (searchGuests) searchGuests.value = guests;
-                    } else {
-                        showCustomAlert('Rooms content container not found!', 'error');
-                        return;
-                    }
-                } else {
-                    showCustomAlert('Rooms container not found in response!', 'error');
-                    return;
-                }
-            } catch (error) {
-                console.error('Error loading rooms:', error);
-                showCustomAlert('Failed to load available rooms. Please try again.', 'error');
+            // Get selected room and guest value
+            const selectedOption = document.querySelector('input[name="guests"]:checked');
+            if (!selectedOption) {
+                showCustomAlert('Please select the number of rooms and guests!', 'warning');
+                e.preventDefault(); // Prevent submission if guests are missing
+                return;
             }
+            
+            // Format dates for the request input fields
+            // Ensure the input fields are updated before the form is submitted
+            document.getElementById('landing_check_in').value = formatDateForSubmit(checkIn);
+            document.getElementById('landing_check_out').value = formatDateForSubmit(checkOut);
+            
+            // The form will now submit normally, navigating to the kamar.index route
+            // The server-side needs to handle displaying the results in the desired layout
         });
     }
 });
 
 window.handleDateClick = function(info) {
-    const clickedDate = new Date(info.dateStr);
+    // Use info.date which is a Date object representing the start of the day in the local timezone
+    const clickedDate = info.date;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -1105,14 +1089,20 @@ window.handleDateClick = function(info) {
 
     if (window.currentInputType === 'check_in') {
         window.selectedStartDate = clickedDate;
+        // If check-out was before or same as new check-in, clear it
+        if (window.selectedEndDate && window.selectedEndDate <= window.selectedStartDate) {
+             window.selectedEndDate = null;
+             document.getElementById('landing_check_out').value = '';
+        }
         highlightDates();
     } else if (window.currentInputType === 'check_out') {
         if (!window.selectedStartDate) {
             showCustomAlert('Please select a check-in date before selecting check-out date!', 'error');
-            closeCalendar();
-            openCalendar('check_in');
+            // Optionally reopen check-in calendar
+            // setTimeout(() => openCalendar('check_in'), 100);
             return;
         }
+        // Ensure check-out is strictly after check-in
         if (clickedDate <= window.selectedStartDate) {
             showCustomAlert('Check-out date must be after check-in date!', 'error');
             return;
@@ -1123,24 +1113,32 @@ window.handleDateClick = function(info) {
 };
 
 window.highlightDates = function() {
+    // Clear existing highlights
     window.calendar.getEvents().forEach(event => event.remove());
     
     if (window.selectedStartDate) {
-        // Create a new date object for end date to avoid modifying the original
-        let displayEndDate = window.selectedEndDate ? new Date(window.selectedEndDate) : window.selectedStartDate;
-        // Subtract one day from the end date for display purposes
-        displayEndDate.setDate(displayEndDate.getDate() - 1);
+        let displayEndDate = window.selectedEndDate ? new Date(window.selectedEndDate) : new Date(window.selectedStartDate);
         
+        // FullCalendar end date is exclusive. To highlight the end date itself, add one day.
+        // Only add a day if an end date is selected, otherwise highlight only the start date.
+        if (window.selectedEndDate) {
+             displayEndDate.setDate(displayEndDate.getDate() + 1);
+        }
+       
         window.calendar.addEvent({
             start: window.selectedStartDate,
-            end: displayEndDate,
+            end: displayEndDate, // FullCalendar end is exclusive
             display: 'background',
             backgroundColor: '#fef3c7'
         });
+    } else {
+        // If check-in is cleared, also clear highlight
+         window.calendar.getEvents().forEach(event => event.remove());
     }
 };
 
 window.formatDate = function(date) {
+     // This function seems redundant, using formatDateForDisplay instead
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
