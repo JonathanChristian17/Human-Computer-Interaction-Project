@@ -9,6 +9,7 @@ use App\Models\Revenue;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use PDF;
 
 class ReceptionistController extends Controller
 {
@@ -20,30 +21,45 @@ class ReceptionistController extends Controller
         // Set timezone ke Asia/Jakarta
         date_default_timezone_set('Asia/Jakarta');
         
-        $totalRooms = Room::count();
-        $occupiedRooms = Room::where('status', 'occupied')->count();
-        $availableRooms = Room::where('status', 'available')->count();
-        $pendingBookings = Booking::where('status', 'pending')->count();
-        
         $today = now()->setTimezone('Asia/Jakarta')->format('Y-m-d');
         
-        // Get today's check-ins with guest and room details - show all bookings for today
-        $todayCheckIns = Booking::with(['user', 'rooms'])
-            ->whereRaw('DATE(check_in_date) = ?', [$today])
+        // Get room statistics
+        $totalRooms = Room::count();
+        $availableRooms = Room::where('status', 'available')->count();
+        
+        // Count rooms with active guests (checked-in) for today
+        $occupiedRooms = Room::whereHas('bookings', function($query) use ($today) {
+            $query->where('status', 'checked_in')
+                  ->whereDate('check_in_date', '<=', $today)
+                  ->whereDate('check_out_date', '>', $today);
+        })->count();
+        
+        // Get today's check-ins with guest and room details - only show ready for check-in
+        $todayCheckIns = Booking::with(['rooms'])
+            ->whereDate('check_in_date', $today)
+            ->where(function($q) {
+                $q->where('status', 'confirmed')
+                  ->orWhere('status', 'checked_in');
+            })
+            ->where('payment_status', 'paid')
             ->get();
             
-        // Get today's check-outs with guest and room details
-        $todayCheckOuts = Booking::with(['user', 'rooms'])
-            ->whereRaw('DATE(check_out_date) = ?', [$today])
+        // Get today's check-outs with guest and room details - only show currently checked in
+        $todayCheckOuts = Booking::with(['rooms'])
+            ->whereDate('check_out_date', $today)
+            ->where('status', 'checked_in')
             ->get();
+
+        // Calculate today's revenue
+        $todayRevenue = Revenue::whereDate('created_at', $today)->sum('amount');
 
         return view('receptionist.dashboard', compact(
             'totalRooms',
-            'occupiedRooms',
             'availableRooms',
-            'pendingBookings',
+            'occupiedRooms',
             'todayCheckIns',
-            'todayCheckOuts'
+            'todayCheckOuts',
+            'todayRevenue'
         ));
     }
 
@@ -101,7 +117,6 @@ class ReceptionistController extends Controller
             } elseif ($validated['status'] === 'checked_in') {
                 // Just update room status and check-in time, no revenue recording
                 foreach ($booking->rooms as $room) {
-                    $room->update(['status' => 'occupied']);
                 }
                 $booking->checked_in_at = now();
             } elseif ($validated['status'] === 'checked_out') {
@@ -157,11 +172,13 @@ class ReceptionistController extends Controller
     {
         $query = Room::query();
 
-        // Add eager loading for current booking
+        // Add eager loading for current booking and guest information
         $query->with(['bookings' => function($query) {
             $query->whereIn('status', ['confirmed', 'checked_in'])
-                  ->orderBy('check_in_date', 'desc')
-                  ->limit(1);
+                  ->with(['user' => function($query) {
+                      $query->select('id', 'name', 'email', 'phone');
+                  }])
+                  ->orderBy('check_in_date', 'asc');
         }]);
 
         // Search functionality
@@ -177,7 +194,7 @@ class ReceptionistController extends Controller
             $query->where('status', $request->status);
         }
 
-        $rooms = $query->latest()->paginate(10)->withQueryString();
+        $rooms = $query->latest()->paginate(9)->withQueryString();
         return view('receptionist.rooms', compact('rooms'));
     }
 
@@ -187,12 +204,47 @@ class ReceptionistController extends Controller
     public function updateRoomStatus(Request $request, Room $room)
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:available,occupied,cleaning,maintenance'],
+            'status' => ['required', 'in:available,maintenance'],
         ]);
 
-        $room->update($validated);
+        try {
+            // Check if room has active bookings
+            $hasActiveBooking = $room->bookings()
+                ->whereIn('status', ['confirmed', 'checked_in'])
+                ->where('check_in_date', '<=', now())
+                ->where('check_out_date', '>', now())
+                ->exists();
 
-        return back()->with('success', 'Room status updated successfully.');
+            if ($hasActiveBooking) {
+                return response()->json([
+                    'message' => 'Cannot change status of room with active bookings.'
+                ], 422);
+            }
+
+            $room->status = $validated['status'];
+            $room->save();
+
+            // Return success response for AJAX request
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Room status updated successfully.',
+                    'status' => $room->status
+                ]);
+            }
+
+            // Redirect with success message for non-AJAX request
+            return back()->with('success', 'Room status updated successfully.');
+        } catch (\Exception $e) {
+            // Return error response for AJAX request
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Failed to update room status: ' . $e->getMessage()
+                ], 500);
+            }
+
+            // Redirect with error message for non-AJAX request
+            return back()->with('error', 'Failed to update room status. ' . $e->getMessage());
+        }
     }
 
     /**
@@ -290,6 +342,105 @@ class ReceptionistController extends Controller
      */
     public function reports(): View
     {
+        // Get monthly bookings from actual bookings in database
+        $monthlyBookings = Booking::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as total')
+            ->groupBy('month')
+            ->orderBy('month', 'desc')
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'month' => \Carbon\Carbon::createFromFormat('Y-m', $booking->month),
+                    'total' => $booking->total
+                ];
+            });
+
+        // Calculate monthly revenue from paid bookings
+        $monthlyRevenue = Booking::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(total_price) as revenue')
+            ->where('payment_status', 'paid')
+            ->groupBy('month')
+            ->orderBy('month', 'desc')
+            ->get()
+            ->map(function ($revenue) {
+                return [
+                    'month' => \Carbon\Carbon::createFromFormat('Y-m', $revenue->month),
+                    'revenue' => $revenue->revenue
+                ];
+            });
+
+        // Calculate this month's total revenue from paid bookings
+        $thisMonthRevenue = Booking::where('payment_status', 'paid')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_price');
+
+        // Calculate average price per night for this month's bookings
+        $thisMonthBookings = Booking::with('rooms')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->get();
+
+        $totalNights = 0;
+        $totalPrice = 0;
+        foreach ($thisMonthBookings as $booking) {
+            $nights = $booking->check_in_date->diffInDays($booking->check_out_date);
+            $totalNights += $nights;
+            $totalPrice += $booking->total_price;
+        }
+        $averageRatePerNight = $totalNights > 0 ? $totalPrice / $totalNights : 0;
+
+        // Get all booking records with rooms and user information with pagination
+        $bookingDetails = Booking::with(['rooms', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->through(function ($booking) {
+                return [
+                    'tanggal' => $booking->created_at,
+                    'guest_name' => $booking->full_name,
+                    'rooms' => $booking->rooms->map(function ($room) {
+                        return $room->room_number . ' (' . $room->type . ')';
+                    })->join(', '),
+                    'check_in' => $booking->check_in_date->format('d M Y'),
+                    'check_out' => $booking->check_out_date->format('d M Y'),
+                    'total_price' => $booking->total_price,
+                    'status' => $booking->status,
+                    'payment_status' => $booking->payment_status
+                ];
+            });
+
+        // Calculate occupancy rate
+        $totalRooms = Room::count();
+        $occupiedRooms = Room::whereHas('bookings', function($query) {
+            $query->where('status', 'checked_in')
+                  ->whereDate('check_in_date', '<=', now())
+                  ->whereDate('check_out_date', '>', now());
+        })->count();
+        
+        $occupancyRate = $totalRooms > 0 ? ($occupiedRooms / $totalRooms) * 100 : 0;
+
+        // Get last month's revenue for comparison
+        $lastMonthRevenue = Booking::where('payment_status', 'paid')
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->sum('total_price');
+
+        $revenueGrowth = $lastMonthRevenue > 0 ? (($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 0;
+
+        return view('receptionist.reports', compact(
+            'monthlyBookings', 
+            'monthlyRevenue', 
+            'bookingDetails',
+            'occupancyRate',
+            'thisMonthRevenue',
+            'averageRatePerNight',
+            'revenueGrowth'
+        ));
+    }
+
+    /**
+     * Download reports as PDF
+     */
+    public function downloadReports()
+    {
         $monthlyBookings = Booking::selectRaw('MONTH(check_in_date) as month, COUNT(*) as total')
             ->whereYear('check_in_date', date('Y'))
             ->groupBy('month')
@@ -301,13 +452,48 @@ class ReceptionistController extends Controller
             ->groupBy('month')
             ->get();
 
-        // Get detailed revenue records for the current month
-        $revenueDetails = Revenue::with('recorder')
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->latest()
-            ->get();
+        // Get all booking records with rooms and user information
+        $bookingDetails = Booking::with(['rooms', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'tanggal' => $booking->created_at,
+                    'guest_name' => $booking->full_name,
+                    'rooms' => $booking->rooms->map(function ($room) {
+                        return $room->room_number . ' (' . $room->type . ')';
+                    })->join(', '),
+                    'check_in' => $booking->check_in_date->format('d M Y'),
+                    'check_out' => $booking->check_out_date->format('d M Y'),
+                    'total_price' => $booking->total_price,
+                    'status' => $booking->status,
+                    'payment_status' => $booking->payment_status
+                ];
+            });
 
-        return view('receptionist.reports', compact('monthlyBookings', 'monthlyRevenue', 'revenueDetails'));
+        // Calculate occupancy rate
+        $totalRooms = Room::count();
+        $occupiedRooms = Room::whereHas('bookings', function($query) {
+            $query->where('status', 'checked_in')
+                  ->whereDate('check_in_date', '<=', now())
+                  ->whereDate('check_out_date', '>', now());
+        })->count();
+        
+        $occupancyRate = $totalRooms > 0 ? ($occupiedRooms / $totalRooms) * 100 : 0;
+
+        // Calculate average rate
+        $thisMonthBookings = $monthlyBookings->where('month', now()->month)->first()?->total ?? 0;
+        $thisMonthRevenue = $monthlyRevenue->where('month', now()->month)->first()?->revenue ?? 0;
+        $averageRate = $thisMonthBookings > 0 ? $thisMonthRevenue / $thisMonthBookings : 0;
+
+        $pdf = PDF::loadView('receptionist.reports-pdf', compact(
+            'monthlyBookings', 
+            'monthlyRevenue', 
+            'bookingDetails',
+            'occupancyRate',
+            'averageRate'
+        ));
+
+        return $pdf->download('laporan-pendapatan-' . now()->format('Y-m') . '.pdf');
     }
 } 

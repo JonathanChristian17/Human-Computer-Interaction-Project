@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\CheckExpiredBookings::class,
+        Commands\CancelExpiredTransactions::class,
     ];
 
     /**
@@ -28,6 +29,9 @@ class Kernel extends ConsoleKernel
     {
         // Check expired bookings every minute
         $schedule->command('bookings:check-expired')->everyMinute();
+        
+        // Check and cancel expired transactions every minute
+        $schedule->command('transactions:cancel-expired')->everyMinute();
     }
 
     /**

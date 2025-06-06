@@ -98,7 +98,7 @@
                         <span class="mx-2 text-gray-400">atau</span>
                         <div class="flex-grow border-t border-gray-200"></div>
                     </div>
-                    <button type="button" class="w-full flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 transition">
+                    <button type="button" onclick="window.location.href='{{ route('google.login') }}'" class="w-full flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 transition">
                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="h-5 w-5 mr-2">
                         Masuk dengan Google
                     </button>

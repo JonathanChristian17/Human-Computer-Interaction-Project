@@ -30,8 +30,6 @@
                                         </div>
                                         <span class="px-2 py-1 text-xs font-semibold rounded-full
                                             @if($room->status === 'available') bg-green-500/10 text-green-400
-                                            @elseif($room->status === 'occupied') bg-blue-500/10 text-blue-400
-                                            @elseif($room->status === 'cleaning') bg-amber-500/10 text-amber-400
                                             @else bg-red-500/10 text-red-400 @endif">
                                             {{ ucfirst($room->status) }}
                                         </span>

@@ -20,6 +20,9 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\MidtransWebhookController;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,8 +58,11 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotForm'])
+        ->name('password.request');
+
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetCode'])
+        ->name('password.email');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
@@ -145,11 +151,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 Route::middleware(['auth', 'receptionist'])->prefix('receptionist')->name('receptionist.')->group(function () {
     Route::get('/dashboard', [ReceptionistController::class, 'dashboard'])->name('dashboard');
     
+    // Offline Booking
+    Route::get('/offline-booking', [App\Http\Controllers\Receptionist\OfflineBookingController::class, 'create'])->name('offline-booking');
+    Route::post('/offline-booking', [App\Http\Controllers\Receptionist\OfflineBookingController::class, 'store'])->name('offline-booking.store');
+    Route::get('/get-booked-dates/{room}', [App\Http\Controllers\Receptionist\OfflineBookingController::class, 'getBookedDates'])->name('get-booked-dates');
+    
     // Booking Management
     Route::get('/bookings', [App\Http\Controllers\Receptionist\BookingController::class, 'index'])->name('bookings');
-    Route::patch('/bookings/{booking}/status', [App\Http\Controllers\Receptionist\BookingController::class, 'updateStatus'])->name('bookings.status');
-    Route::patch('/bookings/{booking}/payment', [App\Http\Controllers\Receptionist\BookingController::class, 'updatePaymentStatus'])->name('bookings.payment');
     Route::get('/bookings/{booking}/invoice', [App\Http\Controllers\Receptionist\BookingController::class, 'generateInvoice'])->name('bookings.invoice');
+    Route::patch('/bookings/{booking}/status', [App\Http\Controllers\Receptionist\BookingController::class, 'updateStatus'])->name('bookings.update-status');
+    Route::patch('/bookings/{booking}/payment', [App\Http\Controllers\Receptionist\BookingController::class, 'updatePayment'])->name('bookings.update-payment');
+    Route::get('/bookings/completed', [App\Http\Controllers\Receptionist\CheckInOutController::class, 'completedList'])->name('bookings.completed');
     
     // Check-in/Check-out Management
     Route::get('/check-in', [App\Http\Controllers\Receptionist\CheckInOutController::class, 'checkInList'])->name('check-in');
@@ -169,6 +181,7 @@ Route::middleware(['auth', 'receptionist'])->prefix('receptionist')->name('recep
     
     // Reports
     Route::get('/reports', [ReceptionistController::class, 'reports'])->name('reports');
+    Route::get('/reports/download', [ReceptionistController::class, 'downloadReports'])->name('reports.download');
 });
 
 Route::get('/get-booked-dates/{room_id}', [App\Http\Controllers\BookingController::class, 'getBookedDates'])->name('bookings.getBookedDates');
@@ -225,3 +238,28 @@ Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payme
 
 // Midtrans webhook
 Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handle'])->name('midtrans.webhook');
+
+// Google Login Routes
+Route::get('auth/google', [SocialiteController::class, 'redirectToGoogle'])
+    ->name('google.login')
+    ->middleware('guest');
+Route::get('auth/google/callback', [SocialiteController::class, 'handleGoogleCallback'])
+    ->name('google.callback')
+    ->middleware('guest');
+
+// Password Reset Routes
+Route::get('/reset-password/verify', [PasswordResetController::class, 'showCodeVerificationForm'])->name('password.code');
+Route::post('/reset-password/verify', [PasswordResetController::class, 'verifyCode'])->name('password.verify-code');
+
+// Password Reset Routes
+Route::get('/verify-code', [ForgotPasswordController::class, 'showVerifyForm'])
+    ->name('password.verify');
+
+Route::post('/verify-code', [ForgotPasswordController::class, 'verifyCode'])
+    ->name('password.verify-code');
+
+Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm'])
+    ->name('password.reset.form');
+
+Route::post('/reset-password', [ForgotPasswordController::class, 'updatePassword'])
+    ->name('password.update');

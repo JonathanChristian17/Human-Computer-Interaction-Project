@@ -96,17 +96,17 @@
                 </div>
 
                 <!-- Occupied Rooms -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-xl">
                     <div class="p-6">
                         <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-red-500 bg-opacity-75">
+                            <div class="p-3 rounded-xl bg-purple-500 bg-opacity-75">
                                 <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                 </svg>
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Kamar Terisi</p>
-                                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">{{ $occupiedRooms }}</p>
+                                <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">{{ $occupiedRooms }}</p>
                             </div>
                         </div>
                     </div>

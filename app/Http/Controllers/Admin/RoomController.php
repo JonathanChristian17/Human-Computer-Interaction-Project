@@ -33,7 +33,7 @@ class RoomController extends Controller
             'price_per_night' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'status' => 'required|in:available,occupied,maintenance'
+            'status' => 'required|in:available,maintenance'
         ]);
 
         if ($request->hasFile('image')) {

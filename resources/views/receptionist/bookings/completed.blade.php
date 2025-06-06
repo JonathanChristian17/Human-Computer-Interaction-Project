@@ -1,7 +1,7 @@
 <x-receptionist-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-100 leading-tight">
-            {{ __('Check-out Tamu') }}
+            {{ __('Riwayat Booking Selesai') }}
         </h2>
     </x-slot>
 
@@ -22,26 +22,11 @@
                 </div>
             @endif
 
-            @if(session('error'))
-                <div class="mb-6 bg-red-500/10 backdrop-blur-sm border border-red-500/20 rounded-xl p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-red-400">{{ session('error') }}</p>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
             <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
                 <div class="p-6">
                     <!-- Search and Filter Form -->
                     <div class="mb-6">
-                        <form method="GET" action="{{ route('receptionist.check-out') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <form method="GET" action="{{ route('receptionist.bookings.completed') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label for="search" class="block text-sm font-medium text-gray-300">Cari</label>
                                 <input type="text" name="search" id="search" value="{{ request('search') }}"
@@ -52,15 +37,6 @@
                                 <label for="date" class="block text-sm font-medium text-gray-300">Tanggal Check-out</label>
                                 <input type="date" name="date" id="date" value="{{ request('date') }}"
                                     class="mt-1 block w-full rounded-lg bg-gray-700/50 border border-gray-600/50 text-white focus:ring-amber-500 focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label for="status" class="block text-sm font-medium text-gray-300">Status</label>
-                                <select name="status" id="status" 
-                                    class="mt-1 block w-full rounded-lg bg-gray-700/50 border border-gray-600/50 text-white focus:ring-amber-500 focus:border-amber-500">
-                                    <option value="">Semua Status</option>
-                                    <option value="checked_in" {{ request('status') === 'checked_in' ? 'selected' : '' }}>Menunggu Check-out</option>
-                                    <option value="checked_out" {{ request('status') === 'checked_out' ? 'selected' : '' }}>Sudah Check-out</option>
-                                </select>
                             </div>
                             <div class="flex items-end">
                                 <button type="submit" 
@@ -93,9 +69,6 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        Aksi
-                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-700">
@@ -121,41 +94,18 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-100">{{ $booking->check_out_date->format('d M Y') }}</div>
-                                            @if($booking->checked_out_at)
-                                                <div class="text-sm text-gray-400">{{ $booking->checked_out_at->format('H:i') }}</div>
-                                            @endif
+                                            <div class="text-sm text-gray-400">{{ $booking->checked_out_at->format('H:i') }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-lg
-                                                {{ $booking->status === 'checked_in' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/50' : '' }}
-                                                {{ $booking->status === 'checked_out' ? 'bg-green-500/10 text-green-400 border border-green-500/50' : '' }}">
-                                                @if($booking->status === 'checked_in')
-                                                    Menunggu Check-out
-                                                @elseif($booking->status === 'checked_out')
-                                                    Sudah Check-out
-                                                @endif
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-lg bg-green-500/10 text-green-400 border border-green-500/50">
+                                                Selesai
                                             </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                            @if($booking->status === 'checked_in')
-                                                <form action="{{ route('receptionist.check-out.process', $booking) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <button type="submit" 
-                                                        class="text-amber-400 hover:text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
-                                                        Check-out
-                                                    </button>
-                                                </form>
-                                            @elseif($booking->status === 'checked_out')
-                                                <span class="text-green-400 bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-500/20">
-                                                    Selesai
-                                                </span>
-                                            @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-6 py-4 text-center text-gray-400">
-                                            Tidak ada data booking yang ditemukan.
+                                        <td colspan="6" class="px-6 py-4 text-center text-gray-400">
+                                            Tidak ada data booking yang selesai.
                                         </td>
                                     </tr>
                                 @endforelse

@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('rooms', function (Blueprint $table) {
-            $table->enum('status', ['available', 'maintenance'])
-                  ->default('available')
-                  ->after('is_available');
+        Schema::create('password_reset_codes', function (Blueprint $table) {
+            $table->id();
+            $table->string('email');
+            $table->string('code');
+            $table->timestamp('expires_at');
+            $table->timestamps();
         });
     }
 
@@ -23,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('rooms', function (Blueprint $table) {
-            $table->dropColumn('status');
-        });
+        Schema::dropIfExists('password_reset_codes');
     }
 };

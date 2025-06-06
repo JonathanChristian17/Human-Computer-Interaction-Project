@@ -10,16 +10,17 @@ class RoomController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Room::where('status', 'available')
-                    ->select('id', 'name', 'price_per_night', 'capacity', 'description', 'image');
+        $query = Room::select('id', 'name', 'room_number', 'type', 'price_per_night', 'capacity', 'description', 'image', 'status');
 
         // If check-in and check-out dates are provided, filter available rooms
         if ($request->filled(['check_in', 'check_out'])) {
             $checkIn = $request->check_in;
             $checkOut = $request->check_out;
 
-            // Get rooms that are not booked for these dates
-            $query->whereDoesntHave('bookings', function($query) use ($checkIn, $checkOut) {
+            // Get rooms that are not booked for these dates and are available
+            $query->where(function($query) {
+                $query->where('status', 'available');
+            })->whereDoesntHave('bookings', function($query) use ($checkIn, $checkOut) {
                 $query->join('transactions', 'bookings.id', '=', 'transactions.booking_id')
                     ->where(function($q) {
                         // Include only valid bookings
@@ -58,7 +59,7 @@ class RoomController extends Controller
      */
     public function create()
     {
-        $rooms = Room::all(); // Or any specific query to get available rooms
+        $rooms = Room::where('status', 'available')->get();
         return view('rooms.create', compact('rooms'));
     }
 
@@ -67,41 +68,33 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate request
         $validated = $request->validate([
             'room_id' => 'required|exists:rooms,id',
-            'check_in' => 'required|date|after_or_equal:today',
-            'check_out' => 'required|date|after:check_in',
-            'guests' => 'required|integer|min:1',
+            'check_in_date' => 'required|date|after_or_equal:today',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'guest_count' => 'required|integer|min:1'
         ]);
 
-        // Calculate number of nights
-        $checkIn = new \DateTime($validated['check_in']);
-        $checkOut = new \DateTime($validated['check_out']);
-        $nights = $checkIn->diff($checkOut)->days;
-
-        // Get the room
+        // Check if room is available
         $room = Room::findOrFail($validated['room_id']);
+        if ($room->status !== 'available') {
+            return back()->with('error', 'Room is not available for booking.');
+        }
 
-        // Calculate total price
-        $totalPrice = $room->price_per_night * $nights;
-
-        // Create the booking
+        // Create booking
         $booking = Booking::create([
             'user_id' => auth()->id(),
-            'check_in_date' => $validated['check_in'],
-            'check_out_date' => $validated['check_out'],
-            'total_price' => $totalPrice,
+            'check_in_date' => $validated['check_in_date'],
+            'check_out_date' => $validated['check_out_date'],
+            'guest_count' => $validated['guest_count'],
             'status' => 'pending'
         ]);
 
-        // Attach the room with pivot data
-        $booking->rooms()->attach($room->id, [
-            'price_per_night' => $room->price_per_night,
-            'quantity' => 1,
-            'subtotal' => $totalPrice
-        ]);
+        // Attach room to booking
+        $booking->rooms()->attach($room->id);
 
         return redirect()->route('bookings.show', $booking)
-                       ->with('success', 'Pemesanan berhasil dibuat!');
+            ->with('success', 'Booking created successfully.');
     }
 }

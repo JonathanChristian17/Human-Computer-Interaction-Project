@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Room extends Model
 {
@@ -30,38 +31,81 @@ class Room extends Model
 
     // Define status constants
     const STATUS_AVAILABLE = 'available';
-    const STATUS_OCCUPIED = 'occupied';
-    const STATUS_CLEANING = 'cleaning';
     const STATUS_MAINTENANCE = 'maintenance';
 
-    public function bookings()
+    /**
+     * The bookings that belong to the room.
+     */
+    public function bookings(): BelongsToMany
     {
-        return $this->belongsToMany(Booking::class)
-                    ->withPivot(['price_per_night', 'quantity', 'subtotal'])
-                    ->withTimestamps();
+        return $this->belongsToMany(Booking::class, 'booking_room')
+            ->withTimestamps();
     }
 
-    public function currentBooking()
+    /**
+     * Check if room has an active booking
+     */
+    public function hasActiveBooking(): bool
     {
         return $this->bookings()
             ->whereIn('status', ['confirmed', 'checked_in'])
-            ->orderBy('check_in_date', 'desc')
-            ->limit(1);
+            ->exists();
+    }
+
+    /**
+     * Get current active booking
+     */
+    public function getCurrentBooking()
+    {
+        return $this->bookings()
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->orderBy('check_in_date', 'asc')
+            ->first();
+    }
+
+    /**
+     * Check if room has checked-in guests
+     */
+    public function hasCheckedInGuests(): bool
+    {
+        return $this->bookings()
+            ->where('status', 'checked_in')
+            ->exists();
+    }
+
+    /**
+     * Get current checked-in booking
+     */
+    public function getCheckedInBooking()
+    {
+        return $this->bookings()
+            ->where('status', 'checked_in')
+            ->with('user')
+            ->first();
+    }
+
+    /**
+     * Update room status and handle related bookings
+     */
+    public function updateStatus(string $status): bool
+    {
+        // If room has checked-in guests, prevent any status change
+        if ($this->hasCheckedInGuests()) {
+            return false;
+        }
+
+        // If room has active bookings, only allow changing to 'available'
+        if ($this->hasActiveBooking() && $status !== 'available') {
+            return false;
+        }
+
+        $this->status = $status;
+        return $this->save();
     }
 
     public function isAvailable()
     {
         return $this->status === self::STATUS_AVAILABLE;
-    }
-
-    public function isOccupied()
-    {
-        return $this->status === self::STATUS_OCCUPIED;
-    }
-
-    public function isCleaning()
-    {
-        return $this->status === self::STATUS_CLEANING;
     }
 
     public function isUnderMaintenance()
@@ -78,8 +122,6 @@ class Room extends Model
     {
         return match($this->status) {
             self::STATUS_AVAILABLE => 'green',
-            self::STATUS_OCCUPIED => 'red',
-            self::STATUS_CLEANING => 'yellow',
             self::STATUS_MAINTENANCE => 'gray',
             default => 'gray'
         };
@@ -98,15 +140,6 @@ class Room extends Model
             'check_out' => $checkOut->toDateString(),
             'exclude_booking_id' => $excludeBookingId
         ]);
-
-        // First check if room status allows booking
-        if (!in_array($this->status, [self::STATUS_AVAILABLE, self::STATUS_CLEANING])) {
-            \Log::info('Room not available - status not bookable', [
-                'room_id' => $this->id,
-                'status' => $this->status
-            ]);
-            return false;
-        }
 
         // Check for any overlapping bookings (including pending)
         $conflictingBookings = $this->bookings()

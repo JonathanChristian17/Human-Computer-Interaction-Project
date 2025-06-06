@@ -29,8 +29,8 @@ class Booking extends Model
     ];
 
     protected $casts = [
-        'check_in_date' => 'date:Y-m-d',
-        'check_out_date' => 'date:Y-m-d',
+        'check_in_date' => 'datetime',
+        'check_out_date' => 'datetime',
         'checked_in_at' => 'datetime',
         'checked_out_at' => 'datetime',
         'total_price' => 'decimal:2'
@@ -185,23 +185,21 @@ class Booking extends Model
 
     public function getCheckInDateAttribute($value)
     {
-        if (!$value) return null;
-        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+        return $value ? \Carbon\Carbon::parse($value) : null;
     }
 
     public function getCheckOutDateAttribute($value)
     {
-        if (!$value) return null;
-        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+        return $value ? \Carbon\Carbon::parse($value) : null;
     }
 
     public function setCheckInDateAttribute($value)
     {
-        $this->attributes['check_in_date'] = $value;
+        $this->attributes['check_in_date'] = $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : null;
     }
 
     public function setCheckOutDateAttribute($value)
     {
-        $this->attributes['check_out_date'] = $value;
+        $this->attributes['check_out_date'] = $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : null;
     }
 }
