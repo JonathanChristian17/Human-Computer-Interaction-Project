@@ -482,7 +482,9 @@ class BookingController extends Controller
             }
         }
 
-        return response()->json(array_values(array_unique($dates)));
+        return response()->json([
+            'unavailable_dates' => array_values(array_unique($dates))
+        ]);
     }
 
     public function getTransactionStatus($orderId)

@@ -82,7 +82,6 @@
                             <x-input-label for="status" :value="__('Status')" class="text-gray-300" />
                             <select id="status" name="status" class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="available">Available</option>
-                                <option value="occupied">Occupied</option>
                                 <option value="maintenance">Maintenance</option>
                             </select>
                             <x-input-error :messages="$errors->get('status')" class="mt-2" />
