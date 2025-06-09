@@ -14,32 +14,27 @@
                 @foreach($rooms as $room)
                     @php
                         $imageUrl = $room->image ? asset('storage/' . $room->image) : 'https://source.unsplash.com/random/600x400/?hotel-room,' . $loop->index;
-                        $roomData = [
-                            'id' => $room->id,
-                            'name' => $room->name,
-                            'price_per_night' => $room->price_per_night,
-                            'description' => $room->description,
-                            'capacity' => $room->capacity,
-                            'image' => $imageUrl
-                        ];
                         
                         // Define status badge styles
                         $statusClasses = match($room->status) {
                             'available' => 'bg-green-500/20 text-green-500',
-                            'occupied' => 'bg-red-500/20 text-red-500',
-                            'cleaning' => 'bg-blue-800/20 text-blue-800',
                             'maintenance' => 'bg-yellow-500/20 text-yellow-500',
-                            default => 'bg-gray-500/20 text-gray-400'
+                            default => 'bg-red-500/20 text-red-500'
                         };
                         
                         // Define status text for customers
                         $statusText = match($room->status) {
                             'available' => 'Tersedia',
-                            'occupied' => 'Terisi',
-                            'cleaning' => 'Dalam Pembersihan',
                             'maintenance' => 'Dalam Perbaikan',
                             default => 'Tidak Tersedia'
                         };
+
+                        // Define button state based on room status
+                        $isBookable = $room->status === 'available';
+                        $buttonClasses = $isBookable 
+                            ? 'bg-amber-500 hover:bg-amber-600 text-white cursor-pointer'
+                            : 'bg-gray-500 text-gray-300 cursor-not-allowed';
+                        $buttonText = $isBookable ? 'Tambahkan' : $statusText;
                     @endphp
                     <article class="group relative overflow-hidden rounded-xl bg-gray-800 shadow-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
                         <div class="relative h-64 overflow-hidden">
@@ -59,39 +54,27 @@
                                 </span>
                             </div>
                         </div>
+
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-white mb-2">{{ $room->name }}</h3>
-                            <p class="text-gray-400 mb-4 line-clamp-2">{{ $room->description }}</p>
-                            <div class="flex items-center justify-between mt-6">
-                                <span class="text-2xl font-bold text-amber-400">Rp{{ number_format($room->price_per_night, 0, ',', '.') }}</span>
-                                @if(in_array($room->status, ['available', 'cleaning']))
-                                    @auth
-                                        <button 
-                                            type="button"
-                                            id="add-btn-{{ $room->id }}"
-                                            onclick="addToSelection('{{ json_encode($roomData) }}')"
-                                            class="add-to-cart-btn bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
-                                            <span>Tambahkan</span>
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                            </svg>
-                                        </button>
-                                    @else
-                                        <button 
-                                           type="button"
-                                           class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-                                           onclick="showLoginNotification()">
-                                            <span>Tambahkan</span>
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                            </svg>
-                                        </button>
-                                    @endauth
-                                @else
-                                    <span class="text-sm font-medium text-gray-400">
-                                        Tidak tersedia
-                                    </span>
-                                @endif
+                            <p class="text-gray-400 text-sm mb-4">{{ $room->description }}</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-amber-500 font-bold">Rp {{ number_format($room->price_per_night, 0, ',', '.') }}/malam</span>
+                                <button 
+                                    @if($isBookable)
+                                        onclick="addToBooking({{ json_encode([
+                                            'id' => $room->id,
+                                            'name' => $room->name,
+                                            'price' => $room->price_per_night,
+                                            'capacity' => $room->capacity,
+                                            'image' => $imageUrl
+                                        ]) }})"
+                                    @endif
+                                    class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 {{ $buttonClasses }}"
+                                    {{ $isBookable ? '' : 'disabled' }}
+                                >
+                                    {{ $buttonText }}
+                                </button>
                             </div>
                         </div>
                     </article>
@@ -401,6 +384,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function addToBooking(room) {
+    // Check if user is authenticated
+    @auth
+        // Add room to booking
+        window.dispatchEvent(new CustomEvent('add-room-to-booking', { detail: room }));
+    @else
+        // Show login prompt
+        Swal.fire({
+            title: 'Login Required',
+            text: 'Please login first to book a room',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Login Now',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#f59e0b',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '{{ route("login") }}';
+            }
+        });
+    @endauth
+}
 </script>
 @endpush
 

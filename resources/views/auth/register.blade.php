@@ -130,7 +130,7 @@
                         <span class="mx-2 text-gray-400 text-xs">or</span>
                         <div class="flex-grow border-t border-gray-200"></div>
                     </div>
-                    <button type="button" class="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 text-xs font-medium transition">
+                    <button type="button" onclick="window.location.href='{{ route('google.login') }}'" class="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 text-xs font-medium transition">
                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="h-4 w-4 mr-2">
                         Continue with Google
                     </button>

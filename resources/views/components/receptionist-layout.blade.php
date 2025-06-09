@@ -13,6 +13,9 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Additional Styles -->
+    @stack('styles')
 </head>
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -36,11 +39,17 @@
                             <x-nav-link :href="route('receptionist.bookings')" :active="request()->routeIs('receptionist.bookings')">
                                 {{ __('Bookings') }}
                             </x-nav-link>
+                            <x-nav-link :href="route('receptionist.offline-booking')" :active="request()->routeIs('receptionist.offline-booking')">
+                                {{ __('Offline Booking') }}
+                            </x-nav-link>
                             <x-nav-link :href="route('receptionist.check-in')" :active="request()->routeIs('receptionist.check-in')">
                                 {{ __('Check-in') }}
                             </x-nav-link>
                             <x-nav-link :href="route('receptionist.check-out')" :active="request()->routeIs('receptionist.check-out')">
                                 {{ __('Check-out') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('receptionist.bookings.completed')" :active="request()->routeIs('receptionist.bookings.completed')">
+                                {{ __('Riwayat Selesai') }}
                             </x-nav-link>
                             <x-nav-link :href="route('receptionist.rooms')" :active="request()->routeIs('receptionist.rooms')">
                                 {{ __('Rooms') }}
@@ -81,10 +90,7 @@
                             </x-slot>
 
                             <x-slot name="content">
-                                <x-dropdown-link :href="route('profile.edit')">
-                                    {{ __('Profile') }}
-                                </x-dropdown-link>
-
+                          
                                 <!-- Authentication -->
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -120,11 +126,17 @@
                     <x-responsive-nav-link :href="route('receptionist.bookings')" :active="request()->routeIs('receptionist.bookings')">
                         {{ __('Bookings') }}
                     </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('receptionist.offline-booking')" :active="request()->routeIs('receptionist.offline-booking')">
+                        {{ __('Offline Booking') }}
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('receptionist.check-in')" :active="request()->routeIs('receptionist.check-in')">
                         {{ __('Check-in') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('receptionist.check-out')" :active="request()->routeIs('receptionist.check-out')">
                         {{ __('Check-out') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('receptionist.bookings.completed')" :active="request()->routeIs('receptionist.bookings.completed')">
+                        {{ __('Riwayat Selesai') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('receptionist.rooms')" :active="request()->routeIs('receptionist.rooms')">
                         {{ __('Rooms') }}
@@ -193,5 +205,8 @@
             {{ $slot }}
         </main>
     </div>
+
+    <!-- Additional Scripts -->
+    @stack('scripts')
 </body>
 </html> 

@@ -22,18 +22,18 @@ class Transaction extends Model
         'payment_code',
         'pdf_url',
         'raw_response',
-        'payment_deadline',
-        'is_deposit'
+        'is_deposit',
+        'payment_deadline'
     ];
 
     protected $casts = [
         'gross_amount' => 'decimal:2',
         'raw_response' => 'json',
         'payment_deadline' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
         'transaction_time' => 'datetime',
-        'is_deposit' => 'boolean'
+        'is_deposit' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     protected $attributes = [

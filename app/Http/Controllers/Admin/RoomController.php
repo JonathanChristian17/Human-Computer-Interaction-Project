@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class RoomController extends Controller
 {
@@ -33,12 +35,14 @@ class RoomController extends Controller
             'price_per_night' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'status' => 'required|in:available,occupied,maintenance'
+            'status' => 'required|in:available,maintenance'
         ]);
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('rooms', 'public');
-            $validated['image'] = $imagePath;
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('storage/images'), $imageName);
+            $validated['image'] = $imageName;
         }
 
         $validated['is_available'] = $validated['status'] === 'available';
@@ -61,6 +65,15 @@ class RoomController extends Controller
                 'status' => $validated['status'],
                 'is_available' => $validated['is_available']
             ]);
+
+            // Log activity
+            Activity::log(
+                Auth::id(),
+                'Created new room',
+                "Room {$room->room_number} ({$room->name}) has been created",
+                'room_create',
+                $room
+            );
 
             \Log::info('Room created successfully:', ['room_id' => $room->id]);
 
@@ -94,13 +107,21 @@ class RoomController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
+        $oldRoom = $room->replicate();
+
         if ($request->hasFile('image')) {
             // Delete old image
             if ($room->image) {
-                Storage::disk('public')->delete($room->image);
+                $oldImagePath = public_path('storage/images/' . $room->image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
             }
-            $imagePath = $request->file('image')->store('rooms', 'public');
-            $validated['image'] = $imagePath;
+            
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('storage/images'), $imageName);
+            $validated['image'] = $imageName;
         }
 
         // Ensure price is treated as integer
@@ -122,17 +143,48 @@ class RoomController extends Controller
 
         $room->update($updateData);
 
+        // Log activity with changes
+        $changes = [];
+        foreach ($updateData as $key => $value) {
+            if ($oldRoom->$key != $value) {
+                $changes[] = "$key: {$oldRoom->$key} → $value";
+            }
+        }
+
+        if (!empty($changes)) {
+            Activity::log(
+                Auth::id(),
+                'Updated room',
+                "Room {$room->room_number} updated. Changes: " . implode(', ', $changes),
+                'room_update',
+                $room
+            );
+        }
+
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Kamar berhasil diperbarui! Nomor kamar: ' . $room->room_number);
     }
 
     public function destroy(Room $room)
     {
+        $roomNumber = $room->room_number;
+        
         if ($room->image) {
-            Storage::disk('public')->delete($room->image);
+            $oldImagePath = public_path('storage/images/' . $room->image);
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
         }
         
         $room->delete();
+
+        // Log activity
+        Activity::log(
+            Auth::id(),
+            'Deleted room',
+            "Room {$roomNumber} has been deleted",
+            'room_delete'
+        );
 
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Kamar berhasil dihapus!');

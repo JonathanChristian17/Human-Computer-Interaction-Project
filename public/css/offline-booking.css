@@ -1,0 +1,331 @@
+/* Reset all positioning and z-index */
+* {
+    position: relative;
+}
+
+/* Basic layout */
+.min-h-screen {
+    min-height: 100vh;
+    width: 100%;
+    background: #f9fafb;
+}
+
+/* Main content and payment panel container */
+.content-container {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Main booking form */
+.booking-form-container {
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* Payment panel */
+.payment-panel {
+    width: 100%;
+    min-height: 100vh;
+    background: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    transition: all 0.3s ease;
+}
+
+.payment-panel.hidden {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Make sure form elements are clickable */
+input,
+select,
+textarea,
+button {
+    position: relative;
+    z-index: 5;
+}
+
+/* Ensure sticky elements work */
+.sticky-back-container {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    padding: 1rem;
+    margin: -2rem -2rem 1rem -2rem;
+}
+
+/* Date input styling */
+.date-input-wrapper {
+    position: relative;
+}
+
+input.date-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 1em !important;
+    padding-right: 2.5rem !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 15px !important;
+    background-color: #ccc !important;
+    box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3) !important;
+    transition: 300ms ease-in-out !important;
+    cursor: pointer !important;
+}
+
+input.date-input:focus {
+    background-color: white !important;
+    transform: scale(1.05) !important;
+    box-shadow: 13px 13px 100px #969696, -13px -13px 100px #ffffff !important;
+}
+
+.calendar-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* Flatpickr customization */
+.flatpickr-calendar {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.flatpickr-day.selected {
+    background: #f97316 !important;
+    border-color: #f97316 !important;
+}
+
+.flatpickr-day.today {
+    border-color: #f97316;
+}
+
+.flatpickr-day:hover {
+    background: #fed7aa !important;
+    border-color: #fed7aa !important;
+}
+
+/* Add custom styles for booked and disabled dates */
+.flatpickr-day.fully-booked {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+    text-decoration: line-through;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.flatpickr-day.fully-booked:hover {
+    background-color: #fecaca !important;
+}
+
+.flatpickr-day.disabled-date {
+    color: #ccc !important;
+    background-color: transparent !important;
+    pointer-events: none;
+    text-decoration: none;
+    opacity: 0.3;
+}
+
+.tombolform {
+    border: none;
+    outline: none;
+    border-radius: 15px;
+    padding: 1em;
+    background-color: #ccc;
+    box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3);
+    transition: 300ms ease-in-out;
+}
+
+.tombolform:focus {
+    background-color: white;
+    transform: scale(1.05);
+    box-shadow: 13px 13px 100px #969696,
+                -13px -13px 100px #ffffff;
+}
+
+.custom-alert {
+    width: 24em;
+    min-height: 4.5em;
+    background: #171717;
+    color: white;
+    border-radius: 20px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    padding: 1.2em 2em;
+    position: fixed;
+    top: 2em;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2em;
+    animation: fadeInDown 0.5s;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px) translateX(-50%);}
+    to { opacity: 1; transform: translateY(0) translateX(-50%);}
+}
+
+@keyframes fadeOutUp {
+    from { opacity: 1; transform: translateY(0) translateX(-50%);}
+    to   { opacity: 0; transform: translateY(-30px) translateX(-50%);}
+}
+
+.custom-alert.success {
+    border-left: 10px solid #22c55e;
+}
+
+.custom-alert.error {
+    border-left: 10px solid #ef4444;
+}
+
+.custom-alert.warning {
+    border-left: 10px solid #f59e0b;
+}
+
+.alert-icon {
+    font-size: 2.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Room Selection Styles */
+.room-card {
+    transition: all 0.3s ease;
+}
+
+.room-card:hover {
+    transform: translateY(-2px);
+}
+
+.room-card.border-orange-500 {
+    border-color: #f97316;
+    box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1), 0 2px 4px -1px rgba(249, 115, 22, 0.06);
+}
+
+.room-card img {
+    transition: transform 0.3s ease;
+}
+
+.room-card:hover img {
+    transform: scale(1.05);
+}
+
+/* Form Input Styles */
+.form-input {
+    @apply w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500;
+}
+
+.form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+/* Date Picker Customization */
+.flatpickr-calendar {
+    @apply shadow-lg border border-gray-200 rounded-lg;
+}
+
+.flatpickr-day.selected {
+    background: #f97316 !important;
+    border-color: #f97316 !important;
+}
+
+.flatpickr-day.today {
+    border-color: #f97316;
+}
+
+.flatpickr-day:hover {
+    background: #fed7aa !important;
+    border-color: #fed7aa !important;
+}
+
+/* Selected Rooms Summary Animation */
+#selectedRoomsSummary {
+    transition: all 0.3s ease;
+}
+
+#selectedRoomsSummary:not(.hidden) {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Alert Styles */
+.custom-alert {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 50;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    max-width: 24rem;
+}
+
+.custom-alert.success {
+    border-left: 4px solid #22c55e;
+}
+
+.custom-alert.error {
+    border-left: 4px solid #ef4444;
+}
+
+.custom-alert.warning {
+    border-left: 4px solid #f59e0b;
+}
+
+/* Button Styles */
+.btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+}
+
+.btn-primary {
+    @apply bg-orange-500 text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+}
+
+/* Summary Card Styles */
+.summary-card {
+    @apply bg-white rounded-xl shadow-sm p-6 sticky top-8;
+}
+
+.summary-item {
+    @apply flex justify-between items-center py-2;
+}
+
+.summary-label {
+    @apply text-gray-600;
+}
+
+.summary-value {
+    @apply font-medium text-gray-900;
+}
+
+.summary-total {
+    @apply text-lg font-bold text-orange-600;
+} 
