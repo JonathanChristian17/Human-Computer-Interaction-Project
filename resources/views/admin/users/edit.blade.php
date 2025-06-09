@@ -98,6 +98,37 @@
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />
                         </div>
 
+                        <!-- Phone -->
+                        <div class="mt-6">
+                            <label for="phone" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                                {{ __('Phone Number') }}
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <input id="phone" 
+                                class="w-full px-5 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm" 
+                                type="text" 
+                                name="phone" 
+                                value="{{ old('phone', $user->phone) }}"
+                                placeholder="Enter phone number"
+                                required />
+                            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                        </div>
+
+                        <!-- Address -->
+                        <div class="mt-6">
+                            <label for="address" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                                {{ __('Address') }}
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <textarea id="address" 
+                                class="w-full px-5 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm" 
+                                name="address" 
+                                placeholder="Enter address"
+                                required 
+                                rows="3">{{ old('address', $user->address) }}</textarea>
+                            <x-input-error :messages="$errors->get('address')" class="mt-2" />
+                        </div>
+
                         <div class="flex items-center justify-end mt-8 pt-4 border-t border-gray-600">
                             <x-secondary-button type="button" onclick="window.location.href='{{ route('admin.users.index') }}'" class="mr-3">
                                 {{ __('Cancel') }}

@@ -77,13 +77,44 @@
             background-color: #fef9c3;
             color: #854d0e;
         }
-        .status-checked-in {
+        .status-deposit {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .status-checked_in, .status-checked_out {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .status-confirmed {
             background-color: #dcfce7;
             color: #166534;
         }
-        .status-checked-out {
-            background-color: #dbeafe;
-            color: #1e40af;
+        .status-cancelled, .status-expired {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .room-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            max-height: 85px;
+            overflow: hidden;
+        }
+        .room-list li {
+            padding: 4px 6px;
+            margin-bottom: 4px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .room-list li:last-child {
+            margin-bottom: 0;
+        }
+        .room-list-overflow {
+            color: #666;
+            font-size: 11px;
+            font-style: italic;
+            margin-top: 2px;
         }
     </style>
 </head>
@@ -170,7 +201,21 @@
                 <tr>
                     <td>{{ $detail['tanggal']->format('d M Y H:i') }}</td>
                     <td>{{ $detail['guest_name'] }}</td>
-                    <td>{{ $detail['rooms'] }}</td>
+                    <td>
+                        @php
+                            $rooms = explode(', ', $detail['rooms']);
+                            $visibleRooms = array_slice($rooms, 0, 2);
+                            $remainingCount = count($rooms) - 2;
+                        @endphp
+                        <ul class="room-list">
+                            @foreach($visibleRooms as $room)
+                                <li>{{ $room }}</li>
+                            @endforeach
+                        </ul>
+                        @if($remainingCount > 0)
+                            <div class="room-list-overflow">+{{ $remainingCount }} more rooms...</div>
+                        @endif
+                    </td>
                     <td>{{ $detail['check_in'] }}</td>
                     <td>{{ $detail['check_out'] }}</td>
                     <td>Rp {{ number_format($detail['total_price'], 0, ',', '.') }}</td>

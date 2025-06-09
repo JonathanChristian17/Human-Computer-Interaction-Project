@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class RoomController extends Controller
 {
@@ -22,34 +24,34 @@ class RoomController extends Controller
 
     public function store(Request $request)
     {
-        // Dump request data for debugging
-        \Log::info('Room creation request data:', $request->all());
-
         $validated = $request->validate([
             'room_number' => 'required|unique:rooms,room_number',
             'name' => 'required|string|max:255',
             'type' => 'required',
             'description' => 'required',
-            'price_per_night' => 'required|numeric|min:0',
+            'price_per_night' => 'required|string|min:1',
             'capacity' => 'required|integer|min:1',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'status' => 'required|in:available,maintenance'
         ]);
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('rooms', 'public');
-            $validated['image'] = $imagePath;
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('storage/images'), $imageName);
+            $validated['image'] = $imageName;
         }
 
         $validated['is_available'] = $validated['status'] === 'available';
 
-        // Log validated data before creation
-        \Log::info('Validated data for room creation:', $validated);
-
         try {
-            // Ensure price is treated as integer
-            $price = (int) str_replace('.', '', $request->price_per_night);
+            // Convert price string to integer by removing non-numeric characters
+            $price = (int) preg_replace('/[^0-9]/', '', $request->price_per_night);
             
+            if ($price <= 0) {
+                return back()->withInput()->withErrors(['price_per_night' => 'Harga harus lebih besar dari 0']);
+            }
+
             $room = Room::create([
                 'room_number' => $validated['room_number'],
                 'name' => $validated['name'],
@@ -62,14 +64,22 @@ class RoomController extends Controller
                 'is_available' => $validated['is_available']
             ]);
 
-            \Log::info('Room created successfully:', ['room_id' => $room->id]);
+            // Log activity
+            Activity::log(
+                Auth::id(),
+                'Created new room',
+                "Room {$room->room_number} ({$room->name}) has been created",
+                'room_create',
+                $room
+            );
 
             return redirect()->route('admin.rooms.index')
                 ->with('success', 'Kamar berhasil ditambahkan! Nomor kamar: ' . $room->room_number);
         } catch (\Exception $e) {
             \Log::error('Error creating room:', [
                 'error' => $e->getMessage(),
-                'validated_data' => $validated
+                'validated_data' => $validated,
+                'price' => $price ?? null
             ]);
 
             return back()->withInput()
@@ -88,23 +98,35 @@ class RoomController extends Controller
             'number' => 'required|unique:rooms,room_number,' . $room->id,
             'name' => 'required|string|max:255',
             'type' => 'required',
-            'price_per_night' => 'required|numeric|min:0',
+            'price_per_night' => 'required|string|min:1',
             'capacity' => 'required|integer|min:1',
             'description' => 'required',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
+        $oldRoom = $room->replicate();
+
         if ($request->hasFile('image')) {
             // Delete old image
             if ($room->image) {
-                Storage::disk('public')->delete($room->image);
+                $oldImagePath = public_path('storage/images/' . $room->image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
             }
-            $imagePath = $request->file('image')->store('rooms', 'public');
-            $validated['image'] = $imagePath;
+            
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('storage/images'), $imageName);
+            $validated['image'] = $imageName;
         }
 
-        // Ensure price is treated as integer
-        $price = (int) str_replace('.', '', $request->price_per_night);
+        // Convert price string to integer by removing non-numeric characters
+        $price = (int) preg_replace('/[^0-9]/', '', $request->price_per_night);
+        
+        if ($price <= 0) {
+            return back()->withInput()->withErrors(['price_per_night' => 'Harga harus lebih besar dari 0']);
+        }
 
         // Map number to room_number and include name
         $updateData = [
@@ -122,17 +144,48 @@ class RoomController extends Controller
 
         $room->update($updateData);
 
+        // Log activity with changes
+        $changes = [];
+        foreach ($updateData as $key => $value) {
+            if ($oldRoom->$key != $value) {
+                $changes[] = "$key: {$oldRoom->$key} → $value";
+            }
+        }
+
+        if (!empty($changes)) {
+            Activity::log(
+                Auth::id(),
+                'Updated room',
+                "Room {$room->room_number} updated. Changes: " . implode(', ', $changes),
+                'room_update',
+                $room
+            );
+        }
+
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Kamar berhasil diperbarui! Nomor kamar: ' . $room->room_number);
     }
 
     public function destroy(Room $room)
     {
+        $roomNumber = $room->room_number;
+        
         if ($room->image) {
-            Storage::disk('public')->delete($room->image);
+            $oldImagePath = public_path('storage/images/' . $room->image);
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
         }
         
         $room->delete();
+
+        // Log activity
+        Activity::log(
+            Auth::id(),
+            'Deleted room',
+            "Room {$roomNumber} has been deleted",
+            'room_delete'
+        );
 
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Kamar berhasil dihapus!');

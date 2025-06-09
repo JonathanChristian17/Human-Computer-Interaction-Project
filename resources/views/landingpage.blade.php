@@ -2,6 +2,7 @@
 
 @php
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 @endphp
 
 @section('title', 'Welcome to Cahaya Resort Pangururan')
@@ -268,107 +269,160 @@ use Illuminate\Support\Facades\Storage;
 
     /* Room & Guests Custom Select */
     .select {
-      width: fit-content;
-      min-width: 180px;
-      cursor: pointer;
       position: relative;
-      transition: 300ms;
-      color: white;
-      overflow: visible;
-      font-family: 'Poppins', sans-serif;
+      width: 220px;
+      z-index: 1000;
     }
+
     .selected {
-      background-color: rgba(0, 0, 0, 0.3);
-      padding: 10px 16px;
-      border-radius: 8px;
-      position: relative;
-      z-index: 100000;
-      font-size: 1rem;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      color: #fff;
-      min-height: 40px;
-      width: 100%;
-      box-sizing: border-box;
-      gap: 10px;
-    }
-    .arrow {
-      margin-left: auto;
-      height: 14px;
-      width: 25px;
-      fill: white;
-      z-index: 100000;
-      transition: 300ms;
-    }
-    .options {
-      display: flex;
-      flex-direction: column;
-      border-radius: 8px;
-      padding: 8px 0;
-      background-color: rgba(0, 0, 0, 0.3);
-      position: absolute;
-      left: 0;
-      top: 100%;
-      min-width: 180px;
-      width: 100%;
-      opacity: 0;
-      pointer-events: none;
-      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18);
-      border: 2px solid #FFA040;
-      transition: opacity 0.3s, top 0.3s;
-      z-index: 10001;
-    }
-    .select:hover > .options {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .select:hover > .selected .arrow {
-      transform: rotate(0deg);
-    }
-    .option {
-      border-radius: 8px;
-      padding: 12px 24px;
-      transition: background 0.3s, color 0.3s, transform 0.3s;
-      background-color: rgba(0, 0, 0, 0.3);
-      width: 100%;
-      font-size: 1rem;
-      color: #fff;
-      text-align: left;
-      box-sizing: border-box;
+      gap: 12px;
       cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      height: 48px;
+      min-width: 220px;
     }
-    .option:hover, .options input[type="radio"]:focus + label {
-      background-color: #FFA040 !important;
-      color: #fff !important;
-      transform: translateX(8px) scale(1.04);
+
+    .selected i {
+      color: #FFA040;
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
     }
-    .options input[type="radio"] {
+
+    .selected-text {
+      color: #fff;
+      font-weight: 500;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 8px;
+    }
+
+    .arrow {
+      width: 14px;
+      height: 14px;
+      fill: #fff;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .select.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .options {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 220px;
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      max-height: 200px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #FFA040 #1a1a1a;
+    }
+
+    .options::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .options::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-radius: 3px;
+    }
+
+    .options::-webkit-scrollbar-thumb {
+      background: #FFA040;
+      border-radius: 3px;
+    }
+
+    .select.open .options {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .option {
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 48px;
+    }
+
+    .option:hover {
+      background: rgba(255,160,64,0.1);
+    }
+
+    .option.selected {
+      background: rgba(255,160,64,0.2);
+    }
+
+    .option i {
+      color: #FFA040;
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .option span {
+      color: #fff;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .option input[type="radio"] {
       display: none;
     }
-    .options label {
-      display: inline-block;
+
+    .option label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      cursor: pointer;
+      height: 24px;
     }
-    .options label::before {
-      content: attr(data-txt);
+
+    .option.selected span {
+      color: #FFA040;
     }
-    .options input[type="radio"]:checked + label {
-      display: none;
-    }
-    .options input[type="radio"]#all:checked + label {
-      display: none;
-    }
-    .select:has(.options input[type="radio"]#all:checked) .selected::before {
-      content: attr(data-default);
-    }
-    .select:has(.options input[type="radio"]#option-1:checked) .selected::before {
-      content: attr(data-one);
-    }
-    .select:has(.options input[type="radio"]#option-2:checked) .selected::before {
-      content: attr(data-two);
-    }
-    .select:has(.options input[type="radio"]#option-3:checked) .selected::before {
-      content: attr(data-three);
+
+    @media (max-width: 768px) {
+      .select {
+        width: 100%;
+      }
+      
+      .selected {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .options {
+        width: 100%;
+      }
     }
 </style>
 @endsection
@@ -408,7 +462,7 @@ use Illuminate\Support\Facades\Storage;
                 </div>
             
                 <!-- Booking Form -->
-                <form id="searchForm" action="{{ route('kamar.index') }}" method="GET" class="flex flex-col items-stretch gap-4 p-4 mt-10 bg-black/40 backdrop-blur-md rounded-xl md:inline-flex md:flex-row md::items-center md::gap-4" style="overflow:visible; z-index:9999;">
+                <form id="searchForm" class="flex flex-col items-stretch gap-4 p-4 mt-10 bg-black/40 backdrop-blur-md rounded-xl md:inline-flex md:flex-row md::items-center md::gap-4" style="overflow:visible; z-index:9999;">
                     <!-- Check-in -->
                     <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-black/30 w-full md:w-auto" onclick="openCalendar('check_in')">
                         <i class="text-white fas fa-calendar"></i>
@@ -431,40 +485,35 @@ use Illuminate\Support\Facades\Storage;
                                readonly>
                     </div>
             
-                    <!-- Room & Guests -->
-                    <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-black/30 w-full md:w-auto" style="height:48px;">
-                      <div class="select" style="width:100%;">
-                        <div
-                          class="selected w-full"
-                          data-default="1 Room, 2 guest"
-                          data-one="2 Rooms, 4 guests"
-                          data-two="3 Rooms, 6 guests"
-                          data-three="4 Rooms, 8 guests"
-                        >
-                          <i class="text-white fas fa-house" style="margin-right:8px;"></i>
-                          <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512" class="arrow">
-                            <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"></path>
-                          </svg>
+                    <!-- Room Type Selector -->
+                    <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-black/30 w-full md:w-auto">
+                        <div class="select">
+                            <div class="selected">
+                                <i class="fas fa-home"></i>
+                                <span class="selected-text">All Room Types</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512" class="arrow">
+                                    <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"></path>
+                                </svg>
+                            </div>
+                            <div class="options">
+                                <div class="option" data-value="">
+                                    <input type="radio" id="all" name="room_type" value="" checked>
+                                    <label for="all">
+                                        <i class="fas fa-home"></i>
+                                        <span>All Room Types</span>
+                                    </label>
+                                </div>
+                                @foreach($roomTypes as $type)
+                                <div class="option" data-value="{{ $type }}">
+                                    <input type="radio" id="{{ Str::slug($type) }}" name="room_type" value="{{ $type }}">
+                                    <label for="{{ Str::slug($type) }}">
+                                        <i class="fas fa-bed"></i>
+                                        <span>{{ $type }}</span>
+                                    </label>
+                                </div>
+                                @endforeach
+                            </div>
                         </div>
-                        <div class="options">
-                          <div title="1 Room, 2 guest">
-                            <input id="all" name="guests" type="radio" value="1-2" checked />
-                            <label class="option" for="all" data-txt="1 Room, 2 guest"></label>
-                          </div>
-                          <div title="2 Rooms, 4 guests">
-                            <input id="option-1" name="guests" type="radio" value="2-4" />
-                            <label class="option" for="option-1" data-txt="2 Rooms, 4 guests"></label>
-                          </div>
-                          <div title="3 Rooms, 6 guests">
-                            <input id="option-2" name="guests" type="radio" value="3-6" />
-                            <label class="option" for="option-2" data-txt="3 Rooms, 6 guests"></label>
-                          </div>
-                          <div title="4 Rooms, 8 guests">
-                            <input id="option-3" name="guests" type="radio" value="4-8" />
-                            <label class="option" for="option-3" data-txt="4 Rooms, 8 guests"></label>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                 
                     <!-- Search Button -->
@@ -1041,50 +1090,121 @@ window.formatDateForSubmit = function(date) {
     return `${year}-${month}-${day}`;
 };
 
-// Add form submit handler
+// Update form submit handler
 document.addEventListener('DOMContentLoaded', function() {
     const searchForm = document.getElementById('searchForm');
     if (searchForm) {
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get the dates
+            // Get the dates (optional now)
             const checkIn = window.selectedStartDate;
             const checkOut = window.selectedEndDate;
             
-            if (!checkIn || !checkOut) {
-                showCustomAlert('Please select both check-in and check-out dates!', 'warning');
-                e.preventDefault(); // Prevent submission if dates are missing
-                return;
+            // Validate dates if they are selected
+            if (checkIn || checkOut) {
+                if (!checkIn || !checkOut) {
+                    showCustomAlert('Please select both check-in and check-out dates!', 'warning');
+                    return;
+                }
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (checkIn < today) {
+                    showCustomAlert('Check-in date cannot be in the past!', 'error');
+                    return;
+                }
+                
+                if (checkOut <= checkIn) {
+                    showCustomAlert('Check-out date must be after check-in date!', 'error');
+                    return;
+                }
             }
             
-            // Get selected room and guest value
-            const selectedOption = document.querySelector('input[name="guests"]:checked');
-            if (!selectedOption) {
-                showCustomAlert('Please select the number of rooms and guests!', 'warning');
-                e.preventDefault(); // Prevent submission if guests are missing
-                return;
+            // Get selected room type
+            const selectedRoomType = document.querySelector('input[name="room_type"]:checked');
+            
+            // Show loading state in rooms panel
+            const roomsPanel = document.getElementById('roomsPanel');
+            const roomsContent = document.getElementById('roomsContent');
+            if (roomsPanel && roomsContent) {
+                roomsContent.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                        <p class="mt-2 text-gray-600">Loading rooms...</p>
+                    </div>
+                `;
+                roomsPanel.classList.add('show');
             }
-            
-            // Format dates for the request input fields
-            // Ensure the input fields are updated before the form is submitted
-            document.getElementById('landing_check_in').value = formatDateForSubmit(checkIn);
-            document.getElementById('landing_check_out').value = formatDateForSubmit(checkOut);
-            
-            // The form will now submit normally, navigating to the kamar.index route
-            // The server-side needs to handle displaying the results in the desired layout
+
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (checkIn && checkOut) {
+                params.set('check_in', formatDateForSubmit(checkIn));
+                params.set('check_out', formatDateForSubmit(checkOut));
+            }
+            if (selectedRoomType && selectedRoomType.value) {
+                params.set('room_type', selectedRoomType.value);
+            }
+
+            // Update URL without page reload
+            const url = new URL(window.location);
+            Array.from(params.entries()).forEach(([key, value]) => {
+                url.searchParams.set(key, value);
+            });
+            window.history.pushState({}, '', url);
+
+            // Fetch filtered rooms
+            fetch(`/kamar?${params.toString()}`)
+                .then(response => response.text())
+                .then(html => {
+                    // Extract the rooms container content
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const mainContent = doc.querySelector('.min-h-screen');
+                    
+                    if (mainContent) {
+                        roomsContent.innerHTML = mainContent.innerHTML;
+                        
+                        // Update navigation state
+                        const navContainer = document.querySelector('[x-data]');
+                        if (navContainer && navContainer.__x) {
+                            navContainer.__x.$data.activeTab = 'rooms';
+                            localStorage.setItem('activeTab', 'rooms');
+                        }
+
+                        // Force update UI for navigation
+                        document.querySelectorAll('.nav-item').forEach(item => {
+                            const text = item.textContent.trim();
+                            if (text === 'Rooms') {
+                                item.classList.add('active');
+                            } else {
+                                item.classList.remove('active');
+                            }
+                        });
+
+                        // Bind pagination events
+                        bindPanelPagination();
+                    } else {
+                        roomsContent.innerHTML = html;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         });
     }
 });
 
 window.handleDateClick = function(info) {
-    // Use info.date which is a Date object representing the start of the day in the local timezone
     const clickedDate = info.date;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     if (clickedDate < today) {
-        return; // Prevent selecting past dates
+        showCustomAlert('Cannot select dates in the past!', 'error');
+        return;
     }
 
     if (window.currentInputType === 'check_in') {
@@ -1095,11 +1215,11 @@ window.handleDateClick = function(info) {
              document.getElementById('landing_check_out').value = '';
         }
         highlightDates();
+        applyDates();
     } else if (window.currentInputType === 'check_out') {
         if (!window.selectedStartDate) {
-            showCustomAlert('Please select a check-in date before selecting check-out date!', 'error');
-            // Optionally reopen check-in calendar
-            // setTimeout(() => openCalendar('check_in'), 100);
+            showCustomAlert('Please select a check-in date first!', 'error');
+            setTimeout(() => openCalendar('check_in'), 100);
             return;
         }
         // Ensure check-out is strictly after check-in
@@ -1109,6 +1229,7 @@ window.handleDateClick = function(info) {
         }
         window.selectedEndDate = clickedDate;
         highlightDates();
+        applyDates();
     }
 };
 
@@ -1119,21 +1240,17 @@ window.highlightDates = function() {
     if (window.selectedStartDate) {
         let displayEndDate = window.selectedEndDate ? new Date(window.selectedEndDate) : new Date(window.selectedStartDate);
         
-        // FullCalendar end date is exclusive. To highlight the end date itself, add one day.
-        // Only add a day if an end date is selected, otherwise highlight only the start date.
+        // Add one day to include the end date in the highlight
         if (window.selectedEndDate) {
-             displayEndDate.setDate(displayEndDate.getDate() + 1);
+            displayEndDate.setDate(displayEndDate.getDate() + 1);
         }
        
         window.calendar.addEvent({
             start: window.selectedStartDate,
-            end: displayEndDate, // FullCalendar end is exclusive
+            end: displayEndDate,
             display: 'background',
             backgroundColor: '#fef3c7'
         });
-    } else {
-        // If check-in is cleared, also clear highlight
-         window.calendar.getEvents().forEach(event => event.remove());
     }
 };
 
@@ -1190,6 +1307,76 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     console.log('Dropdown elements NOT found');
   }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.querySelector('.select');
+    const selected = select.querySelector('.selected');
+    const selectedText = select.querySelector('.selected-text');
+    const options = select.querySelectorAll('.option');
+    
+    // Toggle dropdown on selected click
+    selected.addEventListener('click', function(e) {
+        e.stopPropagation();
+        select.classList.toggle('open');
+    });
+    
+    // Handle option selection
+    options.forEach(option => {
+        const input = option.querySelector('input');
+        const label = option.querySelector('label');
+        
+        option.addEventListener('click', function(e) {
+            e.stopPropagation();
+            updateSelection(this);
+        });
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function() {
+        select.classList.remove('open');
+    });
+    
+    // Initialize from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomType = urlParams.get('room_type');
+    if (roomType) {
+        const option = select.querySelector(`.option input[value="${roomType}"]`).closest('.option');
+        if (option) {
+            updateSelection(option, false);
+        }
+    }
+    
+    function updateSelection(selectedOption, shouldUpdateUrl = true) {
+        const input = selectedOption.querySelector('input');
+        const label = selectedOption.querySelector('label');
+        const value = input.value;
+        
+        // Update radio state
+        input.checked = true;
+        
+        // Update selected text
+        selectedText.textContent = label.querySelector('span').textContent;
+        
+        // Update visual state
+        options.forEach(opt => opt.classList.remove('selected'));
+        selectedOption.classList.add('selected');
+        
+        // Close dropdown
+        select.classList.remove('open');
+        
+        // Update URL if needed
+        if (shouldUpdateUrl) {
+            const url = new URL(window.location);
+            if (value) {
+                url.searchParams.set('room_type', value);
+            } else {
+                url.searchParams.delete('room_type');
+            }
+            window.history.pushState({}, '', url);
+        }
+    }
 });
 </script>
 @endpush

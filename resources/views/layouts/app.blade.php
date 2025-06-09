@@ -955,15 +955,13 @@
                 @auth
                     <div class="profile-dropdown">
                         <button type="button" class="profile-dropdown-button text-white hover:text-gray-200 transition font-medium flex items-center text-sm">
-                            <div class="relative">
+                            <div class="flex items-center gap-2">
                                 <img src="{{ Auth::check() ? Auth::user()->profile_photo_url : asset('images/default-avatar.png') }}" 
                                      alt="{{ Auth::check() ? Auth::user()->name : 'Guest' }}"
-                                     class="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover mr-1 sm:mr-2 cursor-pointer"
-                                     onclick="event.stopPropagation(); showPhotoUploadDialog();">
-                                <input type="file" id="headerProfilePhoto" class="hidden" accept="image/*" onchange="handleQuickProfilePhotoUpload(this)">
+                                     class="h-8 w-8 rounded-full object-cover">
+                                <span class="text-white" data-user-name>{{ Auth::user()->name }}</span>
+                                <i class="fas fa-chevron-down text-white"></i>
                             </div>
-                            <span class="hidden sm:inline" data-user-name>{{ Auth::user()->name }}</span>
-                            <i class="fas fa-chevron-down text-sm ml-1 sm:ml-2"></i>
                         </button>
                         <div class="profile-dropdown-menu">
                             <a href="#" onclick="event.preventDefault(); showProfile();" class="dropdown-item">
@@ -2196,83 +2194,6 @@
                 document.getElementById('profilePhotoInput').click();
             };
 
-            // Handle quick profile photo upload
-            window.handleQuickProfilePhotoUpload = async function(input) {
-                @guest
-                    showBrutalistSwalAlert({
-                        type: 'danger',
-                        title: 'Authentication Required',
-                        message: 'Please log in to update your profile photo.',
-                        confirmText: 'Login',
-                        cancelText: 'Register',
-                        onConfirm: function() {
-                            window.location.href = '{{ route('login') }}';
-                        },
-                        onCancel: function() {
-                            window.location.href = '{{ route('register') }}';
-                        }
-                    });
-                    return;
-                @endguest
-
-                if (!input.files || !input.files[0]) return;
-
-                const file = input.files[0];
-                const formData = new FormData();
-                formData.append('profile_photo', file);
-                formData.append('_token', '{{ csrf_token() }}');
-
-                try {
-                    const response = await fetch('{{ route("profile.photo.update") }}', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(data.message || 'Failed to upload photo');
-                    }
-
-                    if (!data.profile_photo_url) {
-                        throw new Error('No photo URL received from server');
-                    }
-
-                    console.log('Upload response:', data); // Debug log
-
-                    // Update all profile photos on the page
-                    @auth
-                    const profilePhotos = document.querySelectorAll('img[alt="{{ Auth::user()->name }}"]');
-                    profilePhotos.forEach(photo => {
-                        photo.src = data.profile_photo_url + '?t=' + new Date().getTime();
-                    });
-                    @endauth
-
-                    // Show success message
-                    showBrutalistSwalAlert({
-                        type: 'success',
-                        title: 'Success!',
-                        message: 'Profile photo updated successfully',
-                        timer: 1500
-                    });
-
-                    // Clear the file input
-                    input.value = '';
-                } catch (error) {
-                    console.error('Profile photo upload error:', error);
-                    showBrutalistSwalAlert({
-                        type: 'danger',
-                        title: 'Error',
-                        message: error.message || 'Failed to upload profile photo'
-                    });
-                    // Clear the file input on error too
-                    input.value = '';
-                }
-            };
 
             // Make sure storage link exists
             window.addEventListener('DOMContentLoaded', async function() {
@@ -2457,8 +2378,8 @@
                                                     <div class="font-medium">${data.transaction_id || '-'}</div>
                                                     <div class="text-gray-600">Status:</div>
                                                     <div class="font-medium">
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(data.transaction_status)}">
-                                                            ${data.transaction_status ? data.transaction_status.charAt(0).toUpperCase() + data.transaction_status.slice(1) : '-'}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(data.payment_status)}">
+                                                            ${data.payment_status ? data.payment_status.charAt(0).toUpperCase() + data.payment_status.slice(1) : '-'}
                                                         </span>
                                                     </div>
                                                     <div class="text-gray-600">Payment Type:</div>
@@ -2533,13 +2454,19 @@
                                                 <div class="grid grid-cols-2 gap-2 text-sm">
                                                     <div class="text-gray-600">Amount:</div>
                                                     <div class="font-medium text-lg text-green-600">Rp ${new Intl.NumberFormat('id-ID').format(data.gross_amount)}</div>
-                                                    <div class="text-gray-600">Payment Status:</div>
-                                                    <div class="font-medium">
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(data.payment_status)}">
-                                                            ${data.payment_status ? data.payment_status.charAt(0).toUpperCase() + data.payment_status.slice(1) : '-'}
-                                                        </span>
-                                                    </div>
                                                 </div>
+                                                ${data.payment_status === 'paid' || data.payment_status === 'settlement' || data.payment_status === 'deposit' ? `
+                                                    <div class="mt-4 flex justify-center">
+                                                        <button 
+                                                            onclick="downloadInvoice(${data.id})"
+                                                            class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150">
+                                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                            </svg>
+                                                            Download Invoice
+                                                        </button>
+                                                    </div>
+                                                ` : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -3002,6 +2929,46 @@
                     return 'bg-red-100 text-red-800';
                 default:
                     return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        async function downloadInvoice(id) {
+            try {
+                const response = await fetch(`/transactions/${id}/invoice`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to download invoice');
+                }
+
+                // Get the blob from response
+                const blob = await response.blob();
+                
+                // Create a temporary URL for the blob
+                const url = window.URL.createObjectURL(blob);
+                
+                // Create a temporary link element
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `invoice-${id}.pdf`; // Set the download filename
+                
+                // Append link to body, click it, and remove it
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // Release the temporary URL
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading invoice:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to download invoice. Please try again.'
+                });
             }
         }
     </script>

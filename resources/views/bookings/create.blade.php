@@ -282,7 +282,20 @@ input.date-input:focus {
                                         </div>
                                         <div>
                                             <label for="id_number" class="block text-sm font-medium text-gray-700 mb-1">ID Number</label>
-                                            <input type="text" id="id_number" name="id_number" placeholder="NIK/Passport Number" autocomplete="off" required style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';">
+                                            <input type="text" 
+                                                   id="id_number" 
+                                                   name="id_number" 
+                                                   placeholder="NIK/Passport Number (16 digit)" 
+                                                   autocomplete="off" 
+                                                   pattern="[0-9]{16}"
+                                                   maxlength="16"
+                                                   title="NIK harus 16 digit angka"
+                                                   oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 16)"
+                                                   required 
+                                                   style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" 
+                                                   onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" 
+                                                   onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';">
+                                            <p class="mt-1 text-sm text-gray-500">NIK harus 16 digit angka</p>
                                         </div>
                                     </div>
                                 </div>

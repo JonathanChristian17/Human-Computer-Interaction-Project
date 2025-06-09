@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('type');
             $table->text('description');
-            $table->decimal('price_per_night', 10, 2);
+            $table->bigInteger('price_per_night');
             $table->integer('capacity');
             $table->string('image')->nullable();
             $table->boolean('is_available')->default(true);
