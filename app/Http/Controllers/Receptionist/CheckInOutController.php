@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\Revenue;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -132,6 +133,15 @@ class CheckInOutController extends Controller
             $booking->checked_in_at = now();
             $booking->save();
 
+            // Log activity
+            Activity::log(
+                auth()->id(),
+                'Check-in booking',
+                "Check-in booking #{$booking->id} untuk {$booking->full_name}",
+                'booking_check_in',
+                $booking
+            );
+
             DB::commit();
             return redirect()->back()->with('success', 'Check-in berhasil dilakukan.');
         } catch (\Exception $e) {
@@ -176,6 +186,15 @@ class CheckInOutController extends Controller
                 $room->status = 'available';
                 $room->save();
             }
+
+            // Log activity
+            Activity::log(
+                auth()->id(),
+                'Check-out booking',
+                "Check-out booking #{$booking->id} untuk {$booking->full_name}",
+                'booking_check_out',
+                $booking
+            );
 
             DB::commit();
             return redirect()->route('receptionist.bookings.completed')->with('success', 'Check-out berhasil dilakukan.');

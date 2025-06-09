@@ -456,6 +456,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const checkIn = urlParams.get('check_in');
     const checkOut = urlParams.get('check_out');
+    const guests = urlParams.get('guests');
+
     if (checkIn) {
         window.selectedStartDate = new Date(checkIn);
         document.getElementById('search_check_in').value = formatDateForDisplay(window.selectedStartDate);
@@ -464,21 +466,94 @@ document.addEventListener('DOMContentLoaded', function() {
         window.selectedEndDate = new Date(checkOut);
         document.getElementById('search_check_out').value = formatDateForDisplay(window.selectedEndDate);
     }
+    if (guests) {
+        const guestInput = document.querySelector(`input[name="guests"][value="${guests}"]`);
+        if (guestInput) {
+            guestInput.checked = true;
+            const selectedText = guestInput.parentElement.querySelector('.option').getAttribute('data-txt');
+            document.querySelector('.selected').textContent = selectedText;
+        }
+    }
 
-    // Add pagination handling
+    // Add search form handler
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get the dates
+            const checkIn = window.selectedStartDate;
+            const checkOut = window.selectedEndDate;
+            
+            if (!checkIn || !checkOut) {
+                showBrutalistSwalAlert({
+                    type: 'warning',
+                    title: 'Missing Dates',
+                    text: 'Please select both check-in and check-out dates!'
+                });
+                return;
+            }
+
+            // Validate date range
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (checkIn < today) {
+                showBrutalistSwalAlert({
+                    type: 'error',
+                    title: 'Invalid Date',
+                    text: 'Check-in date cannot be in the past!'
+                });
+                return;
+            }
+            
+            if (checkOut <= checkIn) {
+                showBrutalistSwalAlert({
+                    type: 'error',
+                    title: 'Invalid Date Range',
+                    text: 'Check-out date must be after check-in date!'
+                });
+                return;
+            }
+            
+            // Get selected room and guest value
+            const selectedOption = document.querySelector('input[name="guests"]:checked');
+            if (!selectedOption) {
+                showBrutalistSwalAlert({
+                    type: 'warning',
+                    title: 'Missing Selection',
+                    text: 'Please select the number of rooms and guests!'
+                });
+                return;
+            }
+            
+            // Format dates for the request
+            document.getElementById('search_check_in').value = formatDateForSubmit(checkIn);
+            document.getElementById('search_check_out').value = formatDateForSubmit(checkOut);
+            
+            // Submit the form
+            searchForm.submit();
+        });
+    }
+
+    // Add pagination handling with search parameters
     document.addEventListener('click', function(e) {
         const paginationLink = e.target.closest('#pagination-links a');
         if (paginationLink) {
             e.preventDefault();
             const url = new URL(paginationLink.href);
-            const checkIn = window.selectedStartDate ? formatDateForSubmit(window.selectedStartDate) : document.getElementById('search_check_in').value;
-            const checkOut = window.selectedEndDate ? formatDateForSubmit(window.selectedEndDate) : document.getElementById('search_check_out').value;
-            const guests = document.getElementById('search_guests').value;
             
             // Add search parameters to pagination URL
-            url.searchParams.set('check_in', checkIn);
-            url.searchParams.set('check_out', checkOut);
-            url.searchParams.set('guests', guests);
+            if (window.selectedStartDate) {
+                url.searchParams.set('check_in', formatDateForSubmit(window.selectedStartDate));
+            }
+            if (window.selectedEndDate) {
+                url.searchParams.set('check_out', formatDateForSubmit(window.selectedEndDate));
+            }
+            const selectedGuests = document.querySelector('input[name="guests"]:checked');
+            if (selectedGuests) {
+                url.searchParams.set('guests', selectedGuests.value);
+            }
             
             fetch(url)
                 .then(response => response.text())
@@ -496,13 +571,114 @@ document.addEventListener('DOMContentLoaded', function() {
                     showBrutalistSwalAlert({
                         type: 'error',
                         title: 'Error',
-                        text: 'Failed to load the next page. Please try again.',
-                        confirmButtonColor: '#f59e0b'
+                        text: 'Failed to load the next page. Please try again.'
                     });
                 });
         }
     });
 });
+
+// Add date formatting functions
+window.formatDateForSubmit = function(date) {
+    const year = date.getUTCFullYear();
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+window.formatDateForDisplay = function(date) {
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+};
+
+// Update handleDateClick to include better validation
+window.handleDateClick = function(info) {
+    const clickedDate = info.date;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (clickedDate < today) {
+        showBrutalistSwalAlert({
+            type: 'error',
+            title: 'Invalid Date',
+            text: 'Cannot select dates in the past!'
+        });
+        return;
+    }
+
+    if (window.currentInputType === 'check_in') {
+        window.selectedStartDate = clickedDate;
+        // If check-out was before or same as new check-in, clear it
+        if (window.selectedEndDate && window.selectedEndDate <= window.selectedStartDate) {
+             window.selectedEndDate = null;
+             document.getElementById('search_check_out').value = '';
+        }
+        highlightDates();
+        applyDates();
+    } else if (window.currentInputType === 'check_out') {
+        if (!window.selectedStartDate) {
+            showBrutalistSwalAlert({
+                type: 'error',
+                title: 'Missing Check-in',
+                text: 'Please select a check-in date first!'
+            });
+            setTimeout(() => openCalendar('check_in'), 100);
+            return;
+        }
+        // Ensure check-out is strictly after check-in
+        if (clickedDate <= window.selectedStartDate) {
+            showBrutalistSwalAlert({
+                type: 'error',
+                title: 'Invalid Date Range',
+                text: 'Check-out date must be after check-in date!'
+            });
+            return;
+        }
+        window.selectedEndDate = clickedDate;
+        highlightDates();
+        applyDates();
+    }
+};
+
+// Update applyDates to handle date application more smoothly
+window.applyDates = function() {
+    if (window.currentInputType === 'check_in' && window.selectedStartDate) {
+        document.getElementById('search_check_in').value = formatDateForDisplay(window.selectedStartDate);
+        closeCalendar();
+        // Automatically open check-out selection
+        setTimeout(() => openCalendar('check_out'), 100);
+    } else if (window.currentInputType === 'check_out' && window.selectedEndDate) {
+        document.getElementById('search_check_out').value = formatDateForDisplay(window.selectedEndDate);
+        closeCalendar();
+        // Trigger search after selecting dates
+        document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+    }
+};
+
+// Update highlightDates to show selection range more clearly
+window.highlightDates = function() {
+    // Clear existing highlights
+    window.calendar.getEvents().forEach(event => event.remove());
+    
+    if (window.selectedStartDate) {
+        let displayEndDate = window.selectedEndDate ? new Date(window.selectedEndDate) : new Date(window.selectedStartDate);
+        
+        // Add one day to include the end date in the highlight
+        if (window.selectedEndDate) {
+            displayEndDate.setDate(displayEndDate.getDate() + 1);
+        }
+       
+        window.calendar.addEvent({
+            start: window.selectedStartDate,
+            end: displayEndDate,
+            display: 'background',
+            backgroundColor: '#fef3c7'
+        });
+    }
+};
 
 // Calendar Functions
 window.openCalendar = function(type) {
@@ -532,96 +708,6 @@ window.openCalendar = function(type) {
 window.closeCalendar = function() {
     document.querySelector('.calendar-modal').style.display = 'none';
 };
-
-window.applyDates = function() {
-    if (window.currentInputType === 'check_in' && window.selectedStartDate) {
-        document.getElementById('search_check_in').value = formatDateForDisplay(window.selectedStartDate);
-        // Clear check-out if it's before new check-in
-        if (window.selectedEndDate && window.selectedEndDate <= window.selectedStartDate) {
-            window.selectedEndDate = null;
-            document.getElementById('search_check_out').value = '';
-        }
-        closeCalendar();
-        // Automatically open check-out selection
-        setTimeout(() => openCalendar('check_out'), 100);
-    } else if (window.currentInputType === 'check_out' && window.selectedEndDate) {
-        document.getElementById('search_check_out').value = formatDateForDisplay(window.selectedEndDate);
-        closeCalendar();
-        // Trigger search after selecting dates
-        searchRooms();
-    }
-};
-
-window.handleDateClick = function(info) {
-    const clickedDate = new Date(info.dateStr);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (clickedDate < today) {
-        return; // Prevent selecting past dates
-    }
-
-    if (window.currentInputType === 'check_in') {
-        window.selectedStartDate = clickedDate;
-        highlightDates();
-    } else if (window.currentInputType === 'check_out') {
-        if (!window.selectedStartDate) {
-            showBrutalistSwalAlert({
-                icon: 'warning',
-                title: 'Select Check-in First',
-                text: 'Please select a check-in date before selecting check-out date.',
-                confirmButtonColor: '#f59e0b'
-            });
-            closeCalendar();
-            openCalendar('check_in');
-            return;
-        }
-        if (clickedDate <= window.selectedStartDate) {
-            showBrutalistSwalAlert({
-                icon: 'warning',
-                title: 'Invalid Date',
-                text: 'Check-out date must be after check-in date.',
-                confirmButtonColor: '#f59e0b'
-            });
-            return;
-        }
-        window.selectedEndDate = clickedDate;
-        highlightDates();
-    }
-};
-
-window.highlightDates = function() {
-    window.calendar.getEvents().forEach(event => event.remove());
-    
-    if (window.selectedStartDate) {
-        // Create a new date object for end date to avoid modifying the original
-        let displayEndDate = window.selectedEndDate ? new Date(window.selectedEndDate) : window.selectedStartDate;
-        // Subtract one day from the end date for display purposes
-        displayEndDate.setDate(displayEndDate.getDate() - 1);
-        
-        window.calendar.addEvent({
-            start: window.selectedStartDate,
-            end: displayEndDate,
-            display: 'background',
-            backgroundColor: '#fef3c7'
-        });
-    }
-};
-
-window.formatDateForDisplay = function(date) {
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-};
-
-window.formatDateForSubmit = function(date) {
-    return date.toISOString().split('T')[0];
-};
-
-// Add event listener for calendar overlay
-document.querySelector('.calendar-overlay')?.addEventListener('click', closeCalendar);
 
 // Tambahkan fungsi handleBackClick agar tombol back sama dengan app.blade
 window.handleBackClick = function(event) {

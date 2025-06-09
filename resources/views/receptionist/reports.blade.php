@@ -1,4 +1,31 @@
 <x-receptionist-layout>
+    <style>
+        /* Custom Scrollbar Styles */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
+        }
+
+        /* Hide scrollbar when not hovering */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) rgba(55, 65, 81, 0.3);
+        }
+    </style>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-100 leading-tight">
             {{ __('Reports') }}
@@ -182,8 +209,17 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
                                             {{ $detail['guest_name'] }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                            {{ $detail['rooms'] }}
+                                        <td class="px-6 py-4 text-sm text-white relative">
+                                            @php
+                                                $rooms = explode(', ', $detail['rooms']);
+                                            @endphp
+                                            <div class="max-h-[85px] overflow-y-auto custom-scrollbar">
+                                                <div class="flex flex-col space-y-1.5 pr-2">
+                                                    @foreach($rooms as $room)
+                                                        <div class="bg-gray-700/50 px-3 py-1.5 rounded-md border border-gray-600/30">{{ $room }}</div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
                                             {{ $detail['check_in'] }}
@@ -196,17 +232,19 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full
-                                                {{ $detail['status'] === 'checked_in' ? 'bg-green-100 text-green-800' : 
-                                                   ($detail['status'] === 'checked_out' ? 'bg-blue-100 text-blue-800' :
-                                                   ($detail['status'] === 'confirmed' ? 'bg-yellow-100 text-yellow-800' :
-                                                   ($detail['status'] === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'))) }}">
+                                                {{ $detail['status'] === 'checked_in' ? 'bg-blue-100/10 text-blue-400' : 
+                                                   ($detail['status'] === 'checked_out' ? 'bg-blue-100/10 text-blue-400' :
+                                                   ($detail['status'] === 'confirmed' ? 'bg-green-100/10 text-green-400' :
+                                                   ($detail['status'] === 'cancelled' || $detail['status'] === 'expired' ? 'bg-red-100/10 text-red-400' : 
+                                                   ($detail['status'] === 'pending' ? 'bg-yellow-100/10 text-yellow-400' : 'bg-gray-100/10 text-gray-400')))) }}">
                                                 {{ ucfirst($detail['status']) }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full
-                                                {{ $detail['payment_status'] === 'paid' ? 'bg-green-100 text-green-800' : 
-                                                   ($detail['payment_status'] === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                                {{ $detail['payment_status'] === 'paid' ? 'bg-green-100/10 text-green-400' : 
+                                                   ($detail['payment_status'] === 'pending' ? 'bg-yellow-100/10 text-yellow-400' : 
+                                                   ($detail['payment_status'] === 'deposit' ? 'bg-blue-100/10 text-blue-400' : 'bg-red-100/10 text-red-400')) }}">
                                                 {{ ucfirst($detail['payment_status']) }}
                                             </span>
                                         </td>

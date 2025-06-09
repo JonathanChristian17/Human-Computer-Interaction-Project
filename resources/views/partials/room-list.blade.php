@@ -13,8 +13,8 @@
             <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-2">
                 <h3 class="text-lg md:text-xl font-bold">{{ $room->name }}</h3>
                 <div class="flex items-center gap-1">
-                    <span class="px-2 py-1 bg-[#f59e0b]/10 text-[#f59e0b] rounded-lg text-xs">2.1</span>
-                    <span class="px-2 py-1 bg-[#f59e0b]/10 text-[#f59e0b] rounded-lg text-xs">King Size Bed</span>
+                    <span class="px-2 py-1 bg-[#f59e0b]/10 text-[#f59e0b] rounded-lg text-xs">{{ $room->type }}</span>
+                    <span class="px-2 py-1 bg-[#f59e0b]/10 text-[#f59e0b] rounded-lg text-xs">{{ $room->capacity }} Guest</span>
                     <span class="px-2 py-1 rounded-lg text-xs
                         @if($room->status === 'available') bg-green-100 text-green-800
                         @else bg-red-100 text-red-800 @endif">
@@ -23,16 +23,14 @@
                 </div>
             </div>
             <p class="text-gray-600 text-sm mb-4 line-clamp-3 md:line-clamp-none">{{ $room->description }}</p>
-            <div class="flex flex-col md:flex-row md:justify-between gap-4 md:gap-0 md:items-end">
+
+            <!-- Price and Action -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <p class="text-xl md:text-2xl font-bold text-gray-900">IDR {{ number_format($room->price_per_night, 0, ',', ',') }}</p>
-                    <p class="text-sm text-gray-500">per night</p>
+                    <span class="text-lg font-bold text-[#f59e0b]">Rp{{ number_format($room->price_per_night, 0, ',', '.') }}</span>
+                    <span class="text-gray-500 text-sm">/night</span>
                 </div>
-                @if($room->status === 'maintenance')
-                    <button class="w-full md:w-auto bg-red-500 text-white px-6 py-2 rounded-lg transition text-sm cursor-not-allowed">
-                        Dalam Perbaikan
-                    </button>
-                @else
+                @if($room->status === 'available')
                     <template x-if="!isRoomSelected({{ $room->id }})">
                         <button @click="addRoom({
                             id: {{ $room->id }},
@@ -40,19 +38,20 @@
                             price: {{ $room->price_per_night }},
                             image: '{{ $room->image ?: 'room-default.jpg' }}'
                         })" 
-                        class="w-full md:w-auto bg-[#f59e0b] text-white px-6 py-2 rounded-lg hover:bg-[#d97706] transition text-sm">
-                            Booking
+                        class="px-6 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#f59e0b]/90 transition-colors">
+                            Add to Booking
                         </button>
                     </template>
                     <template x-if="isRoomSelected({{ $room->id }})">
-                        <button 
-                        class="w-full md:w-auto bg-green-500 text-white px-6 py-2 rounded-lg transition text-sm flex items-center justify-center gap-2 cursor-default">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                            </svg>
-                            Sudah Ditambahkan
+                        <button @click="removeRoom({{ $room->id }})" 
+                        class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            Remove
                         </button>
                     </template>
+                @else
+                    <button class="px-6 py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed">
+                        Not Available
+                    </button>
                 @endif
             </div>
         </div>
@@ -78,12 +77,12 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const checkIn = urlParams.get('check_in') || '';
                 const checkOut = urlParams.get('check_out') || '';
-                const guests = urlParams.get('guests') || '';
+                const roomType = urlParams.get('room_type') || '';
                 
                 // Only add parameters if they exist
                 if (checkIn) url.searchParams.set('check_in', checkIn);
                 if (checkOut) url.searchParams.set('check_out', checkOut);
-                if (guests) url.searchParams.set('guests', guests);
+                if (roomType) url.searchParams.set('room_type', roomType);
 
                 // Show loading spinner
                 document.getElementById('rooms-container').innerHTML = `
@@ -93,25 +92,24 @@
                     </div>
                 `;
 
+                // Fetch new page
                 fetch(url)
                     .then(response => response.text())
                     .then(html => {
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
-                        const roomsContainer = doc.querySelector('#rooms-container');
-                        if (roomsContainer) {
-                            document.getElementById('rooms-container').innerHTML = roomsContainer.innerHTML;
-                            window.history.pushState({}, '', url);
+                        const roomList = doc.querySelector('#rooms-container');
+                        if (roomList) {
+                            document.getElementById('rooms-container').innerHTML = roomList.innerHTML;
                         }
                     })
                     .catch(error => {
-                        console.error('Error fetching page:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to load the next page. Please try again.',
-                            confirmButtonColor: '#f59e0b'
-                        });
+                        console.error('Error:', error);
+                        document.getElementById('rooms-container').innerHTML = `
+                            <div class="text-center py-4">
+                                <p class="text-red-600">Error loading rooms. Please try again.</p>
+                            </div>
+                        `;
                     });
             }
         });

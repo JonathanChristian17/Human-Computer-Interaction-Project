@@ -27,10 +27,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Check expired bookings every minute
-        $schedule->command('bookings:check-expired')->everyMinute();
-        
-        // Check and cancel expired transactions every minute
+        // Check for expired transactions every minute
         $schedule->command('transactions:cancel-expired')->everyMinute();
     }
 
@@ -45,4 +42,4 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
-} 
+}

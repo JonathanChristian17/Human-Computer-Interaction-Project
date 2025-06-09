@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Receptionist;
 use App\Http\Controllers\Controller;
 use App\Models\Room;
 use App\Models\Booking;
+use App\Models\User;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class OfflineBookingController extends Controller
 {
@@ -56,11 +59,22 @@ class OfflineBookingController extends Controller
             DB::beginTransaction();
 
             try {
+                // Create or find guest user
+                $guestEmail = $request->email ?? 'guest_' . Str::random(10) . '@offline.booking';
+                $guestUser = User::firstOrCreate(
+                    ['email' => $guestEmail],
+                    [
+                        'name' => $request->full_name,
+                        'password' => Hash::make(Str::random(16)),
+                        'role' => 'customer'
+                    ]
+                );
+
                 // Create booking
                 $booking = new Booking();
-                $booking->user_id = auth()->id();
+                $booking->user_id = $guestUser->id; // Use guest user ID instead of receptionist ID
                 $booking->full_name = $request->full_name;
-                $booking->email = $request->email ?? 'receptionist_booking@cahayaresort.com';
+                $booking->email = $guestEmail;
                 $booking->phone = $request->phone;
                 $booking->id_number = $request->id_number;
                 $booking->check_in_date = $request->check_in_date;
@@ -71,7 +85,7 @@ class OfflineBookingController extends Controller
                 $booking->tax = $tax;
                 $booking->deposit = $deposit;
                 $booking->special_requests = $request->special_requests;
-                $booking->managed_by = auth()->id();
+                $booking->managed_by = auth()->id(); // Keep track of which receptionist created the booking
                 $booking->check_in_time = '14:00:00';
                 $booking->check_out_time = '12:00:00';
                 $booking->save();
@@ -93,6 +107,15 @@ class OfflineBookingController extends Controller
                         'subtotal' => $room->price_per_night * $nights
                     ]);
                 }
+
+                // Log activity after successful booking creation
+                Activity::log(
+                    auth()->id(),
+                    'Membuat booking offline',
+                    "Membuat booking offline untuk {$booking->full_name}, " . count($selectedRooms) . " kamar, check-in: {$booking->check_in_date->format('Y-m-d')}",
+                    'offline_booking_create',
+                    $booking
+                );
 
                 DB::commit();
 

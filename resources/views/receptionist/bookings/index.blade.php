@@ -1,4 +1,31 @@
 <x-receptionist-layout>
+    <style>
+        /* Custom Scrollbar Styles */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
+        }
+
+        /* Hide scrollbar when not hovering */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) rgba(55, 65, 81, 0.3);
+        }
+    </style>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-100 leading-tight">
             {{ __('Kelola Pemesanan') }}
@@ -111,11 +138,17 @@
                                             <div class="text-sm text-gray-400">{{ $booking->email }}</div>
                                             <div class="text-sm text-gray-400">{{ $booking->phone }}</div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @foreach($booking->rooms as $room)
-                                                <div class="text-sm text-gray-100">Room {{ $room->room_number }}</div>
-                                                <div class="text-sm text-gray-400">{{ $room->type }}</div>
-                                            @endforeach
+                                        <td class="px-6 py-4 text-sm text-white relative">
+                                            <div class="max-h-[85px] overflow-y-auto custom-scrollbar">
+                                                <div class="flex flex-col space-y-1.5 pr-2">
+                                                    @foreach($booking->rooms as $room)
+                                                        <div class="bg-gray-700/50 px-3 py-1.5 rounded-md border border-gray-600/30">
+                                                            <div class="text-gray-100">Room {{ $room->room_number }}</div>
+                                                            <div class="text-gray-400 text-xs">{{ $room->type }}</div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-100">
                                             {{ $booking->check_in_date->format('d M Y') }}

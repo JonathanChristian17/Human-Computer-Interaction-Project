@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
     Route::post('/transactions/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('transactions.cancel');
     Route::post('/transactions/{transaction}/pay', [TransactionController::class, 'pay'])->name('transactions.pay');
+    Route::get('/transactions/{transaction}/invoice', [TransactionController::class, 'downloadInvoice'])->name('transactions.invoice');
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
     
     // Transaction routes

@@ -122,34 +122,52 @@
         // Format price input with dots
         const priceInput = document.getElementById('price_per_night');
         
+        function formatNumber(num) {
+            // Remove any non-digit characters first
+            num = num.toString().replace(/\D/g, '');
+            // Format with dots
+            return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function unformatNumber(str) {
+            // Remove anything that's not a digit
+            return str.replace(/\D/g, '');
+        }
+        
+        // Format initial value if exists
+        if (priceInput.value) {
+            priceInput.value = formatNumber(priceInput.value);
+        }
+
         priceInput.addEventListener('input', function(e) {
-            // Remove any character that's not a number
-            let value = this.value.replace(/\D/g, '');
+            // Store cursor position
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const length = this.value.length;
             
-            // Add dots as thousand separators
-            if (value.length > 0) {
-                value = parseInt(value).toLocaleString('id-ID');
-            }
+            // Format the value
+            this.value = formatNumber(this.value);
             
-            this.value = value;
+            // Adjust cursor position if needed
+            const newLength = this.value.length;
+            const diff = newLength - length;
+            this.setSelectionRange(start + diff, end + diff);
         });
 
         // Handle form submission
         document.querySelector('form').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get the price value and remove dots, keeping the original number
-            const price = priceInput.value.replace(/\./g, '');
+            // Get raw numeric value
+            const numericValue = unformatNumber(priceInput.value);
             
-            // Create a hidden input for the actual price value
-            const hiddenPrice = document.createElement('input');
-            hiddenPrice.type = 'hidden';
-            hiddenPrice.name = 'price_per_night';
-            hiddenPrice.value = price;
+            if (!numericValue || parseInt(numericValue) <= 0) {
+                alert('Harga harus berupa angka positif');
+                return;
+            }
             
-            // Replace the formatted input with the actual value
-            priceInput.name = 'price_per_night_formatted';
-            this.appendChild(hiddenPrice);
+            // Set the raw numeric value before submit
+            priceInput.value = numericValue;
             
             // Submit the form
             this.submit();

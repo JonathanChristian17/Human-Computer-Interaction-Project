@@ -45,7 +45,7 @@
                             ->whereIn('status', ['confirmed', 'checked_in'])
                             ->where('check_in_date', '<=', $today)
                             ->where('check_out_date', '>', $today)
-                            ->with('user')
+                            ->with(['user', 'receptionist'])
                             ->orderBy('check_in_date', 'asc')
                             ->first();
                         $isCheckedIn = $activeBooking && $activeBooking->status === 'checked_in';
@@ -85,7 +85,7 @@
                                     <div class="space-y-2">
                                         <div class="flex justify-between">
                                             <span class="text-sm text-gray-400">Nama:</span>
-                                            <span class="text-sm text-white">{{ $activeBooking->user->name }}</span>
+                                            <span class="text-sm text-white">{{ $activeBooking->full_name }}</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-sm text-gray-400">Check-in:</span>
@@ -95,12 +95,14 @@
                                             <span class="text-sm text-gray-400">Check-out:</span>
                                             <span class="text-sm text-white">{{ $activeBooking->check_out_date->format('d M Y') }}</span>
                                         </div>
-                                        @if($activeBooking->user->phone)
-                                            <div class="flex justify-between">
-                                                <span class="text-sm text-gray-400">Telepon:</span>
-                                                <span class="text-sm text-white">{{ $activeBooking->user->phone }}</span>
-                                            </div>
-                                        @endif
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-gray-400">Telepon:</span>
+                                            <span class="text-sm text-white">{{ $activeBooking->phone }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-gray-400">Dikelola oleh:</span>
+                                            <span class="text-sm text-white">{{ $activeBooking->receptionist ? $activeBooking->receptionist->name : 'N/A' }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             @endif

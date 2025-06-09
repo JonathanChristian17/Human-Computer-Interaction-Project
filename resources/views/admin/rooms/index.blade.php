@@ -20,7 +20,7 @@
                         @foreach($rooms as $room)
                             <div class="bg-gray-700 rounded-lg overflow-hidden shadow-md">
                                 @if($room->image)
-                                    <img src="{{ asset('storage/' . $room->image) }}" alt="{{ $room->name }}" class="w-full h-48 object-cover">
+                                    <img src="{{ asset('storage/images/' . $room->image) }}" alt="{{ $room->name }}" class="w-full h-48 object-cover">
                                 @endif
                                 <div class="p-4">
                                     <div class="flex justify-between items-start mb-4">

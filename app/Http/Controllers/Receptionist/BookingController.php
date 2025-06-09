@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Receptionist;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Revenue;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -85,6 +86,7 @@ class BookingController extends Controller
 
             DB::beginTransaction();
 
+            $oldStatus = $booking->payment_status;
             $booking->payment_status = $request->payment_status;
             $booking->save();
 
@@ -97,6 +99,15 @@ class BookingController extends Controller
                 'payment_date' => now(),
                 'description' => 'Pelunasan pembayaran booking #' . $booking->id
             ]);
+
+            // Log activity
+            Activity::log(
+                auth()->id(),
+                'Update status pembayaran',
+                "Mengubah status pembayaran booking #{$booking->id} dari {$oldStatus} menjadi {$booking->payment_status}",
+                'payment_status_update',
+                $booking
+            );
 
             DB::commit();
             return redirect()->back()->with('success', 'Status pembayaran berhasil diperbarui.');

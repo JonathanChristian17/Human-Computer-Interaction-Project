@@ -30,18 +30,17 @@
     }
     .selected-room-card {
         background: #fff;
-    border-radius: 0.5rem;
+        border-radius: 0.75rem;
         padding: 1rem;
         margin-bottom: 0.75rem;
         border: 1px solid #e5e7eb;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         transition: all 0.3s ease;
     }
     .selected-room-card:hover {
-    border-color: #f97316;
+        border-color: #f97316;
         background-color: #fff7ed;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     .selected-room-info h4 {
         font-weight: 600;
@@ -49,14 +48,18 @@
         margin-bottom: 0.25rem;
     }
     .selected-room-price {
-        color: #9ca3af;
+        color: #6b7280;
         font-size: 0.875rem;
+        margin-bottom: 0.25rem;
     }
     .remove-room-btn {
         color: #ef4444;
         padding: 0.5rem;
         border-radius: 0.375rem;
         transition: all 0.2s;
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
     }
     .remove-room-btn:hover {
         background-color: #fee2e2;
@@ -68,15 +71,18 @@
         padding: 1rem;
         border-top: 1px solid #e5e7eb;
         border-radius: 0 0 1rem 1rem;
+        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     .total-section {
-  display: flex;
+        display: flex;
         justify-content: space-between;
-  align-items: center;
+        align-items: center;
         margin-bottom: 1rem;
+        padding: 0.5rem 0;
     }
     .total-label {
         font-size: 1rem;
+        font-weight: 500;
         color: #4b5563;
     }
     .total-amount {
@@ -85,23 +91,25 @@
         color: #f97316;
     }
     .continue-btn {
-    width: 100%;
+        width: 100%;
         padding: 0.75rem;
         background-color: #f97316;
         color: white;
-        border-radius: 0.5rem;
+        border-radius: 0.75rem;
         font-weight: 500;
         transition: all 0.3s ease;
     }
     .continue-btn:hover:not(:disabled) {
         background-color: #ea580c;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
     }
     .continue-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
     }
     #selectedRoomsList {
-        max-height: calc(100% - 120px);
+        max-height: calc(100% - 140px);
         overflow-y: auto;
         padding: 1rem;
     }
@@ -115,7 +123,7 @@
     #selectedRoomsList::-webkit-scrollbar-thumb {
         background-color: #f97316;
         border-radius: 2px;
-}
+    }
     .form-group {
         margin-bottom: 1rem;
     }
@@ -384,8 +392,6 @@ input.date-input:focus {
 
                             <form id="bookingForm" method="POST" action="{{ route('receptionist.offline-booking.store') }}" onsubmit="return validateForm(event)">
                                 @csrf
-                                <input type="hidden" name="email" value="receptionist_booking@cahayaresort.com">
-                                <input type="hidden" name="is_offline_booking" value="1">
                                 <input type="hidden" name="booked_by" value="{{ auth()->user()->id }}">
                                 <input type="hidden" name="selected_rooms" id="selected_rooms_data">
                                 
@@ -487,21 +493,27 @@ input.date-input:focus {
                     <div class="sidebar">
                         <div id="selectedRoomsSummary">
                             <h3 class="text-lg font-semibold text-gray-900 p-4 border-b">Selected Rooms</h3>
-                            <div id="selectedRoomsList">
+                            <div id="selectedRoomsList" class="p-4 space-y-4">
                                 <!-- Selected rooms will be listed here -->
                             </div>
                             <div class="sidebar-footer">
-                                <div class="total-section">
-                                    <span class="total-label">Total:</span>
-                                    <span id="totalPrice" class="total-amount">Rp 0</span>
-                        </div>
-                        <button type="button" 
+                                <div class="space-y-2 mb-4">
+                                    <div class="flex justify-between items-center text-sm text-gray-600">
+                                        <span>Duration:</span>
+                                        <span id="totalNights">0 night(s)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center font-medium">
+                                        <span>Total:</span>
+                                        <span id="totalPrice" class="text-lg text-orange-500">Rp 0</span>
+                                    </div>
+                                </div>
+                                <button type="button" 
                                         onclick="submitBookingForm()" 
-                                        class="continue-btn"
+                                        class="w-full py-3 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all font-medium"
                                         id="actionButton"
                                         disabled>
-                                    Create Booking
-                        </button>
+                                    Continue to Guest Details
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -944,39 +956,70 @@ input.date-input:focus {
         function updateSelectedRoomsSummary() {
             const list = document.getElementById('selectedRoomsList');
             const totalPriceElement = document.getElementById('totalPrice');
-            const continueButton = document.getElementById('actionButton');
+            const totalNightsElement = document.getElementById('totalNights');
+            const actionButton = document.getElementById('actionButton');
+            const sidebarTitle = document.querySelector('#selectedRoomsSummary h3');
+
+            // Update sidebar title based on current step
+            if (sidebarTitle) {
+                sidebarTitle.textContent = currentStep === 1 ? 'Selected Rooms' : 'Booking Details';
+            }
+
+            // Calculate nights if dates are selected
+            const checkInDate = document.getElementById('check_in_date')?.value;
+            const checkOutDate = document.getElementById('check_out_date')?.value;
+            let nights = 0;
+
+            if (checkInDate && checkOutDate) {
+                const start = new Date(checkInDate);
+                const end = new Date(checkOutDate);
+                nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                totalNightsElement.textContent = `${nights} night(s)`;
+            }
 
             if (selectedRooms.size > 0) {
                 let html = '';
-    let total = 0;
+                let total = 0;
 
                 selectedRooms.forEach(room => {
+                    const roomTotal = room.price_per_night * (nights || 1);
                     html += `
-                        <div class="selected-room-card">
-                            <div class="selected-room-info">
-                                <h4>${room.name}</h4>
-                                <p class="selected-room-price">Rp ${room.price_per_night.toLocaleString('id-ID')}/night</p>
+                        <div class="bg-white rounded-lg border border-gray-200 p-4 relative hover:border-orange-500 transition-all">
+                            <div class="pr-8">
+                                <h4 class="font-medium text-gray-900">${room.name}</h4>
+                                <div class="space-y-1 mt-2">
+                                    <p class="text-sm text-gray-600">
+                                        Rp ${room.price_per_night.toLocaleString('id-ID')}/night
+                                    </p>
+                                    ${nights ? `
+                                        <p class="text-sm text-gray-600">× ${nights} night(s)</p>
+                                        <p class="text-orange-500 font-medium">
+                                            Rp ${roomTotal.toLocaleString('id-ID')}
+                                        </p>
+                                    ` : ''}
+                                </div>
                             </div>
-                            <button type="button" onclick="removeRoom('${room.id}')" class="remove-room-btn">
+                            <button type="button" 
+                                    onclick="removeRoom('${room.id}')" 
+                                    class="absolute top-2 right-2 text-gray-400 hover:text-red-500 p-1">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
                         </div>
                     `;
-                    total += room.price_per_night;
+                    total += roomTotal;
                 });
 
                 list.innerHTML = html;
                 totalPriceElement.textContent = `Rp ${total.toLocaleString('id-ID')}`;
-                continueButton.disabled = false;
+                actionButton.disabled = false;
             } else {
                 list.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No rooms selected</p>';
                 totalPriceElement.textContent = 'Rp 0';
-                continueButton.disabled = true;
+                totalNightsElement.textContent = '0 night(s)';
+                actionButton.disabled = true;
             }
-
-            updateBookingSummary();
         }
 
         function removeRoom(roomId) {
@@ -1003,9 +1046,14 @@ input.date-input:focus {
         // Step Navigation
         function goToStep(step) {
             if (step === 2 && selectedRooms.size === 0) {
-                alert('Please select at least one room');
-        return;
-    }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No Rooms Selected',
+                    text: 'Please select at least one room before proceeding.',
+                    confirmButtonColor: '#f97316'
+                });
+                return;
+            }
 
             document.querySelectorAll('.step-content').forEach(content => {
                 content.classList.remove('active');
@@ -1023,19 +1071,36 @@ input.date-input:focus {
             });
 
             currentStep = step;
-            updateActionButton();
-            updateBookingSummary();
+            
+            // Update action button text and sidebar
+            const actionButton = document.getElementById('actionButton');
+            if (actionButton) {
+                actionButton.textContent = step === 1 ? 'Continue to Guest Details' : 'Create Booking';
+            }
+            
+            // Update the sidebar display
+            updateSelectedRoomsSummary();
         }
 
-        // Update action button text based on current step
-        function updateActionButton() {
-            const actionButton = document.getElementById('actionButton');
-            if (currentStep === 1) {
-                actionButton.textContent = 'Continue to Guest Details';
-            } else {
-                actionButton.textContent = 'Create Booking';
+        // Add event listeners for date changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkInInput = document.getElementById('check_in_date');
+            const checkOutInput = document.getElementById('check_out_date');
+
+            if (checkInInput && checkOutInput) {
+                // Update summary when dates change
+                checkInInput.addEventListener('change', () => {
+                    updateSelectedRoomsSummary();
+                });
+                
+                checkOutInput.addEventListener('change', () => {
+                    updateSelectedRoomsSummary();
+                });
             }
-        }
+
+            // Initialize the summary
+            updateSelectedRoomsSummary();
+        });
 
         // Add new function to handle form submission
         function submitBookingForm() {

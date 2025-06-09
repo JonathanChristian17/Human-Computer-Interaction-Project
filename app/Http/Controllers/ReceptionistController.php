@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Room;
 use App\Models\User;
 use App\Models\Revenue;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
@@ -221,8 +222,18 @@ class ReceptionistController extends Controller
                 ], 422);
             }
 
+            $oldStatus = $room->status;
             $room->status = $validated['status'];
             $room->save();
+
+            // Log activity
+            Activity::log(
+                auth()->id(),
+                'Update status kamar',
+                "Mengubah status kamar {$room->room_number} dari {$oldStatus} menjadi {$room->status}",
+                'room_status_update',
+                $room
+            );
 
             // Return success response for AJAX request
             if ($request->expectsJson()) {
@@ -252,20 +263,22 @@ class ReceptionistController extends Controller
      */
     public function guests(Request $request): View
     {
-        $query = User::where('role', 'customer');
+        $query = Booking::select('full_name', 'email', 'phone', 'id_number', 'created_at')
+            ->selectRaw('COUNT(*) as total_bookings')
+            ->groupBy('full_name', 'email', 'phone', 'id_number', 'created_at');
 
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('full_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('id_number', 'like', "%{$search}%");
             });
         }
 
-        $guests = $query->withCount('bookings')
-            ->latest()
+        $guests = $query->latest('created_at')
             ->paginate(10)
             ->withQueryString();
             

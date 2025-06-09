@@ -9,6 +9,7 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Illuminate\Support\Facades\DB;
 use App\Events\BookingStatusChanged;
+use PDF;
 
 class TransactionController extends Controller
 {
@@ -667,6 +668,37 @@ class TransactionController extends Controller
             \Log::error('Error in payment error handler: ' . $e->getMessage());
             return redirect()->route('landing', ['panel' => 'transactions'])
                 ->with('error', 'An error occurred while processing your payment. Please try again.');
+        }
+    }
+
+    public function downloadInvoice(Transaction $transaction)
+    {
+        // Check if transaction is paid
+        if (!in_array($transaction->payment_status, ['paid', 'settlement', 'deposit'])) {
+            return response()->json([
+                'error' => 'Invoice is only available for paid transactions'
+            ], 403);
+        }
+
+        $booking = $transaction->booking;
+        if (!$booking) {
+            return response()->json([
+                'error' => 'Booking not found'
+            ], 404);
+        }
+
+        try {
+            $pdf = PDF::loadView('transactions.invoice', [
+                'transaction' => $transaction,
+                'booking' => $booking
+            ]);
+
+            return $pdf->download('invoice-' . $transaction->order_id . '.pdf');
+        } catch (\Exception $e) {
+            \Log::error('Error generating invoice: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to generate invoice'
+            ], 500);
         }
     }
 } 

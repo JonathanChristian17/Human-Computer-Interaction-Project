@@ -9,6 +9,12 @@ class LandingPageController extends Controller
 {
     public function index()
     {
+        // Get available room types
+        $roomTypes = Room::select('type')
+            ->distinct()
+            ->pluck('type')
+            ->toArray();
+
         $rooms = Room::where('status', 'available')
                     ->select('id', 'name', 'price_per_night', 'capacity', 'image')
                     ->get()
@@ -22,6 +28,6 @@ class LandingPageController extends Controller
                         return $room;
                     });
 
-        return view('landingpage', compact('rooms'));
+        return view('landingpage', compact('rooms', 'roomTypes'));
     }
 } 

@@ -15,7 +15,7 @@
                             <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cari</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Nama, Email, atau No. Telp">
+                                placeholder="Nama, Email, No. Telp, atau No. ID">
                         </div>
                         <div class="flex items-end">
                             <button type="submit"
@@ -44,6 +44,9 @@
                                         No. Telp
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        No. ID
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Total Pemesanan
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -56,7 +59,7 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                {{ $guest->name }}
+                                                {{ $guest->full_name }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -71,7 +74,12 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ $guest->bookings_count ?? 0 }}
+                                                {{ $guest->id_number }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                {{ $guest->total_bookings }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -82,7 +90,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-gray-500 dark:text-gray-400">
+                                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500 dark:text-gray-400">
                                             Tidak ada tamu yang ditemukan.
                                         </td>
                                     </tr>
