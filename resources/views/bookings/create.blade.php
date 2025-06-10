@@ -106,17 +106,17 @@ input.date-input:focus {
 }
 
 .flatpickr-day.selected {
-    background: #f97316 !important;
-    border-color: #f97316 !important;
+    background: #FFA040 !important;
+    border-color: #FFA040 !important;
 }
 
 .flatpickr-day.today {
-    border-color: #f97316;
+    border-color: #FFA040;
 }
 
 .flatpickr-day:hover {
-    background: #fed7aa !important;
-    border-color: #fed7aa !important;
+    background: #ffd7aa !important;
+    border-color: #ffd7aa !important;
 }
 
 /* Add custom styles for booked and disabled dates */
@@ -191,13 +191,79 @@ input.date-input:focus {
   border-left: 10px solid #ef4444;
 }
 .custom-alert.warning {
-  border-left: 10px solid #f59e0b;
+  border-left: 10px solid #FFA040;
 }
 .alert-icon {
   font-size: 2.5em;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Tambahkan style untuk kalender */
+.flatpickr-calendar {
+    /* position: absolute !important; */
+    /* position: fixed !important; */
+    top: 100% !important;
+    left: 0 !important;
+    z-index: 9999 !important;
+    margin-top: 5px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    border-radius: 0.5rem !important;
+    border: 1px solid #e5e7eb !important;
+    background: white !important;
+}
+
+.flatpickr-calendar.open {
+    display: inline-block !important;
+    animation: fadeInDown 0.3s ease-out !important;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Style untuk input wrapper */
+.date-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.date-input-wrapper input {
+    width: 100%;
+    height: 45px;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #374151;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+.date-input-wrapper input:focus {
+    outline: none;
+    border-color: #FFA040;
+    box-shadow: 0 0 0 3px rgba(255, 160, 64, 0.1);
+}
+
+.calendar-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    pointer-events: none;
 }
 </style>
 @endsection
@@ -244,21 +310,37 @@ input.date-input:focus {
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                     <div>
                                         <label for="check_in_date" class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
-                                    <div class="date-input-wrapper">
+                                        <div class="date-input-wrapper">
                                             <input type="text" 
                                                    name="check_in_date" 
                                                    id="check_in_date" 
-                                                   style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';" placeholder="Select check-in date" readonly autocomplete="off" data-input required>
+                                                   class="tombolform"
+                                                   style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" 
+                                                   onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" 
+                                                   onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';" 
+                                                   placeholder="Select check-in date" 
+                                                   readonly 
+                                                   autocomplete="off" 
+                                                   data-input 
+                                                   required>
                                             <i class="fas fa-calendar calendar-icon"></i>
                                         </div>
                                     </div>
                                     <div>
                                         <label for="check_out_date" class="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
-                                    <div class="date-input-wrapper">
+                                        <div class="date-input-wrapper">
                                             <input type="text" 
                                                    name="check_out_date" 
                                                    id="check_out_date" 
-                                                   style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';" placeholder="Select check-out date" readonly autocomplete="off" data-input required>
+                                                   class="tombolform"
+                                                   style="width:100%;box-sizing:border-box;border:none;outline:none;border-radius:15px;padding:1em;background-color:#ccc;box-shadow:inset 2px 5px 10px rgba(0,0,0,0.3);transition:300ms ease-in-out;" 
+                                                   onfocus="this.style.backgroundColor='white';this.style.transform='scale(1.05)';this.style.boxShadow='13px 13px 100px #969696,-13px -13px 100px #ffffff';" 
+                                                   onblur="this.style.backgroundColor='#ccc';this.style.transform='scale(1)';this.style.boxShadow='inset 2px 5px 10px rgba(0,0,0,0.3)';" 
+                                                   placeholder="Select check-out date" 
+                                                   readonly 
+                                                   autocomplete="off" 
+                                                   data-input 
+                                                   required>
                                             <i class="fas fa-calendar calendar-icon"></i>
                                         </div>
                                     </div>
@@ -325,16 +407,8 @@ input.date-input:focus {
                                         <div>
                                             <h4 class="font-medium mb-2">💰 Deposit</h4>
                                             <ul class="text-sm text-gray-600 space-y-1 ml-4">
-                                                <li>• A deposit of Rp50,000 per room will be collected at check-in.</li>
+                                                <li>• A deposit of Rp100,000 per room will be collected at check-in.</li>
                                                 <li>• Don't worry, we'll return it at check-out as long as the room is in good condition.</li>
-                                            </ul>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-medium mb-2">📋 Cancellation Policy</h4>
-                                            <ul class="text-sm text-gray-600 space-y-1 ml-4">
-                                                <li>• 7 days or more before check-in: Full 100% refund</li>
-                                                <li>• 3-6 days before check-in: 50% refund</li>
-                                                <li>• Less than 3 days before check-in: Sorry, no refund</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -601,7 +675,10 @@ input.date-input:focus {
                         <!-- Confirm Button -->
                         <button type="button" 
                                 onclick="processPayment()" 
-                                class="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition font-semibold flex items-center justify-center">
+                                class="w-full text-white py-3 rounded-lg transition font-semibold flex items-center justify-center"
+                                style="background:#FFA040; border:2px solid #FFA040;"
+                                onmouseover="this.style.backgroundColor='#ff8800'" 
+                                onmouseout="this.style.backgroundColor='#FFA040'">
                             <span id="paymentButtonText">PAY NOW</span>
                             <div id="paymentSpinner" class="hidden">
                                 <svg class="animate-spin h-5 w-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -752,6 +829,7 @@ function initializeDatePickers() {
         allowInput: false,
         disableMobile: true,
         clickOpens: true,
+        static: true, // <--- ini kunci agar kalender selalu di bawah input
         locale: {
             firstDayOfWeek: 1
         },
@@ -1114,7 +1192,9 @@ async function updateBookedDates() {
             for (const room of selectedRooms) {
                 const response = await fetch(`/rooms/${room.id}/booked-dates`);
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch booked dates for room ${room.id}`);
+                    console.error(`Failed to fetch booked dates for room ${room.id}`);
+                    // Optional: showBrutalistSwalAlert({ type: 'danger', title: 'Error', message: `Failed to fetch booked dates for room ${room.id}` });
+                    continue; // skip this room, do not throw
                 }
                 
                 const data = await response.json();

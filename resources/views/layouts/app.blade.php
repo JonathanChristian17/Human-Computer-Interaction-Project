@@ -1158,9 +1158,9 @@
                     <div class="mt-6 bg-white rounded-lg shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Account Actions</h3>
                         <div class="space-y-4">
-                            <form method="POST" action="{{ route('logout') }}" class="block w-full">
+                            <form method="POST" action="{{ route('logout') }}" class="block w-full" id="profile-logout-form">
                                 @csrf
-                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition">
+                                <button type="button" onclick="logoutBrutalistConfirm('profile-logout-form')" class="w-full flex items-center justify-center px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition">
                                     <i class="fas fa-sign-out-alt mr-2"></i>
                                     Logout
                                 </button>
@@ -1502,7 +1502,7 @@
             };
 
             // Logout confirmation
-            window.logoutBrutalistConfirm = function() {
+            window.logoutBrutalistConfirm = function(formId = 'logout-form') {
                 showBrutalistAlert({
                     type: 'danger',
                     title: 'Logout Confirmation',
@@ -1510,7 +1510,7 @@
                     confirmText: 'Yes, logout',
                     cancelText: 'Cancel',
                     onConfirm: function() {
-                        document.getElementById('logout-form').submit();
+                        document.getElementById(formId).submit();
                     }
                 });
             };
@@ -2940,34 +2940,46 @@
                     }
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to download invoice');
+                // Cek tipe response
+                const contentType = response.headers.get('content-type');
+                if (!response.ok || !contentType || !contentType.includes('application/pdf')) {
+                    // Jika bukan PDF, coba baca error message dari JSON
+                    let errorMsg = 'Failed to download invoice';
+                    try {
+                        const data = await response.json();
+                        if (data && data.message) errorMsg = data.message;
+                    } catch {}
+                    throw new Error(errorMsg);
                 }
 
                 // Get the blob from response
                 const blob = await response.blob();
-                
+
                 // Create a temporary URL for the blob
                 const url = window.URL.createObjectURL(blob);
-                
+
                 // Create a temporary link element
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `invoice-${id}.pdf`; // Set the download filename
-                
-                // Append link to body, click it, and remove it
+                a.download = `invoice-${id}.pdf`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                
-                // Release the temporary URL
                 window.URL.revokeObjectURL(url);
+
+                // Tampilkan notifikasi sukses brutalist
+                showBrutalistSwalAlert({
+                    type: 'success',
+                    title: 'Success',
+                    message: 'Invoice downloaded successfully',
+                    timer: 1500
+                });
             } catch (error) {
                 console.error('Error downloading invoice:', error);
-                Swal.fire({
-                    icon: 'error',
+                showBrutalistSwalAlert({
+                    type: 'danger',
                     title: 'Error',
-                    text: 'Failed to download invoice. Please try again.'
+                    message: error.message || 'Failed to download invoice. Please try again.'
                 });
             }
         }

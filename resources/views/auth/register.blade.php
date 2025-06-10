@@ -1,212 +1,245 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sign up - Cahaya</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body, html { height: 100%; }
-        .rounded-tl-3xl { border-top-left-radius: 2rem; }
-        .rounded-bl-3xl { border-bottom-left-radius: 2rem; }
-        .rounded-tr-3xl { border-top-right-radius: 2rem; }
-        .rounded-br-3xl { border-bottom-right-radius: 2rem; }
-    </style>
-</head>
-<body class="bg-white min-h-screen flex items-stretch">
-    <div class="flex w-full min-h-screen">
-        <!-- Left: Register Form -->
-        <div class="w-full md:w-1/2 flex flex-col justify-center items-center px-8 py-12 bg-white">
-            <div class="w-full max-w-sm space-y-6">
-                <div class="flex items-center mb-6">
-                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2">
-                        <circle cx="16" cy="16" r="10" stroke="#3B82F6" stroke-width="2" fill="#fff"/>
-                        <path d="M16 4V8" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M16 24V28" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M4 16H8" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M24 16H28" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M7.757 7.757L10.586 10.586" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M21.414 21.414L24.243 24.243" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M7.757 24.243L10.586 21.414" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M21.414 10.586L24.243 7.757" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    <span class="text-xl font-bold text-gray-800">Cahaya</span>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-1">Sign up</h2>
-                <p class="text-xs text-gray-500 mb-4">Sign up to enjoy the feature of Revolutie</p>
-                @if($errors->any())
-                    <div class="bg-red-100 text-red-600 p-3 rounded-lg text-xs">
-                        <ul class="list-disc list-inside">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-                <form class="space-y-3" method="POST" action="{{ route('register') }}">
-                    @csrf
-                    <div>
-                        <label for="name" class="block text-xs font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                        <input id="name" name="name" type="text" autocomplete="name" required
-                               class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition"
-                               placeholder="Nama Anda" value="{{ old('name') }}">
-                    </div>
-                    <div>
-                        <label for="email" class="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                        <input id="email" name="email" type="email" autocomplete="email" required
-                               class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition"
-                               placeholder="email@contoh.com" value="{{ old('email') }}">
-                    </div>
-                    <div>
-                        <label for="phone" class="block text-xs font-medium text-gray-700 mb-1">Nomor Telepon</label>
-                        <input id="phone" name="phone" type="tel" autocomplete="tel" required
-                               class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition"
-                               placeholder="08123456789" value="{{ old('phone') }}">
-                    </div>
-                    <div class="relative">
-                        <label for="password" class="block text-xs font-medium text-gray-700 mb-1">Password</label>
-                        <input id="password" name="password" type="password" autocomplete="new-password" required
-                            class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition pr-10"
-                            placeholder="Password">
-                        <button type="button" onclick="togglePassword('password')" 
-                                class="absolute inset-y-0 right-2 top-5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg id="icon-password" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                        </button>
-                        <div class="mt-2 space-y-1 text-xs text-gray-600">
-                            <p id="length-check" class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Minimal 8 karakter
-                            </p>
-                            <p id="uppercase-check" class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Minimal 1 huruf besar
-                            </p>
-                            <p id="lowercase-check" class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Minimal 1 huruf kecil
-                            </p>
-                            <p id="number-check" class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Minimal 1 angka
-                            </p>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <label for="password-confirm" class="block text-xs font-medium text-gray-700 mb-1">Konfirmasi Password</label>
-                        <input id="password-confirm" name="password_confirmation" type="password" autocomplete="new-password" required
-                            class="block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm transition pr-10"
-                            placeholder="Ulangi Password">
-                        <button type="button" onclick="togglePassword('password-confirm')" 
-                                class="absolute inset-y-0 right-2 top-5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg id="icon-password-confirm" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                        </button>
-                    </div>
-                    <button type="submit"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent text-xs font-medium rounded-md text-white bg-orange-400 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400 transition">
-                        Sign up
-                    </button>
-                    <div class="flex items-center my-3">
-                        <div class="flex-grow border-t border-gray-200"></div>
-                        <span class="mx-2 text-gray-400 text-xs">or</span>
-                        <div class="flex-grow border-t border-gray-200"></div>
-                    </div>
-                    <button type="button" onclick="window.location.href='{{ route('google.login') }}'" class="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 text-xs font-medium transition">
-                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="h-4 w-4 mr-2">
-                        Continue with Google
-                    </button>
-                    <div class="text-center mt-3">
-                        <span class="text-gray-500 text-xs">Already have an account??</span>
-                        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500 transition ml-1 text-xs">Sign in</a>
-                    </div>
-                </form>
+@extends('layouts.auth')
+@section('title', 'Daftar')
+@section('content')
+    <!-- Logo dan Title -->
+    <a href="/" class="absolute top-6 left-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <img src="{{ asset('favicon.ico') }}" alt="Cahaya Resort Logo" class="w-10 h-10">
+        <h1 class="text-xl font-bold text-white">Cahaya Resort</h1>
+    </a>
+
+    <h2 class="mb-5">Daftar</h2>
+    @if($errors->any())
+        <div id="floating-alert" class="fixed top-6 right-6 z-50 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    @if (session('status'))
+        <div id="floating-alert" class="fixed top-6 right-6 z-50 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in">
+            {{ session('status') }}
+        </div>
+    @endif
+    <form method="POST" action="{{ route('register') }}">
+        @csrf
+        <div class="nebula-input">
+            <input id="name" name="name" type="text" class="input" required autocomplete="name" value="{{ old('name') }}" />
+            <label class="user-label">Nama Lengkap</label>
+        </div>
+        <div class="nebula-input">
+            <input id="email" name="email" type="email" class="input" required autocomplete="email" value="{{ old('email') }}" />
+            <label class="user-label">Email</label>
+        </div>
+        <div class="nebula-input">
+            <input id="phone" name="phone" type="tel" class="input" required autocomplete="tel" value="{{ old('phone') }}" />
+            <label class="user-label">Nomor Telepon</label>
+        </div>
+        <div class="nebula-input relative">
+            <input id="password" name="password" type="password" class="input" required autocomplete="new-password" />
+            <label class="user-label">Password</label>
+            <div id="password-requirements" class="password-requirements hidden">
+                <h4 class="text-sm font-semibold mb-2">Password harus memenuhi:</h4>
+                <ul class="text-sm space-y-1">
+                    <li class="requirement" data-requirement="length">
+                        <span class="check"></span> Minimal 8 karakter
+                    </li>
+                    <li class="requirement" data-requirement="uppercase">
+                        <span class="check"></span> Memiliki huruf besar
+                    </li>
+                    <li class="requirement" data-requirement="lowercase">
+                        <span class="check"></span> Memiliki huruf kecil
+                    </li>
+                    <li class="requirement" data-requirement="number">
+                        <span class="check"></span> Memiliki angka
+                    </li>
+                </ul>
             </div>
         </div>
-        <!-- Right: Image -->
-        <div class="hidden md:block md:w-1/2 h-screen relative">
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="Villa" class="object-cover w-full h-full rounded-l-3xl shadow-xl">
+        <div class="nebula-input">
+            <input id="password-confirm" name="password_confirmation" type="password" class="input" required autocomplete="new-password" />
+            <label class="user-label">Konfirmasi Password</label>
         </div>
-    </div>
-    <script>
-        function togglePassword(fieldId) {
-            const input = document.getElementById(fieldId);
-            const icon = document.querySelector(`#icon-${fieldId}`);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.964 
-                             9.964 0 013.401-4.568m3.13-1.396A9.956 9.956 0 0112 5c4.478 0 8.268 
-                             2.943 9.542 7a9.953 9.953 0 01-4.243 5.132M15 12a3 3 0 11-6 
-                             0 3 3 0 016 0zM3 3l18 18"/>
-                `;
-            } else {
-                input.type = 'password';
-                icon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 
-                             9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                `;
-            }
+        <button type="submit" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">Daftar</button>
+        <button type="button" onclick="window.location.href='{{ route('google.login') }}'" class="button mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262" class="svg">
+                <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027" class="blue"></path>
+                <path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1" class="green"></path>
+                <path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782" class="yellow"></path>
+                <path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251" class="red"></path>
+            </svg>
+            <span class="text">Daftar dengan Google</span>
+        </button>
+        <div class="text-center mt-4">
+            <span class="text-gray-300">Sudah punya akun?</span>
+            <a href="{{ route('login') }}" class="lost-password ml-1">Masuk</a>
+        </div>
+    </form>
+
+    <style>
+        .password-requirements {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 12px;
+            z-index: 10;
+            border: 1px solid rgba(255, 214, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
         }
+        .password-requirements.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .password-requirements h4 {
+            color: #FFD600;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .password-requirements ul {
+            color: #fff;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+        .requirement:last-child {
+            margin-bottom: 0;
+        }
+        .requirement .check {
+            color: #ff4444;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 68, 68, 0.1);
+        }
+        .requirement.valid {
+            color: #fff;
+        }
+        .requirement.valid .check {
+            color: #00C851;
+            background: rgba(0, 200, 81, 0.1);
+        }
+        .requirement .check::before {
+            content: "✕";
+        }
+        .requirement.valid .check::before {
+            content: "✓";
+        }
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .animate-fade-in {
+            animation: fade-in 0.5s;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+            z-index: 2;
+        }
+        .password-toggle:hover {
+            color: #FFD600;
+        }
+    </style>
 
-        // Password validation
-        document.getElementById('password').addEventListener('input', function(e) {
-            const password = e.target.value;
-            
-            // Check minimum length
-            const lengthCheck = document.getElementById('length-check');
-            if (password.length >= 8) {
-                lengthCheck.style.display = 'none';
-            } else {
-                lengthCheck.style.display = 'flex';
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const requirements = document.getElementById('password-requirements');
+            const requirementItems = document.querySelectorAll('.requirement');
+
+            function togglePassword(inputId) {
+                const input = document.getElementById(inputId);
+                const icon = input.nextElementSibling.nextElementSibling.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
             }
 
-            // Check uppercase
-            const uppercaseCheck = document.getElementById('uppercase-check');
-            if (/[A-Z]/.test(password)) {
-                uppercaseCheck.style.display = 'none';
-            } else {
-                uppercaseCheck.style.display = 'flex';
+            // Make togglePassword function globally available
+            window.togglePassword = togglePassword;
+
+            passwordInput.addEventListener('focus', function() {
+                requirements.classList.remove('hidden');
+                setTimeout(() => requirements.classList.add('show'), 10);
+            });
+
+            passwordInput.addEventListener('blur', function(e) {
+                if (!requirements.contains(e.relatedTarget)) {
+                    requirements.classList.remove('show');
+                    setTimeout(() => requirements.classList.add('hidden'), 300);
+                }
+            });
+
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                
+                // Check length
+                const hasLength = password.length >= 8;
+                updateRequirement('length', hasLength);
+
+                // Check uppercase
+                const hasUppercase = /[A-Z]/.test(password);
+                updateRequirement('uppercase', hasUppercase);
+
+                // Check lowercase
+                const hasLowercase = /[a-z]/.test(password);
+                updateRequirement('lowercase', hasLowercase);
+
+                // Check number
+                const hasNumber = /[0-9]/.test(password);
+                updateRequirement('number', hasNumber);
+            });
+
+            function updateRequirement(type, isValid) {
+                const requirement = document.querySelector(`[data-requirement="${type}"]`);
+                if (isValid) {
+                    requirement.classList.add('valid');
+                } else {
+                    requirement.classList.remove('valid');
+                }
             }
 
-            // Check lowercase
-            const lowercaseCheck = document.getElementById('lowercase-check');
-            if (/[a-z]/.test(password)) {
-                lowercaseCheck.style.display = 'none';
-            } else {
-                lowercaseCheck.style.display = 'flex';
-            }
-
-            // Check number
-            const numberCheck = document.getElementById('number-check');
-            if (/[0-9]/.test(password)) {
-                numberCheck.style.display = 'none';
-            } else {
-                numberCheck.style.display = 'flex';
-            }
+            // Floating alert auto-hide
+            setTimeout(() => {
+                const alert = document.getElementById('floating-alert');
+                if(alert) alert.style.display = 'none';
+            }, 4000);
         });
     </script>
-</body>
-</html>
+@endsection
