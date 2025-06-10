@@ -464,7 +464,7 @@ use Illuminate\Support\Str;
                 <!-- Booking Form -->
                 <form id="searchForm" class="flex flex-col items-stretch gap-4 p-4 mt-10 bg-black/40 backdrop-blur-md rounded-xl md:inline-flex md:flex-row md::items-center md::gap-4" style="overflow:visible; z-index:9999;">
                     <!-- Check-in -->
-                    <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-black/30 w-full md:w-auto" onclick="openCalendar('check_in')">
+                    <div class="flex items-center justify-center w-full gap-2 px-4 py-2 rounded-lg cursor-pointer bg-black/30 md:w-auto" onclick="openCalendar('check_in')">
                         <i class="text-white fas fa-calendar"></i>
                         <input type="text" 
                                id="landing_check_in"
@@ -475,7 +475,7 @@ use Illuminate\Support\Str;
                     </div>
                             
                     <!-- Check-out -->
-                    <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-black/30 w-full md:w-auto" onclick="openCalendar('check_out')">
+                    <div class="flex items-center justify-center w-full gap-2 px-4 py-2 rounded-lg cursor-pointer bg-black/30 md:w-auto" onclick="openCalendar('check_out')">
                         <i class="text-white fas fa-calendar"></i>
                         <input type="text" 
                                id="landing_check_out"
@@ -486,7 +486,7 @@ use Illuminate\Support\Str;
                     </div>
             
                     <!-- Room Type Selector -->
-                    <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-black/30 w-full md:w-auto">
+                    <div class="flex items-center justify-center w-full gap-2 px-4 py-2 rounded-lg bg-black/30 md:w-auto">
                         <div class="select">
                             <div class="selected">
                                 <i class="fas fa-home"></i>
@@ -517,7 +517,7 @@ use Illuminate\Support\Str;
                     </div>
                 
                     <!-- Search Button -->
-                    <button type="submit" class="px-6 py-3 font-semibold text-white transition-all rounded-lg w-full md:w-auto" style="background:#FFA040; font-family:'Poppins',sans-serif; font-weight:600;" onmouseover="this.style.background='#ff8c1a'" onmouseout="this.style.background='#FFA040'">
+                    <button type="submit" class="w-full px-6 py-3 font-semibold text-white transition-all rounded-lg md:w-auto" style="background:#FFA040; font-family:'Poppins',sans-serif; font-weight:600;" onmouseover="this.style.background='#ff8c1a'" onmouseout="this.style.background='#FFA040'">
                         Search
                     </button>
                 </form>
@@ -526,7 +526,7 @@ use Illuminate\Support\Str;
     </section>
 
     <!-- Room Choice Section -->
-    <section class="relative bg-white pt-20 pb-20">
+    <section class="relative pt-20 pb-20 bg-white">
         <!-- Curved Welcome Section -->
         <div class="absolute left-0 right-0 -top-12 sm:-top-16 md:-top-20 lg:-top-12">
             <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -539,7 +539,7 @@ use Illuminate\Support\Str;
         </div>
         
         <!-- Content -->
-        <div class="px-4 pt-20 pb-20 mx-auto max-w-7xl sm:px-6 lg:px-8 mt-48 sm:mt-56 md:mt-64 lg:mt-0">
+        <div class="px-4 pt-20 pb-20 mx-auto mt-48 max-w-7xl sm:px-6 lg:px-8 sm:mt-56 md:mt-64 lg:mt-0">
             <p class="mb-12 text-xl font-bold text-center text-black-600 md:text-2xl">Room Choice in Cahaya Resort</p>
 
             <!-- Room Carousel -->
@@ -567,7 +567,7 @@ use Illuminate\Support\Str;
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <h3 class="text-base font-semibold sm:text-lg">{{ $room->name }}</h3>
-                                        <p class="font-medium text-orange-500 text-sm sm:text-base">Rp. {{ number_format($room->price_per_night, 0, ',', '.') }}</p>
+                                        <p class="text-sm font-medium text-orange-500 sm:text-base">Rp. {{ number_format($room->price_per_night, 0, ',', '.') }}</p>
                                     </div>
                                     <div class="flex items-center gap-2 text-xs text-gray-500 sm:text-sm">
                                         <i class="fas fa-map-marker-alt"></i>
@@ -745,21 +745,9 @@ use Illuminate\Support\Str;
                     <h2 class="flex flex-col items-start gap-1 mb-6 text-2xl font-semibold text-gray-800 sm:flex-row sm:items-center sm:gap-3 md:text-3xl">
                         Dream In <span class="text-gray-600">Serene Luxury</span>
                     </h2>
-                    <p class="mb-8 leading-relaxed text-gray-600 text-sm md:text-base">
+                    <p class="mb-8 text-sm leading-relaxed text-gray-600 md:text-base">
                         Cahaya Pangururan Inn, comfortable with local nuances and natural panorama of Samosir. Wake up with cool air, calming lake views, and a calm atmosphere that refreshes the soul. Enjoy the hospitality of the host, complete facilities, and comfort like at home.
                     </p>
-                </div>
-
-                <!-- Stay & Relax Text -->
-                <div class="absolute top-0 right-0 pb-20 hidden lg:block">
-                    <h3 class="text-6xl font-bold leading-tight"
-                        style="color: #080808;
-                            text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25) inset;
-                            -webkit-text-fill-color: transparent;
-                            -webkit-background-clip: text;
-                            background-image: linear-gradient(to bottom, #080808, #080808);">
-                        Stay & Relax
-                    </h3>
                 </div>
 
                 <!-- Facility Gallery -->
@@ -822,18 +810,16 @@ use Illuminate\Support\Str;
     </section>
 
     <!-- Stay in the know Section -->
-    <section class="py-16 md:py-20 text-white" style="background:#252525; font-family:'Poppins',sans-serif;">
+    <section class="py-16 text-white md:py-20" style="background:#252525; font-family:'Poppins',sans-serif;">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 lg:gap-16">
-                <div class="p-6 shadow-sm bg-white/5 rounded-xl md:p-8 lg:p-10">
-                    <h2 class="mb-4 text-xl font-bold md:text-2xl" style="font-family:'Poppins',sans-serif; font-weight:700;">Stay in the know</h2>
-                    <p class="mb-6 text-sm md:text-base font-normal" style="font-family:'Poppins',sans-serif; font-weight:400;">Sign up to get marketing emails from Cahaya Resort, including promotions, rewards, and information about Cahaya Resort services.</p>
-                    <div class="flex flex-col gap-2 sm:flex-row">
-                        <input type="email" placeholder="Your email" class="flex-1 px-4 py-2 font-normal text-gray-800 bg-white rounded-lg focus:outline-none text-sm md:text-base" style="font-family:'Poppins',sans-serif; font-weight:400;" required>
-                        <button class="px-6 py-2 font-semibold text-white transition rounded-lg text-sm md:text-base" style="background:#FFA040; font-family:'Poppins',sans-serif; font-weight:500;" onmouseover="this.style.background='#ff8c1a'" onmouseout="this.style.background='#FFA040'">
-                            Send it
-                        </button>
-                    </div>
+                <div class="flex flex-col items-center justify-center p-6 shadow-sm bg-white/5 rounded-xl md:p-8 lg:p-10">
+                    <h2 class="mb-4 text-xl font-bold text-center md:text-2xl" style="font-family:'Poppins',sans-serif; font-weight:700;">Contact Center</h2>
+                    <p class="mb-6 text-sm font-normal text-center md:text-base" style="font-family:'Poppins',sans-serif; font-weight:400;">Contact us for information, reservations or other assistance.</p>
+                    <a href="https://wa.me/6281361002918" target="_blank" class="flex items-center gap-3 px-6 py-3 mt-2 text-lg font-semibold text-white transition bg-green-500 rounded-lg shadow-lg hover:bg-green-600" style="font-family:'Poppins',sans-serif; font-weight:500;">
+                        <i class="text-2xl fab fa-whatsapp"></i>
+                        0813 6100 2918
+                    </a>
                 </div>
                 <div class="relative flex flex-col justify-center p-6 shadow-sm bg-white/5 rounded-xl md:p-8 md:border-l md:pl-10 lg:p-10 lg:pl-12 border-gray-400/20">
                     <span class="absolute top-8 left-0 hidden md:block w-0.5 h-[80%] bg-gradient-to-b from-transparent via-gray-400/20 to-transparent rounded-full"></span>
@@ -869,15 +855,15 @@ use Illuminate\Support\Str;
     </section>
 
     <!-- Footer Section -->
-    <section class="pt-12 pb-8 md:pt-16 text-white" style="background:#1D1D1D;">
+    <section class="pt-12 pb-8 text-white md:pt-16" style="background:#1D1D1D;">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-semibold text-center md:text-4xl lg:text-5xl" style="font-family:'Poppins',sans-serif;">Cahaya Resort</h2>
-            <hr class="mb-8 md:mb-12 border-t border-gray-700">
+            <hr class="mb-8 border-t border-gray-700 md:mb-12">
             <div class="grid grid-cols-1 gap-8 mb-12 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
                 <!-- Newsletter -->
                 <div class="text-center md:text-left">
                     <h3 class="mb-4 text-lg font-medium md:text-xl" style="font-family:'Poppins',sans-serif;">Ready to get started?</h3>
-                    <div class="flex items-center justify-center md:justify-start mt-8">
+                    <div class="flex items-center justify-center mt-8 md:justify-start">
                         <button type="button" class="w-full md:w-auto px-8 py-3 bg-[#D2A06E] text-white rounded-lg font-semibold text-lg flex items-center justify-center" style="font-family:'Poppins',sans-serif;">
                             Get Started
                         </button>
@@ -1130,8 +1116,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const roomsContent = document.getElementById('roomsContent');
             if (roomsPanel && roomsContent) {
                 roomsContent.innerHTML = `
-                    <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                    <div class="py-4 text-center">
+                        <div class="w-8 h-8 mx-auto border-b-2 border-orange-500 rounded-full animate-spin"></div>
                         <p class="mt-2 text-gray-600">Loading rooms...</p>
                     </div>
                 `;
