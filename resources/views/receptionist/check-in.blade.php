@@ -1,6 +1,6 @@
 <x-receptionist-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-100 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-100 leading-tight text-center">
             {{ __('Check-in Tamu') }}
         </h2>
     </x-slot>
@@ -37,32 +37,33 @@
                 </div>
             @endif
 
-            <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+            <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                 <div class="p-6">
                     <!-- Search and Filter Form -->
                     <div class="mb-6">
                         <form method="GET" action="{{ route('receptionist.check-in') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label for="search" class="block text-sm font-medium text-gray-300">Cari</label>
+                                <label for="search" class="block text-sm font-medium" style="color:#fff;">Cari</label>
                                 <input type="text" 
                                        name="search" 
                                        id="search" 
                                        value="{{ request('search') }}"
-                                       class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                       class="form-input bg-[#2D2D2D] border border-[#bbb] rounded-xl text-white placeholder-[#bbb] focus:ring-amber-500 focus:border-amber-500 py-2 px-3 text-base" 
                                        placeholder="Nama, Email, atau No. Telp">
                             </div>
                             <div>
-                                <label for="date" class="block text-sm font-medium text-gray-300">Tanggal Check-in</label>
+                                <label for="date" class="block text-sm font-medium" style="color:#fff;">Tanggal Check-in</label>
                                 <input type="date" 
                                        name="date" 
                                        id="date" 
                                        value="{{ request('date') }}"
-                                       class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                       class="form-input bg-[#2D2D2D] border border-[#bbb] rounded-xl text-white focus:ring-amber-500 focus:border-amber-500 py-2 px-3 text-base">
                             </div>
                             <div>
-                                <label for="status" class="block text-sm font-medium text-gray-300">Status</label>
+                                <label for="status" class="block text-sm font-medium" style="color:#fff;">Status</label>
                                 <select name="status" id="status" 
-                                    class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                    class="form-input bg-[#2D2D2D] border border-[#bbb] rounded-xl text-white focus:ring-amber-500 focus:border-amber-500 py-2 px-3 text-base">
                                     <option value="">Semua Status</option>
                                     <option value="not_checked_in" {{ request('status') === 'not_checked_in' ? 'selected' : '' }}>Belum Check In</option>
                                     <option value="checked_in" {{ request('status') === 'checked_in' ? 'selected' : '' }}>Sudah Check In</option>
@@ -70,12 +71,12 @@
                             </div>
                             <div class="flex items-end">
                                 <button type="submit"
-                                    class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    class="inline-flex justify-center rounded-xl border border-transparent bg-amber-500 py-2 px-4 text-base font-medium text-white shadow-sm hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
                                     Filter
                                 </button>
                                 @if(request()->hasAny(['search', 'date', 'status']))
                                     <a href="{{ route('receptionist.check-in') }}" 
-                                        class="ml-2 inline-flex justify-center rounded-md border border-gray-600 bg-transparent py-2 px-4 text-sm font-medium text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                        class="ml-2 inline-flex justify-center rounded-xl border border-[#bbb] bg-transparent py-2 px-4 text-base font-medium text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
                                         Reset
                                     </a>
                                 @endif
@@ -84,33 +85,19 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead class="bg-gray-900/50">
+                        <table class="min-w-full">
+                            <thead style="background:#252525;">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Booking ID
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Nama Tamu
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Kamar
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Check-in
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Check-out
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Aksi
-                                    </th>
+                                    <th style="color:#fff;">Booking ID</th>
+                                    <th style="color:#fff;">Nama Tamu</th>
+                                    <th style="color:#fff;">Kamar</th>
+                                    <th style="color:#fff;">Check-in</th>
+                                    <th style="color:#fff;">Check-out</th>
+                                    <th style="color:#fff;">Status</th>
+                                    <th style="color:#fff;" class="text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-700">
+                            <tbody style="background:#2D2D2D;color:#fff;">
                                 @forelse($bookings as $booking)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white">

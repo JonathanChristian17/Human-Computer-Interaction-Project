@@ -7,7 +7,7 @@
 
     <div class="space-y-6">
         <!-- Active Guests -->
-        <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+        <div class="bg-[#232323] backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-[#FFD740]/40">
             <div class="p-6">
                 <h3 class="text-lg font-medium text-white mb-4">Active Guests</h3>
                 
@@ -64,7 +64,7 @@
         </div>
 
         <!-- Upcoming Guests -->
-        <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+        <div class="bg-[#232323] backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-[#FFD740]/40">
             <div class="p-6">
                 <h3 class="text-lg font-medium text-white mb-4">Upcoming Guests</h3>
                 

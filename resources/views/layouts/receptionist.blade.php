@@ -15,9 +15,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-900">
+    <div class="min-h-screen" style="background:#1D1D1D;">
         <!-- Navigation -->
-        <nav class="bg-gray-800 border-b border-gray-700">
+        <nav style="background:#2D2D2D; border-bottom:2px solid #FFA040;">
             <div class="mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <div class="flex">
@@ -89,7 +89,7 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-            <header class="bg-gray-800 shadow">
+            <header style="background:#2D2D2D;box-shadow:0 2px 8px #0002;">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>

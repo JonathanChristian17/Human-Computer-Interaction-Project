@@ -37,53 +37,69 @@
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Total Revenue -->
-                <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
-                    <div class="p-6">
-                        <div class="text-sm font-medium text-gray-400">Total Pendapatan Bulan Ini</div>
-                        <div class="mt-2 text-3xl font-bold text-white">
-                            Rp {{ number_format($thisMonthRevenue, 0, ',', '.') }}
-                        </div>
-                        @php
-                            $lastMonthRevenue = $monthlyRevenue->where('month', now()->subMonth()->month)->first()?->revenue ?? 0;
-                            $thisMonthRevenue = $monthlyRevenue->where('month', now()->month)->first()?->revenue ?? 0;
-                            $revenueGrowth = $lastMonthRevenue > 0 ? (($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 0;
-                        @endphp
-                        <div class="mt-2 text-sm {{ $revenueGrowth >= 0 ? 'text-green-400' : 'text-red-400' }}">
-                            {{ number_format(abs($revenueGrowth), 1) }}% {{ $revenueGrowth >= 0 ? 'kenaikan' : 'penurunan' }} dari bulan lalu
+                <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                    <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-medium text-white text-center mb-2">Total Pendapatan Bulan Ini</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead style="background:#252525;">
+                                </thead>
+                                <tbody style="background:#2D2D2D;color:#fff;">
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-white">
+                                            <div class="text-3xl font-bold text-white">Rp {{ number_format($thisMonthRevenue, 0, ',', '.') }}</div>
+                                            <div class="mt-1 text-sm {{ $revenueGrowth >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                                                {{ number_format(abs($revenueGrowth), 1) }}% {{ $revenueGrowth >= 0 ? 'kenaikan' : 'penurunan' }} dari bulan lalu
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
                 <!-- Average Daily Rate -->
-                <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
-                    <div class="p-6">
-                        <div class="text-sm font-medium text-gray-400">Rata-rata Harga per Malam</div>
-                        @php
-                            $thisMonthBookings = $monthlyBookings->where('month', now()->month)->first()?->total ?? 0;
-                            $thisMonthRevenue = $monthlyRevenue->where('month', now()->month)->first()?->revenue ?? 0;
-                            $averageRate = $thisMonthBookings > 0 ? $thisMonthRevenue / $thisMonthBookings : 0;
-                        @endphp
-                        <div class="mt-2 text-3xl font-bold text-white">
-                            Rp {{ number_format($averageRatePerNight, 0, ',', '.') }}
-                        </div>
-                        <div class="mt-2 text-sm text-gray-400">
-                            Rata-rata harga kamar per malam
+                <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                    <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-medium text-white text-center mb-2">Rata-rata Harga per Malam</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead style="background:#252525;">
+                                </thead>
+                                <tbody style="background:#2D2D2D;color:#fff;">
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-white">
+                                            <div class="text-3xl font-bold text-white">Rp {{ number_format($averageRatePerNight, 0, ',', '.') }}</div>
+                                            <div class="mt-1 text-sm text-gray-400">Rata-rata harga kamar per malam</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
                 <!-- Occupancy Rate -->
-                <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
-                    <div class="p-6">
-                        <div class="text-sm font-medium text-gray-400">Tingkat Hunian</div>
-                        @php
-                            $totalRooms = App\Models\Room::count();
-                        @endphp
-                        <div class="mt-2 text-3xl font-bold text-white">
-                            {{ number_format($occupancyRate, 1) }}%
-                        </div>
-                        <div class="mt-2 text-sm text-gray-400">
-                            Persentase kamar yang terisi
+                <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                    <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-medium text-white text-center mb-2">Tingkat Hunian</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead style="background:#252525;">
+                                </thead>
+                                <tbody style="background:#2D2D2D;color:#fff;">
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-white">
+                                            <div class="text-3xl font-bold text-white">{{ number_format($occupancyRate, 1) }}%</div>
+                                            <div class="mt-1 text-sm text-gray-400">Persentase kamar yang terisi</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -92,22 +108,19 @@
             <!-- Monthly Reports -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Monthly Bookings -->
-                <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+                <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                    <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                     <div class="p-6">
-                        <h3 class="text-lg font-medium text-white mb-4">Pemesanan per Bulan</h3>
+                        <h3 class="text-lg font-medium text-white text-center mb-4">Pemesanan per Bulan</h3>
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-700">
-                                <thead class="bg-gray-900/50">
+                            <table class="min-w-full">
+                                <thead style="background:#252525;">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                            Bulan
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                            Total Pemesanan
-                                        </th>
+                                        <th style="color:#fff;">Bulan</th>
+                                        <th style="color:#fff;">Total Pemesanan</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-700">
+                                <tbody style="background:#2D2D2D;color:#fff;">
                                     @foreach($monthlyBookings as $booking)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
@@ -125,22 +138,19 @@
                 </div>
 
                 <!-- Monthly Revenue -->
-                <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+                <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                    <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                     <div class="p-6">
-                        <h3 class="text-lg font-medium text-white mb-4">Pendapatan per Bulan</h3>
+                        <h3 class="text-lg font-medium text-white text-center mb-4">Pendapatan per Bulan</h3>
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-700">
-                                <thead class="bg-gray-900/50">
+                            <table class="min-w-full">
+                                <thead style="background:#252525;">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                            Bulan
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                            Total Pendapatan
-                                        </th>
+                                        <th style="color:#fff;">Bulan</th>
+                                        <th style="color:#fff;">Total Pendapatan</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-700">
+                                <tbody style="background:#2D2D2D;color:#fff;">
                                     @foreach($monthlyRevenue as $revenue)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
@@ -159,7 +169,8 @@
             </div>
 
             <!-- Booking Details with Pagination -->
-            <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+            <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-medium text-white">Detail Pesanan</h3>

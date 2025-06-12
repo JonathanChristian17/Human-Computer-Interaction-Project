@@ -22,7 +22,7 @@
                 </div>
             @endif
 
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+            <div class="bg-[#232323] backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-[#FFD740]/40">
                 <div class="p-6">
                     <!-- Search and Filter Form -->
                     <div class="mb-6">
@@ -30,17 +30,17 @@
                             <div>
                                 <label for="search" class="block text-sm font-medium text-gray-300">Cari</label>
                                 <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                    class="mt-1 block w-full rounded-lg bg-gray-700/50 border border-gray-600/50 text-white placeholder-gray-400 focus:ring-amber-500 focus:border-amber-500"
+                                    class="form-input bg-[#2D2D2D] border border-[#bbb] rounded-xl text-white placeholder-[#bbb] focus:ring-amber-500 focus:border-amber-500 py-2 px-3 text-base"
                                     placeholder="Nama, Email, atau No. Telp">
                             </div>
                             <div>
                                 <label for="date" class="block text-sm font-medium text-gray-300">Tanggal Check-out</label>
                                 <input type="date" name="date" id="date" value="{{ request('date') }}"
-                                    class="mt-1 block w-full rounded-lg bg-gray-700/50 border border-gray-600/50 text-white focus:ring-amber-500 focus:border-amber-500">
+                                    class="form-input bg-[#2D2D2D] border border-[#bbb] rounded-xl text-white focus:ring-amber-500 focus:border-amber-500 py-2 px-3 text-base">
                             </div>
                             <div class="flex items-end">
                                 <button type="submit" 
-                                    class="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-900">
+                                    class="w-full px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-900 text-base">
                                     Filter
                                 </button>
                             </div>
