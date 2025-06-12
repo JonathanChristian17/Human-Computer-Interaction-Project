@@ -5,21 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Cahaya Resort') }}</title>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Additional Styles -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #1D1D1D;
+        }
+        .nav-container {
+            background: #1D1D1D;
+            border-bottom: 2px solid #FFA040;
+        }
+        .nav-link {
+            color: #fff;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+        .nav-link:hover {
+            color: #FFA040;
+            background: rgba(255, 160, 64, 0.1);
+            transform: translateY(-2px);
+        }
+        .nav-link.active {
+            color: #FFA040;
+            background: rgba(255, 160, 64, 0.18);
+            box-shadow: 0 2px 8px rgba(255, 160, 64, 0.10);
+        }
+        .nav-link, .nav-link.active {
+            border-bottom: none !important;
+            box-shadow: none !important;
+        }
+        .nav-link.active::after {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 20%;
+            right: 20%;
+            bottom: 6px;
+            height: 3px;
+            background: #FFA040;
+            border-radius: 2px;
+        }
+        .nav-link.active:hover {
+            background: rgba(255, 160, 64, 0.22);
+            transform: translateY(-2px);
+        }
+        .content-container {
+            background: #1D1D1D;
+            color: #fff;
+        }
+        .card {
+            background: #252525;
+            border: 1px solid #FFA040;
+            border-radius: 12px;
+        }
+        .btn-primary {
+            background: #FFA040;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #ff8c1a;
+        }
+        .table-container {
+            background: #252525;
+            border-radius: 12px;
+            border: 1px solid #FFA040;
+        }
+        .table-header {
+            background: #FFA040;
+            color: #fff;
+        }
+        .table-row {
+            border-bottom: 1px solid #FFA040;
+        }
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        /* Responsive nav link styles */
+        .responsive-nav-link {
+            color: #fff;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            margin: 2px 0;
+        }
+        .responsive-nav-link:hover {
+            color: #FFA040;
+            background: rgba(255, 160, 64, 0.1);
+            transform: translateX(4px);
+        }
+        .responsive-nav-link.active {
+            color: #FFA040;
+            background: rgba(255, 160, 64, 0.15);
+            box-shadow: 0 2px 4px rgba(255, 160, 64, 0.2);
+        }
+    </style>
     @stack('styles')
 </head>
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+    <div class="min-h-screen bg-[#1D1D1D]">
+        <nav class="nav-container">
             <!-- Primary Navigation Menu -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
@@ -27,7 +132,7 @@
                         <!-- Logo -->
                         <div class="shrink-0 flex items-center">
                             <a href="{{ route('receptionist.dashboard') }}">
-                                <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                                <img src="{{ asset('favicon.ico') }}" alt="Cahaya Resort" class="h-8 w-8">
                             </a>
                         </div>
 
@@ -70,7 +175,7 @@
                     <div class="hidden sm:flex sm:items-center sm:ml-6">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
-                                <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md" style="color:#fff;background:#2D2D2D;transition:all 0.2s;" onmouseover="this.style.color='#FFA040'" onmouseout="this.style.color='#fff'">
                                     <div class="flex items-center">
                                         @auth
                                         <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="h-8 w-8 rounded-full object-cover mr-2">
@@ -90,11 +195,10 @@
                             </x-slot>
 
                             <x-slot name="content">
-                          
+
                                 <!-- Authentication -->
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-
                                     <x-dropdown-link :href="route('logout')"
                                             onclick="event.preventDefault();
                                                         this.closest('form').submit();">
@@ -155,20 +259,10 @@
                 <!-- Responsive Settings Options -->
                 <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
                     <div class="px-4">
-                        <div class="font-medium text-base text-gray-800 dark:text-gray-200">
-                            @auth
-                            {{ Auth::user()->name }}
-                            @else
-                            Guest
-                            @endauth
-                        </div>
-                        <div class="font-medium text-sm text-gray-500">
-                            @auth
-                            {{ Auth::user()->email }}
-                            @else
-                            guest@example.com
-                            @endauth
-                        </div>
+                        @auth
+                            <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
+                            <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                        @endauth
                     </div>
 
                     <div class="mt-3 space-y-1">
@@ -179,7 +273,6 @@
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-responsive-nav-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
@@ -193,7 +286,7 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-            <header class="bg-white dark:bg-gray-800 shadow">
+            <header class="bg-[#252525] shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
@@ -201,7 +294,7 @@
         @endif
 
         <!-- Page Content -->
-        <main>
+        <main class="content-container">
             {{ $slot }}
         </main>
     </div>

@@ -8,19 +8,20 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Search and Filter -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="relative overflow-hidden shadow-sm sm:rounded-lg mb-6" style="background:#2D2D2D;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                 <div class="p-6">
                     <form method="GET" action="{{ route('receptionist.transactions') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Search</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full rounded-md border-[#FFD740] bg-[#232323] text-white focus:border-[#FFD740] focus:ring-[#FFD740]"
                                 placeholder="Name, Email, or Phone">
                         </div>
                         <div>
                             <label for="payment_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Status</label>
                             <select name="payment_status" id="payment_status"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                class="text-sm rounded-md border-[#FFD740] bg-[#232323] text-white focus:border-[#FFD740] focus:ring-[#FFD740] status-select">
                                 <option value="">All</option>
                                 <option value="pending" {{ request('payment_status') === 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Paid</option>
@@ -37,41 +38,42 @@
             </div>
 
             <!-- Transactions Table -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                 <div class="p-6">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
+                            <thead style="background:#252525;">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="color:#fff;">
                                         Guest
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="color:#fff;">
                                         Room
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="color:#fff;">
                                         Payment Details
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="color:#fff;">
                                         Status
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="color:#fff;">
                                         Date
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody style="background:#2D2D2D;color:#fff;" class="bg-[#232323] divide-y divide-[#333]">
                                 @forelse($bookings as $booking)
-                                    <tr>
+                                    <tr class="hover:bg-[#252525] transition-colors duration-200">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex flex-col">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $booking->full_name }}</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $booking->email }}</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $booking->phone }}</div>
+                                                <div class="text-sm font-medium text-white">{{ $booking->full_name }}</div>
+                                                <div class="text-sm text-gray-400">{{ $booking->email }}</div>
+                                                <div class="text-sm text-gray-400">{{ $booking->phone }}</div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900 dark:text-gray-100">
+                                            <div class="text-sm text-white">
                                                 @foreach($booking->rooms as $room)
                                                     Room {{ $room->number }}<br>
                                                 @endforeach
@@ -79,15 +81,15 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col space-y-2">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                <div class="text-sm font-medium text-white">
                                                     Rp {{ number_format($booking->total_price, 0, ',', '.') }}
                                                 </div>
                                                 @if($booking->transaction)
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                    <div class="text-xs text-gray-400">
                                                         Order #{{ $booking->transaction->order_id }}
                                                     </div>
                                                     @if($booking->transaction->transaction_id)
-                                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                        <div class="text-xs text-gray-400">
                                                             Trans ID: {{ $booking->transaction->transaction_id }}
                                                         </div>
                                                     @endif
@@ -130,13 +132,13 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                             {{ $booking->created_at->format('d M Y H:i') }}
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-400">
                                             No transactions found
                                         </td>
                                     </tr>

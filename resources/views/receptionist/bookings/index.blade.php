@@ -64,7 +64,7 @@
                 </div>
             @endif
 
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+            <div class="bg-[#232323] backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-[#FFD740]/40">
                 <div class="p-6">
                     <!-- Search and Filter Form -->
                     <div class="mb-6">

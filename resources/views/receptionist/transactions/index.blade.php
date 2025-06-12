@@ -168,4 +168,59 @@ use Carbon\Carbon;
         }, 1000);
     });
 </script>
-@endpush 
+@endpush
+
+<style>
+.pagination nav {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+.pagination nav > div {
+    width: 100%;
+}
+.pagination nav ul {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 0;
+}
+.pagination nav li {
+    list-style: none;
+}
+.pagination nav a,
+.pagination nav span {
+    background: #232323 !important;
+    color: #fff !important;
+    border: 1px solid #FFA040 !important;
+    border-radius: 6px !important;
+    padding: 8px 14px !important;
+    margin: 0 2px;
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s;
+}
+.pagination nav a:hover,
+.pagination nav a:focus {
+    background: #FFA040 !important;
+    color: #232323 !important;
+    border-color: #FFA040 !important;
+}
+.pagination nav .active span,
+.pagination nav li.active span {
+    background: #FFA040 !important;
+    color: #232323 !important;
+    border-color: #FFA040 !important;
+}
+.pagination nav .disabled span,
+.pagination nav li.disabled span {
+    background: #232323 !important;
+    color: #888 !important;
+    border-color: #444 !important;
+    cursor: not-allowed !important;
+}
+</style> 

@@ -6,12 +6,13 @@
 }
     .room-card.selected {
         border-color: #f97316;
-        background-color: #fff7ed;
+        background-color: #2D2D2D;
+        color: #fff;
     }
     .room-card.maintenance {
-        opacity: 0.7;
+        opacity: 0.92;
         cursor: not-allowed !important;
-        background-color: #fee2e2;
+        background-color: #3b0d0c;
     }
     .step-content {
     display: none;
@@ -24,31 +25,28 @@
         top: 2rem;
         height: calc(60vh - 4rem);
         overflow-y: auto;
-    background: white;
+    background: #2D2D2D;
         border-radius: 1rem;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
-    .selected-room-card {
-        background: #fff;
-        border-radius: 0.75rem;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
+    .selected-room-card, .selected-room-card * {
+        background: #2D2D2D !important;
+        color: #fff !important;
+        border: 1.5px solid #1D1D1D !important;
     }
     .selected-room-card:hover {
         border-color: #f97316;
-        background-color: #fff7ed;
+        background-color: #252525;
         transform: translateY(-2px);
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     .selected-room-info h4 {
         font-weight: 600;
-        color: #1f2937;
+        color: #fff;
         margin-bottom: 0.25rem;
     }
     .selected-room-price {
-        color: #6b7280;
+        color: #fff;
         font-size: 0.875rem;
         margin-bottom: 0.25rem;
     }
@@ -67,9 +65,9 @@
     .sidebar-footer {
         position: sticky;
         bottom: 0;
-        background: white;
+        background: #2D2D2D;
         padding: 1rem;
-        border-top: 1px solid #e5e7eb;
+        border-top: 2px solid #FFA040;
         border-radius: 0 0 1rem 1rem;
         box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
     }
@@ -83,7 +81,7 @@
     .total-label {
         font-size: 1rem;
         font-weight: 500;
-        color: #4b5563;
+        color: #fff;
     }
     .total-amount {
         font-size: 1.25rem;
@@ -112,6 +110,8 @@
         max-height: calc(100% - 140px);
         overflow-y: auto;
         padding: 1rem;
+        background: #2D2D2D;
+        color: #fff;
     }
     #selectedRoomsList::-webkit-scrollbar {
         width: 4px;
@@ -274,6 +274,124 @@ input.date-input:focus {
     text-decoration: none;
     opacity: 0.3;
 }
+
+.room-type-filter-btn {
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.room-type-filter-btn.selected,
+.room-type-filter-btn:focus {
+    background: #FFA040 !important;
+    color: #fff !important;
+    border: none;
+    outline: none;
+}
+.room-type-filter-btn:hover {
+    background: #FFA040;
+    color: #fff;
+}
+
+.room-card, .room-card * {
+    color: #F0F0F0 !important;
+}
+.room-card .text-orange-600, .room-card .text-orange-700, .room-card .text-orange-500, .room-card .text-yellow-500, .room-card .text-yellow-400 {
+    color: #FFA040 !important;
+}
+.room-card .bg-green-100, .room-card .text-green-800 {
+    color: #16a34a !important;
+    background: #bbf7d0 !important;
+}
+.room-card .bg-red-100, .room-card .text-red-800 {
+    color: #dc2626 !important;
+    background: #fee2e2 !important;
+}
+.room-card .text-sm.text-gray-600, .room-card .text-gray-900, .room-card .text-gray-500 {
+    color: #F0F0F0 !important;
+}
+.selected-room-card, .selected-room-card * {
+    background: #1D1D1D !important;
+    color: #fff !important;
+}
+.selected-room-card .text-orange-500, .selected-room-card .text-orange-600 {
+    color: #FFA040 !important;
+}
+.sidebar, .sidebar * {
+    color: #F0F0F0 !important;
+}
+.sidebar .text-orange-500, .sidebar .text-orange-600 {
+    color: #FFA040 !important;
+}
+.sidebar .total-amount {
+    color: #FFA040 !important;
+}
+.sidebar input,
+.sidebar select,
+.sidebar textarea {
+    background: #2D2D2D !important;
+    color: #fff !important;
+    border: 1.5px solid #1D1D1D !important;
+    border-radius: 8px !important;
+}
+.sidebar input::placeholder,
+.sidebar textarea::placeholder {
+    color: #bbb !important;
+    opacity: 1 !important;
+}
+.sidebar label,
+.sidebar .form-label {
+    color: #fff !important;
+}
+
+/* Guest Details Form Styling */
+.step-content input,
+.step-content select,
+.step-content textarea {
+    background: #2D2D2D !important;
+    color: #fff !important;
+    border: 1.5px solid #bbb !important;
+    border-radius: 12px !important;
+    font-size: 1rem;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.step-content input::placeholder,
+.step-content textarea::placeholder {
+    color: #bbb !important;
+    opacity: 1 !important;
+}
+.step-content input:focus,
+.step-content select:focus,
+.step-content textarea:focus {
+    border: 1.5px solid #FFA040 !important;
+    box-shadow: 0 0 0 2px #FFA04033 !important;
+    outline: none !important;
+    background: #252525 !important;
+    color: #fff !important;
+}
+.step-content label,
+.step-content .form-label {
+    color: #fff !important;
+}
+
+/* Custom select arrow and hover for Payment Status */
+.step-content select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background: #2D2D2D url('data:image/svg+xml;utf8,<svg fill="%23FFA040" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>') no-repeat right 1rem center/1.2em 1.2em !important;
+    padding-right: 2.5rem !important;
+    cursor: pointer;
+}
+.step-content select:focus {
+    border: 1.5px solid #FFA040 !important;
+    box-shadow: 0 0 0 2px #FFA04033 !important;
+    outline: none !important;
+    background-color: #252525 !important;
+}
+/* Custom dropdown option hover (works in some browsers) */
+.step-content select option:hover, .step-content select option:checked {
+    background: #FFA040 !important;
+    color: #fff !important;
+}
 </style>
 @endpush
 
@@ -281,11 +399,12 @@ input.date-input:focus {
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script src="{{ asset('js/echo.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
 <x-receptionist-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-100 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-100 leading-tight text-center">
             {{ __('Offline Booking') }}
         </h2>
     </x-slot>
@@ -312,27 +431,20 @@ input.date-input:focus {
                 <div class="flex-1">
                     <!-- Step 1: Room Selection -->
                     <div id="step1" class="step-content active">
-                        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                                <div class="mb-6">
-                                <h3 class="text-lg font-semibold text-gray-900">Available Rooms</h3>
+                        <div class="relative overflow-hidden shadow-xl sm:rounded-lg p-6" style="background:#2D2D2D;">
+                            <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold mb-2" style="color:#FFA040;">Available Rooms</h3>
                                 <p class="text-sm text-gray-600">Select one or more rooms to book</p>
-                                </div>
+                            </div>
 
                             <!-- Room Type Filter -->
                             <div class="mb-6 flex flex-wrap gap-2">
-                                <button onclick="filterRooms('all')" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-medium hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
-                                    All Rooms
-                                </button>
-                                <button onclick="filterRooms('standard')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                    Standard
-                                </button>
-                                <button onclick="filterRooms('deluxe')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                    Deluxe
-                                </button>
-                                <button onclick="filterRooms('suite')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                    Suite
-                                </button>
-                                </div>
+                                <button type="button" onclick="selectRoomTypeFilter(this, 'all')" class="room-type-filter-btn selected px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">All Rooms</button>
+                                <button type="button" onclick="selectRoomTypeFilter(this, 'standard')" class="room-type-filter-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Standard</button>
+                                <button type="button" onclick="selectRoomTypeFilter(this, 'deluxe')" class="room-type-filter-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Deluxe</button>
+                                <button type="button" onclick="selectRoomTypeFilter(this, 'suite')" class="room-type-filter-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Suite</button>
+                            </div>
 
                             <!-- Room Grid -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -377,7 +489,8 @@ input.date-input:focus {
 
                     <!-- Step 2: Guest Details Form -->
                     <div id="step2" class="step-content">
-                        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+                        <div class="relative overflow-hidden shadow-xl sm:rounded-lg p-6" style="background:#2D2D2D;">
+                            <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                             <div class="flex items-center mb-6">
                                 <button onclick="goToStep(1)" class="mr-4 text-gray-600 hover:text-gray-900">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -385,7 +498,7 @@ input.date-input:focus {
                     </svg>
                 </button>
                         <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">Guest Details</h3>
+                                    <h3 class="text-lg font-semibold mb-2" style="color:#FFA040;">Guest Details</h3>
                                     <p class="text-sm text-gray-600">Fill in the guest information</p>
                                             </div>
                                         </div>
@@ -459,20 +572,24 @@ input.date-input:focus {
                                                required>
                                         <div class="error-message">Please enter a valid ID number</div>
                                 </div>
-                                    <div class="form-group">
+                                    <div class="form-group" style="position:relative;">
                                         <label for="payment_status" class="form-label required">Payment Status</label>
-                                        <select id="payment_status" 
-                                                name="payment_status" 
-                                                class="form-input" 
-                                                required>
-                                            <option value="">Select payment status</option>
-                                            <option value="pending">Pending</option>
-                                            <option value="paid">Paid</option>
-                                            <option value="deposit">Deposit Paid</option>
-                                        </select>
+                                        <div style="position:relative;">
+                                            <select id="payment_status" 
+                                                    name="payment_status" 
+                                                    class="form-input" 
+                                                    required
+                                                    style="background-image:none !important; padding-right:2.5rem !important;">
+                                                <option value="">Select payment status</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="paid">Paid</option>
+                                                <option value="deposit">Deposit Paid</option>
+                                            </select>
+                                            <svg class="select-arrow" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);pointer-events:none;transition:transform 0.2s;fill:#FFA040;width:1.2em;height:1.2em;" viewBox="0 0 20 20"><path d="M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>
+                                        </div>
                                         <div class="error-message">Please select payment status</div>
-                    </div>
-                </div>
+                                    </div>
+                                </div>
 
                                 <!-- Special Requests -->
                                 <div class="form-group">
@@ -490,10 +607,10 @@ input.date-input:focus {
 
                 <!-- Sidebar - Selected Rooms Summary -->
                 <div class="w-80">
-                    <div class="sidebar">
+                    <div class="sidebar" style="background:#2D2D2D;">
                         <div id="selectedRoomsSummary">
-                            <h3 class="text-lg font-semibold text-gray-900 p-4 border-b">Selected Rooms</h3>
-                            <div id="selectedRoomsList" class="p-4 space-y-4">
+                            <h3 class="text-lg font-semibold p-4 border-b" style="color:#FFA040;">Selected Rooms</h3>
+                            <div id="selectedRoomsList" class="p-4 space-y-4" style="color:#fff;">
                                 <!-- Selected rooms will be listed here -->
                             </div>
                             <div class="sidebar-footer">
@@ -984,16 +1101,16 @@ input.date-input:focus {
                 selectedRooms.forEach(room => {
                     const roomTotal = room.price_per_night * (nights || 1);
                     html += `
-                        <div class="bg-white rounded-lg border border-gray-200 p-4 relative hover:border-orange-500 transition-all">
-                            <div class="pr-8">
-                                <h4 class="font-medium text-gray-900">${room.name}</h4>
-                                <div class="space-y-1 mt-2">
-                                    <p class="text-sm text-gray-600">
+                        <div class="selected-room-card rounded-lg p-4 relative" style="border:none;box-shadow:none;">
+                            <div class="pr-8" style="border:none;box-shadow:none;">
+                                <h4 class="font-medium" style="border:none;box-shadow:none;">${room.name}</h4>
+                                <div class="space-y-1 mt-2" style="border:none;box-shadow:none;">
+                                    <p class="text-sm" style="border:none;box-shadow:none;">
                                         Rp ${room.price_per_night.toLocaleString('id-ID')}/night
                                     </p>
                                     ${nights ? `
-                                        <p class="text-sm text-gray-600">× ${nights} night(s)</p>
-                                        <p class="text-orange-500 font-medium">
+                                        <p class="text-sm" style="border:none;box-shadow:none;">× ${nights} night(s)</p>
+                                        <p class="text-orange-500 font-medium" style="border:none;box-shadow:none;">
                                             Rp ${roomTotal.toLocaleString('id-ID')}
                                         </p>
                                     ` : ''}
@@ -1001,8 +1118,8 @@ input.date-input:focus {
                             </div>
                             <button type="button" 
                                     onclick="removeRoom('${room.id}')" 
-                                    class="absolute top-2 right-2 text-gray-400 hover:text-red-500 p-1">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="absolute top-2 right-2 text-gray-400 hover:text-red-500 p-1" style="border:none;box-shadow:none;">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="border:none;box-shadow:none;">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
@@ -1108,11 +1225,16 @@ input.date-input:focus {
                 goToStep(2);
             } else {
                 // Get the form
-    const form = document.getElementById('bookingForm');
-    
+                const form = document.getElementById('bookingForm');
+                
                 // Validate form
                 if (selectedRooms.size === 0) {
-                    alert('Please select at least one room');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'No Rooms Selected',
+                        text: 'Please select at least one room before proceeding.',
+                        confirmButtonColor: '#f97316'
+                    });
                     return;
                 }
 
@@ -1121,31 +1243,60 @@ input.date-input:focus {
                 const missingFields = requiredFields.filter(field => !document.getElementById(field).value);
                 
                 if (missingFields.length > 0) {
-                    alert('Please fill in all required fields: ' + missingFields.join(', '));
-        return;
-    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Missing Information',
+                        text: 'Please fill in all required fields: ' + missingFields.join(', '),
+                        confirmButtonColor: '#f97316'
+                    });
+                    return;
+                }
 
-                // Calculate total price and nights
-                const checkInDate = new Date(document.getElementById('check_in_date').value);
-                const checkOutDate = new Date(document.getElementById('check_out_date').value);
-                const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-                
-                let totalPrice = 0;
-                const roomsData = Array.from(selectedRooms.values()).map(room => {
-                    const subtotal = room.price_per_night * nights;
-                    totalPrice += subtotal;
-                    return {
-                        ...room,
-                        nights: nights,
-                        subtotal: subtotal
-                    };
+                // Show confirmation dialog
+                Swal.fire({
+                    title: 'Confirm Booking',
+                    text: 'Are you sure you want to create this booking?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#f97316',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, create booking',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Creating Booking',
+                            text: 'Please wait...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Calculate total price and nights
+                        const checkInDate = new Date(document.getElementById('check_in_date').value);
+                        const checkOutDate = new Date(document.getElementById('check_out_date').value);
+                        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+                        
+                        let totalPrice = 0;
+                        const roomsData = Array.from(selectedRooms.values()).map(room => {
+                            const subtotal = room.price_per_night * nights;
+                            totalPrice += subtotal;
+                            return {
+                                ...room,
+                                nights: nights,
+                                subtotal: subtotal
+                            };
+                        });
+
+                        // Set the selected rooms data in the hidden input
+                        document.getElementById('selected_rooms_data').value = JSON.stringify(roomsData);
+
+                        // Submit the form
+                        form.submit();
+                    }
                 });
-
-                // Set the selected rooms data in the hidden input
-                document.getElementById('selected_rooms_data').value = JSON.stringify(roomsData);
-
-                // Submit the form
-                form.submit();
             }
         }
 
@@ -1346,12 +1497,12 @@ function validateForm(event) {
 
     // Validate ID number format
     const idField = document.getElementById('id_number');
-    if (idField.value.trim() && !/^[0-9]{16}$/.test(idField.value.trim())) {
+    if (idField.value.trim().length !== 16) {
         isValid = false;
         idField.classList.add('error');
         const errorMessage = idField.nextElementSibling;
         if (errorMessage) {
-            errorMessage.textContent = 'Please enter a valid 16-digit ID number';
+            errorMessage.textContent = 'ID Number must be exactly 16 digits';
             errorMessage.classList.add('visible');
         }
         if (!firstInvalidField) {
@@ -1406,6 +1557,38 @@ function validateForm(event) {
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('bookingForm');
     const inputs = form.querySelectorAll('.form-input');
+    const idField = document.getElementById('id_number');
+    const idError = idField.nextElementSibling;
+
+    // Only allow numbers and max 16 digits
+    idField.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 16);
+        if (this.value.length !== 16) {
+            idField.classList.add('error');
+            if (idError) {
+                idError.textContent = 'ID Number must be exactly 16 digits';
+                idError.classList.add('visible');
+            }
+        } else {
+            idField.classList.remove('error');
+            if (idError) idError.classList.remove('visible');
+        }
+    });
+    // Prevent non-numeric keydown
+    idField.addEventListener('keydown', function(e) {
+        if (
+            // Allow: backspace, delete, tab, escape, enter, arrows
+            [46, 8, 9, 27, 13, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+            // Allow: Ctrl/cmd+A, Ctrl/cmd+C, Ctrl/cmd+V, Ctrl/cmd+X
+            (e.ctrlKey === true || e.metaKey === true) && [65, 67, 86, 88].indexOf(e.keyCode) !== -1
+        ) {
+            return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
 
     inputs.forEach(input => {
         input.addEventListener('input', function() {
@@ -1416,6 +1599,78 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorMessage.classList.remove('visible');
                 }
             }
+        });
+    });
+});
+
+// Room Type Filter Selection
+function selectRoomTypeFilter(btn, type) {
+    document.querySelectorAll('.room-type-filter-btn').forEach(el => el.classList.remove('selected'));
+    btn.classList.add('selected');
+    filterRooms(type);
+}
+
+// Animate select arrow on Payment Status
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('payment_status');
+    const arrow = document.querySelector('.select-arrow');
+    if (select && arrow) {
+        select.addEventListener('focus', function() {
+            arrow.style.transform = 'translateY(-50%) rotate(180deg)';
+        });
+        select.addEventListener('blur', function() {
+            arrow.style.transform = 'translateY(-50%) rotate(0deg)';
+        });
+    }
+});
+
+// Add this new function to handle form submission response
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('bookingForm');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = new FormData(form);
+        
+        // Send AJAX request
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Booking Created!',
+                    text: 'The booking has been successfully created.',
+                    confirmButtonColor: '#f97316'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = data.redirect || '/receptionist/bookings';
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'An error occurred while creating the booking.',
+                    confirmButtonColor: '#f97316'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred. Please try again.',
+                confirmButtonColor: '#f97316'
+            });
         });
     });
 });

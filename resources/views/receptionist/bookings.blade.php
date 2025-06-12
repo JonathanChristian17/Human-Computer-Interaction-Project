@@ -8,19 +8,19 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Search and Filter -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="bg-[#232323] overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
                     <form method="GET" action="{{ route('receptionist.bookings') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cari</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full rounded-md border-[#FFD740] bg-[#232323] text-white focus:border-[#FFD740] focus:ring-[#FFD740]"
                                 placeholder="Nama, Email, atau No. Telp">
                         </div>
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                             <select name="status" id="status"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full rounded-md border-[#FFD740] bg-[#232323] text-white focus:border-[#FFD740] focus:ring-[#FFD740]">
                                 <option value="">Semua Status</option>
                                 <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Dikonfirmasi</option>
@@ -38,7 +38,8 @@
             </div>
 
             <!-- Bookings Table -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="relative overflow-hidden shadow-sm sm:rounded-lg" style="background:#2D2D2D;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                 <div class="p-6">
                     <div class="overflow-x-auto">
                         <style>
@@ -73,36 +74,20 @@
                                 border-right: none;
                             }
                         </style>
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 booking-table">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
+                        <table class="min-w-full booking-table">
+                            <thead style="background:#252525;">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        ID Booking
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Tamu
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Kamar
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Check In
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Check Out
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Pembayaran
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Aksi
-                                    </th>
+                                    <th style="color:#fff;">ID Booking</th>
+                                    <th style="color:#fff;">Tamu</th>
+                                    <th style="color:#fff;">Kamar</th>
+                                    <th style="color:#fff;">Check In</th>
+                                    <th style="color:#fff;">Check Out</th>
+                                    <th style="color:#fff;">Status</th>
+                                    <th style="color:#fff;">Pembayaran</th>
+                                    <th style="color:#fff;" class="text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody style="background:#2D2D2D;color:#fff;">
                                 @forelse ($bookings as $booking)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
@@ -154,7 +139,7 @@
                                                     @csrf
                                                     @method('PATCH')
                                                     <select name="status" 
-                                                        class="text-sm rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 status-select"
+                                                        class="text-sm rounded-md border-[#FFD740] bg-[#232323] text-white focus:border-[#FFD740] focus:ring-[#FFD740] status-select"
                                                         onchange="updateStatus(this)" data-current-status="{{ $booking->status }}">
                                                         <option value="pending" {{ $booking->status === 'pending' ? 'selected' : '' }}>Pending</option>
                                                         <option value="confirmed" {{ $booking->status === 'confirmed' ? 'selected' : '' }}>Konfirmasi</option>
@@ -167,7 +152,7 @@
                                                     @csrf
                                                     @method('PATCH')
                                                     <select name="payment_status" 
-                                                        class="text-sm rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 payment-select"
+                                                        class="text-sm rounded-md border-[#FFD740] bg-[#232323] text-white focus:border-[#FFD740] focus:ring-[#FFD740] payment-select"
                                                         onchange="updatePaymentStatus(this)" data-current-payment-status="{{ $booking->payment_status }}">
                                                         <option value="pending" {{ $booking->payment_status === 'pending' ? 'selected' : '' }}>Pending</option>
                                                         <option value="paid" {{ $booking->payment_status === 'paid' ? 'selected' : '' }}>Lunas</option>
