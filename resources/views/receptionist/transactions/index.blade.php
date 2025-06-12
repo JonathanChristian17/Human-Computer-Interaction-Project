@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50">
+            <div class="bg-[#252525] rounded-xl shadow-xl overflow-hidden border border-[#FFA040]">
                 <div class="p-6">
                     <!-- Search and Filter Form -->
                     <div class="mb-6">
@@ -44,42 +44,42 @@ use Carbon\Carbon;
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead>
+                        <table class="min-w-full divide-y divide-[#FFA040] bg-[#1D1D1D]">
+                            <thead class="bg-[#FFA040]">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider border-b border-[#FFA040]">
                                         Guest
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider border-b border-[#FFA040]">
                                         Room
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider border-b border-[#FFA040]">
                                         Payment Details
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider border-b border-[#FFA040]">
                                         Status
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider border-b border-[#FFA040]">
                                         Date
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-700">
+                            <tbody class="divide-y divide-[#FFA040]">
                                 @forelse($bookings as $booking)
-                                    <tr class="hover:bg-gray-700/30">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-100">{{ $booking->full_name }}</div>
+                                    <tr class="hover:bg-[#FFA040]/10 transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap text-white">
+                                            <div class="text-sm text-white">{{ $booking->full_name }}</div>
                                             <div class="text-sm text-gray-400">{{ $booking->email }}</div>
                                             <div class="text-sm text-gray-400">{{ $booking->phone }}</div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4 whitespace-nowrap text-white">
                                             @foreach($booking->rooms as $room)
-                                                <div class="text-sm text-gray-100">Room {{ $room->room_number }}</div>
+                                                <div class="text-sm text-white">Room {{ $room->room_number }}</div>
                                                 <div class="text-sm text-gray-400">{{ $room->type }}</div>
                                             @endforeach
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="text-sm text-gray-100">Rp {{ number_format($booking->transaction->gross_amount ?? $booking->total_price, 0, ',', '.') }}</div>
+                                        <td class="px-6 py-4 text-white">
+                                            <div class="text-sm text-white">Rp {{ number_format($booking->transaction->gross_amount ?? $booking->total_price, 0, ',', '.') }}</div>
                                             <div class="text-sm text-gray-400">Order #{{ $booking->transaction->order_id }}</div>
                                             <div class="text-sm text-gray-400">Trans ID: {{ $booking->transaction->transaction_id }}</div>
                                             @if($booking->transaction && $booking->transaction->payment_type)
@@ -122,7 +122,7 @@ use Carbon\Carbon;
                                                 @endif
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-100">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
                                             {{ $booking->transaction ? ($booking->transaction->transaction_time ?? $booking->transaction->created_at->format('d M Y H:i')) : '-' }}
                                         </td>
                                     </tr>

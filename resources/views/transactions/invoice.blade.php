@@ -75,7 +75,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">{{ config('app.name') }}</div>
+            <img src="{{ public_path('favicon.ico') }}" alt="Cahaya Resort Logo" style="height: 60px; margin-bottom: 10px;">
+            <div class="logo">Cahaya Resort Pangururan</div>
             <div>Invoice #{{ $transaction->order_id }}</div>
             <div>{{ $transaction->created_at->format('F d, Y') }}</div>
         </div>
@@ -91,10 +92,8 @@
                     </td>
                     <td width="50%" style="text-align: right;">
                         <strong>Hotel Address:</strong><br>
-                        {{ config('app.name') }}<br>
-                        123 Hotel Street<br>
-                        City, Province 12345<br>
-                        Indonesia<br>
+                        Cahaya Resort Pangururan<br>
+                        Alamat: Jl. Pelabuhan No.5, Pardomuan I, Kec. Pangururan, Kabupaten Samosir, Sumatera Utara 22392<br>
                         Phone: (123) 456-7890<br>
                         Email: info@hotel.com
                     </td>
@@ -147,8 +146,8 @@
         </div>
 
         <div class="footer">
-            <p>Thank you for choosing {{ config('app.name') }}!</p>
-            <p>For any inquiries, please contact us at info@hotel.com or call (123) 456-7890</p>
+            <p>Thank you for choosing Cahaya Resort Pangururan!</p>
+            <p>For any inquiries, please contact us at call 0813-6100-2918</p>
         </div>
     </div>
 </body>

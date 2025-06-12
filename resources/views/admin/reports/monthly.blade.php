@@ -1,47 +1,47 @@
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-[#FFA040] leading-tight">
                 {{ __('Monthly Report') }} - {{ \Carbon\Carbon::createFromFormat('Y-m', $month)->format('F Y') }}
             </h2>
-            <a href="{{ url()->previous() }}" class="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors duration-200">
+            <a href="{{ url()->previous() }}" class="px-4 py-2 bg-[#1D1D1D] border border-[#FFA040] text-white rounded-md hover:bg-[#FFA040] hover:text-black transition-colors duration-200">
                 ← Back
             </a>
         </div>
     </x-slot>
 
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 text-gray-900">
+    <div class="bg-[#1D1D1D] border border-[#FFA040] overflow-hidden shadow-sm sm:rounded-lg text-white">
+        <div class="p-6 text-white">
             <!-- Summary -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="bg-blue-100 p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold text-blue-800">Total Bookings</h3>
-                    <p class="text-3xl font-bold text-blue-600">{{ $totalBookings }}</p>
+                <div class="bg-[#1D1D1D] border border-[#FFA040] p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-[#FFA040]">Total Bookings</h3>
+                    <p class="text-3xl font-bold text-white">{{ $totalBookings }}</p>
                 </div>
-                <div class="bg-green-100 p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold text-green-800">Total Revenue</h3>
-                    <p class="text-3xl font-bold text-green-600">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
+                <div class="bg-[#1D1D1D] border border-[#FFA040] p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-[#FFA040]">Total Revenue</h3>
+                    <p class="text-3xl font-bold text-white">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
                 </div>
             </div>
 
             <!-- Daily Stats -->
             <div class="mt-6">
-                <h3 class="text-lg font-semibold mb-4">Daily Breakdown</h3>
+                <h3 class="text-lg font-semibold mb-4 text-[#FFA040]">Daily Breakdown</h3>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border">
+                    <table class="min-w-full bg-[#1D1D1D] border border-[#FFA040] text-white">
                         <thead>
-                            <tr class="bg-gray-100">
-                                <th class="py-2 px-4 border">Date</th>
-                                <th class="py-2 px-4 border">Bookings</th>
-                                <th class="py-2 px-4 border">Revenue</th>
+                            <tr class="bg-[#FFA040] text-black">
+                                <th class="py-2 px-4 border border-[#FFA040]">Date</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Bookings</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Revenue</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($dailyStats as $stat)
                                 <tr>
-                                    <td class="py-2 px-4 border">{{ \Carbon\Carbon::parse($stat['date'])->format('d F Y') }}</td>
-                                    <td class="py-2 px-4 border">{{ $stat['bookings'] }}</td>
-                                    <td class="py-2 px-4 border">Rp {{ number_format($stat['revenue'], 0, ',', '.') }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">{{ \Carbon\Carbon::parse($stat['date'])->format('d F Y') }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">{{ $stat['bookings'] }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">Rp {{ number_format($stat['revenue'], 0, ',', '.') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -51,48 +51,47 @@
 
             <!-- Bookings Table -->
             <div class="mt-6">
-                <h3 class="text-lg font-semibold mb-4">Booking Details</h3>
+                <h3 class="text-lg font-semibold mb-4 text-[#FFA040]">Booking Details</h3>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border">
+                    <table class="min-w-full bg-[#1D1D1D] border border-[#FFA040] text-white">
                         <thead>
-                            <tr class="bg-gray-100">
-                                <th class="py-2 px-4 border">Booking ID</th>
-                                <th class="py-2 px-4 border">Customer</th>
-                                <th class="py-2 px-4 border">Rooms</th>
-                                <th class="py-2 px-4 border">Check In</th>
-                                <th class="py-2 px-4 border">Check Out</th>
-                                <th class="py-2 px-4 border">Total Price</th>
-                                <th class="py-2 px-4 border">Status</th>
-                                <th class="py-2 px-4 border">Managed By</th>
+                            <tr class="bg-[#FFA040] text-black">
+                                <th class="py-2 px-4 border border-[#FFA040]">Booking ID</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Customer</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Rooms</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Check In</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Check Out</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Total Price</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Status</th>
+                                <th class="py-2 px-4 border border-[#FFA040]">Managed By</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($bookings as $booking)
                                 <tr>
-                                    <td class="py-2 px-4 border">{{ $booking->id }}</td>
-                                    <td class="py-2 px-4 border">{{ $booking->user->name }}</td>
-                                    <td class="py-2 px-4 border">
+                                    <td class="py-2 px-4 border border-[#FFA040]">{{ $booking->id }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">{{ $booking->user->name }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">
                                         @foreach($booking->rooms as $room)
                                             Room {{ $room->room_number }} ({{ $room->type }})<br>
                                         @endforeach
                                     </td>
-                                    <td class="py-2 px-4 border">{{ $booking->check_in_date }}</td>
-                                    <td class="py-2 px-4 border">{{ $booking->check_out_date }}</td>
-                                    <td class="py-2 px-4 border">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</td>
-                                    <td class="py-2 px-4 border">
-                                        <span class="px-2 py-1 rounded text-sm
-                                            @if($booking->status === 'confirmed') bg-green-100 text-green-800
-                                            @elseif($booking->status === 'pending') bg-yellow-100 text-yellow-800
-                                            @elseif($booking->status === 'cancelled') bg-red-100 text-red-800
-                                            @endif">
+                                    <td class="py-2 px-4 border border-[#FFA040]">{{ $booking->check_in_date }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">{{ $booking->check_out_date }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">
+                                        <span class="px-2 py-1 rounded text-sm font-semibold"
+                                            @if($booking->status === 'confirmed') style="background-color: #16a34a; color: #fff;" @endif
+                                            @if($booking->status === 'pending') style="background-color: #FFA040; color: #000;" @endif
+                                            @if($booking->status === 'cancelled') style="background-color: #dc2626; color: #fff;" @endif>
                                             {{ ucfirst($booking->status) }}
                                         </span>
                                     </td>
-                                    <td class="py-2 px-4 border">{{ $booking->receptionist->name ?? 'N/A' }}</td>
+                                    <td class="py-2 px-4 border border-[#FFA040]">{{ $booking->receptionist->name ?? 'N/A' }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="py-4 px-4 border text-center text-gray-500">
+                                    <td colspan="8" class="py-4 px-4 border border-[#FFA040] text-center text-gray-400">
                                         No bookings found for this month
                                     </td>
                                 </tr>

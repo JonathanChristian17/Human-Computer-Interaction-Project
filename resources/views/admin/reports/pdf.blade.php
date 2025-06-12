@@ -2,12 +2,20 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>{{ $title }}</title>
+    <title>Cahaya Resort Pangururan - {{ $title }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             font-size: 12px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            height: 60px;
+            margin-bottom: 10px;
         }
         h1 {
             text-align: center;
@@ -87,7 +95,11 @@
     </style>
 </head>
 <body>
-    <h1>{{ $title }}</h1>
+    <div class="header">
+        <img src="{{ public_path('favicon.ico') }}" alt="Cahaya Resort Logo">
+        <h1>Cahaya Resort Pangururan</h1>
+        <p>{{ $title }}</p>
+    </div>
 
     <table>
         <thead>
