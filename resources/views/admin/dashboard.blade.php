@@ -1,3 +1,5 @@
+@section('title', 'Admin Dashboard - Cahaya Resort Pangururan')
+
 <x-admin-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-100 leading-tight">

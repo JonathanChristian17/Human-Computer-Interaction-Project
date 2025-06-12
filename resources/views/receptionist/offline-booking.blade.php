@@ -435,7 +435,7 @@ input.date-input:focus {
                             <div style="position:absolute;left:0;top:0;height:100%;width:6px;background:#FFA040;"></div>
                             <div class="mb-6">
                                 <h3 class="text-lg font-semibold mb-2" style="color:#FFA040;">Available Rooms</h3>
-                                <p class="text-sm text-gray-600">Select one or more rooms to book</p>
+                                <p class="text-sm text-white">Select one or more rooms to book</p>
                             </div>
 
                             <!-- Room Type Filter -->

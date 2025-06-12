@@ -1,6 +1,8 @@
+@section('title', 'Receptionist Dashboard - Cahaya Resort Pangururan')
+
 <x-receptionist-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight text-center">
+        <h2 class="font-semibold text-xl text-white dark:text-gray-200 leading-tight text-center">
             {{ __('Dashboard Resepsionis') }}
         </h2>
     </x-slot>
@@ -144,18 +146,18 @@
                                     @forelse ($todayCheckIns as $booking)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                <div class="text-sm font-medium text-white dark:text-gray-100">
                                                     {{ $booking->user->name }}
                                                 </div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                <div class="text-sm text-white dark:text-gray-400">
                                                     {{ $booking->user->email }}
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900 dark:text-gray-100">
+                                                <div class="text-sm text-white dark:text-gray-100">
                                                     @foreach($booking->rooms as $room)
                                                         Kamar {{ $room->room_number }}<br>
-                                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                        <div class="text-sm text-white dark:text-gray-400">
                                                             {{ $room->type }}
                                                         </div>
                                                     @endforeach
@@ -219,18 +221,18 @@
                                     @forelse ($todayCheckOuts as $booking)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                <div class="text-sm font-medium text-white dark:text-gray-100">
                                                     {{ $booking->user->name }}
                                                 </div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                <div class="text-sm text-white dark:text-gray-400">
                                                     {{ $booking->user->email }}
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900 dark:text-gray-100">
+                                                <div class="text-sm text-white dark:text-gray-100">
                                                     @foreach($booking->rooms as $room)
                                                         Kamar {{ $room->room_number }}<br>
-                                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                        <div class="text-sm text-white dark:text-gray-400">
                                                             {{ $room->type }}
                                                         </div>
                                                     @endforeach

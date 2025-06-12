@@ -13,6 +13,11 @@
             text-align: center;
             margin-bottom: 30px;
         }
+        .header img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+        }
         .header h1 {
             margin: 0;
             color: #333;
@@ -120,6 +125,8 @@
 </head>
 <body>
     <div class="header">
+        <img src="{{ public_path('favicon.ico') }}" alt="Hotel Logo">
+        <h1>Hotel Cahaya</h1>
         <h1>Laporan Pendapatan Hotel</h1>
         <p>Periode: {{ now()->format('F Y') }}</p>
         <p>Dicetak pada: {{ now()->format('d F Y H:i') }}</p>
