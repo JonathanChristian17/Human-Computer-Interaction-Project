@@ -1,6 +1,6 @@
 <x-receptionist-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-white dark:text-gray-200 leading-tight">
             {{ __('Kelola Tamu') }}
         </h2>
     </x-slot>
@@ -13,7 +13,7 @@
                 <div class="p-6">
                     <form method="GET" action="{{ route('receptionist.guests') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cari</label>
+                            <label for="search" class="block text-sm font-medium text-white dark:text-gray-300">Cari</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
                                 class="mt-1 block w-full rounded-md border-[#FFD740] bg-[#232323] text-white focus:border-[#FFD740] focus:ring-[#FFD740]"
                                 placeholder="Nama, Email, No. Telp, atau No. ID">
@@ -60,32 +60,32 @@
                                 @forelse ($guests as $guest)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            <div class="text-sm font-medium text-white dark:text-gray-100">
                                                 {{ $guest->full_name }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            <div class="text-sm text-white dark:text-gray-400">
                                                 {{ $guest->email }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            <div class="text-sm text-white dark:text-gray-400">
                                                 {{ $guest->phone }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            <div class="text-sm text-white dark:text-gray-400">
                                                 {{ $guest->id_number }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            <div class="text-sm text-white dark:text-gray-400">
                                                 {{ $guest->total_bookings }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            <div class="text-sm text-white dark:text-gray-400">
                                                 {{ $guest->created_at->format('d/m/Y H:i') }}
                                             </div>
                                         </td>
