@@ -7,7 +7,7 @@
         </h2>
     </x-slot>
 
-    <div class="bg-[#252525] overflow-hidden shadow-sm sm:rounded-lg border border-[#FFA040]">
+    <div class="bg-[#252525] overflow-hidden shadow-sm sm:rounded-lg border border-[#333333]">
         <div class="p-6 text-gray-100">
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -17,7 +17,6 @@
                     <p class="text-3xl font-bold text-white">{{ $totalRooms }}</p>
                     <div class="mt-2 text-sm">
                         <span class="text-green-400">Available: {{ $availableRooms }}</span><br>
-                        <span class="text-[#FFA040]">Occupied: {{ $occupiedRooms }}</span><br>
                         <span class="text-red-400">Maintenance: {{ $maintenanceRooms }}</span>
                     </div>
                 </div>
@@ -169,29 +168,29 @@
                     </form>
                 </div>
 
-                <div class="bg-[#1D1D1D] rounded-lg border border-[#FFA040] overflow-hidden">
-                    <table class="min-w-full divide-y divide-[#FFA040]">
-                        <thead class="bg-[#252525]">
+                <div class="bg-[#1D1D1D] rounded-lg border border-[#333333] overflow-hidden">
+                    <table class="min-w-full divide-y divide-[#333333]">
+                        <thead class="bg-[#1F1F1F]">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-[#FFA040] uppercase tracking-wider">Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-[#FFA040] uppercase tracking-wider">Activity</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-[#FFA040] uppercase tracking-wider">User</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-[#FFA040] uppercase tracking-wider">Details</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-[#FFA500] uppercase tracking-wider">Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-[#FFA500] uppercase tracking-wider">Activity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-[#FFA500] uppercase tracking-wider">User</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-[#FFA500] uppercase tracking-wider">Details</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-[#1D1D1D] divide-y divide-[#FFA040]">
+                        <tbody class="bg-[#1D1D1D] divide-y divide-[#333333]">
                             @foreach($recentActivities as $activity)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <tr class="@if($loop->even) bg-[#2A2A2A] @else bg-[#1E1E1E] @endif hover:bg-[#333333] transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[#E0E0E0]">
                                     {{ $activity->created_at->diffForHumans() }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
                                     {{ $activity->description }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[#E0E0E0]">
                                     {{ $activity->user->name }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[#E0E0E0]">
                                     {{ $activity->details }}
                                 </td>
                             </tr>
@@ -199,7 +198,7 @@
                         </tbody>
                     </table>
                     <!-- Pagination -->
-                    <div class="px-6 py-4 bg-[#252525] border-t border-[#FFA040]">
+                    <div class="px-6 py-4 bg-[#1F1F1F] border-t border-[#333333]">
                         {{ $recentActivities->links() }}
                     </div>
                 </div>

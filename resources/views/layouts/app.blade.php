@@ -283,7 +283,6 @@
             height: 100%;
             pointer-events: none;
             z-index: 30;
-            background-color: rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 0.4s ease;
         }
@@ -904,6 +903,137 @@
           background: #fff;
           margin-bottom: 1.5rem;
         }
+
+        .panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .panel {
+            display: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 90vh;
+            background: white;
+            z-index: 9999;
+            border-radius: 20px 20px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .panel.show {
+            transform: translateY(0);
+        }
+
+        .panel-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .profile-photo {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            object-fit: cover;
+        }
+
+        .profile-dropdown img {
+            border-radius: 9999px !important;
+        }
+
+        .panel-close {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .panel-close:hover {
+            background-color: #f3f4f6;
+        }
+
+        .panel-content {
+            padding: 1rem;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid #f3f4f6;
+            border-radius: 50%;
+            border-top-color: #FFA040;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .back-button-fixed {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            color: #374151;
+            font-weight: 600;
+            z-index: 50;
+            transform: none !important;
+            transition: none !important;
+        }
+
+        .back-button-fixed:hover {
+            background-color: #f3f4f6;
+        }
+
+        .slide-panel {
+            z-index: 40;
+        }
     </style>
     @stack('styles')
     
@@ -928,7 +1058,8 @@
                              :class="{ 'active': activeTab === 'dashboard', 'text-white': scrolled, 'text-gray-700': !scrolled }">
                          Dashboard
                     </a>
-                    <button @click="activeTab = 'rooms'; showRooms(); localStorage.setItem('activeTab', 'rooms')"
+                    <button type="button" 
+                            @click="activeTab = 'rooms'; localStorage.setItem('activeTab', 'rooms'); openRoomsPanel();"
                             class="text-xs sm:text-sm md:text-base font-medium transition-all duration-300 nav-item"
                             :class="{ 'active': activeTab === 'rooms', 'text-white': scrolled, 'text-gray-700': !scrolled }">
                         Rooms
@@ -958,7 +1089,7 @@
                             <div class="flex items-center gap-2">
                                 <img src="{{ Auth::check() ? Auth::user()->profile_photo_url : asset('images/default-avatar.png') }}" 
                                      alt="{{ Auth::check() ? Auth::user()->name : 'Guest' }}"
-                                     class="h-8 w-8 rounded-full object-cover">
+                                     class="h-8 w-8 rounded-full object-cover shadow-sm">
                                 <span class="text-white" data-user-name>{{ Auth::user()->name }}</span>
                                 <i class="fas fa-chevron-down text-white"></i>
                             </div>
@@ -991,16 +1122,264 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main>
         @yield('content')
     </main>
+
+    <!-- Bottom Sheet Panel -->
+    <div class="panel" id="roomsPanel">
+        <div class="panel-header">
+            <div class="flex items-center">
+                <a href="#" onclick="event.preventDefault(); hidePanel();" class="flex items-center text-gray-600 hover:text-gray-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-sm font-medium">Back</span>
+                </a>
+            </div>
+            <h2 class="panel-title">Rooms</h2>
+            <button class="panel-close" onclick="closePanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content" id="roomsContent">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600">Loading rooms...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openRoomsPanel() {
+        const panel = document.getElementById('roomsPanel');
+        const content = document.getElementById('roomsContent');
+
+        if (!panel || !content) {
+            console.error('Required elements not found');
+            return;
+        }
+
+        // Show panel
+        panel.style.display = 'block';
+        
+        // Force reflow
+        panel.offsetHeight;
+        
+        // Add show class
+        panel.classList.add('show');
+        
+        // Show loading state
+        content.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600">Loading rooms...</p>
+            </div>
+        `;
+
+        // Fetch rooms content
+        fetch('/kamar')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const mainContent = doc.querySelector('.min-h-screen');
+                
+                if (mainContent) {
+                    content.innerHTML = mainContent.innerHTML;
+                    bindPanelEvents();
+                } else {
+                    throw new Error('Could not find main content');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                content.innerHTML = `
+                    <div class="p-4 text-center">
+                        <div class="text-red-600 mb-2">Failed to load rooms.</div>
+                        <button onclick="retryLoadRooms()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            });
+    }
+
+    function closePanel() {
+        const panel = document.getElementById('roomsPanel');
+        if (!panel) return;
+        
+        // Start transition
+        panel.classList.remove('show');
+        
+        // Wait for transition to finish
+        setTimeout(() => {
+            panel.style.display = 'none';
+        }, 300);
+    }
+
+    function bindPanelEvents() {
+        // Add event listeners for pagination, filters, etc.
+        const paginationLinks = document.querySelectorAll('.pagination a');
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = new URL(link.href);
+                fetchRoomsContent(url.search);
+            });
+        });
+    }
+
+    function fetchRoomsContent(queryString = '') {
+        const content = document.getElementById('roomsContent');
+        content.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600">Loading rooms...</p>
+            </div>
+        `;
+
+        fetch(`/kamar${queryString}`)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const mainContent = doc.querySelector('.min-h-screen');
+                
+                if (mainContent) {
+                    content.innerHTML = mainContent.innerHTML;
+                    bindPanelEvents();
+                } else {
+                    throw new Error('Failed to parse content');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                content.innerHTML = `
+                    <div class="p-4 text-center">
+                        <div class="text-red-600 mb-2">Failed to load rooms.</div>
+                        <button onclick="retryLoadRooms()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            });
+    }
+
+    function retryLoadRooms() {
+        const content = document.getElementById('roomsContent');
+        content.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600">Loading rooms...</p>
+            </div>
+        `;
+        openRoomsPanel();
+    }
+    </script>
+
+    <!-- Panel Styles -->
+    <style>
+    .panel {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 90vh;
+        background: white;
+        z-index: 41;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .panel.show {
+        transform: translateY(0);
+    }
+
+    .panel-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1;
+    }
+
+    .panel-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .profile-photo {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 9999px;
+        object-fit: cover;
+    }
+
+    .profile-dropdown img {
+        border-radius: 9999px !important;
+    }
+
+    .panel-close {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .panel-close:hover {
+        background-color: #f3f4f6;
+    }
+
+    .panel-content {
+        padding: 1rem;
+    }
+
+    /* Loading Animation */
+    .loading-spinner {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid #f3f4f6;
+        border-radius: 50%;
+        border-top-color: #FFA040;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        gap: 1rem;
+    }
+    </style>
 
     <!-- Transaction Panel -->
     <div class="slide-panel transaction-panel" id="transactionPanel" x-data="transactionPanel">
         <div class="slide-content">
             <div class="slide-content-inner">
                 <!-- Back Button -->
-                    <button onclick="hidePanel()" class="flex items-center px-5 py-3 bg-white rounded-xl shadow border text-gray-700 font-semibold mr-4 hover:bg-gray-100 transition" style="position: absolute; top: 1rem; left: 1rem;">
+                    <button onclick="hidePanel()" class="back-button-fixed">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                         </svg>
@@ -1026,12 +1405,12 @@
         <div class="slide-content">
             <div class="slide-content-inner">
                 <!-- Back Button -->
-                <button onclick="hidePanel()" class="flex items-center px-5 py-3 bg-white rounded-xl shadow border text-gray-700 font-semibold mr-4 hover:bg-gray-100 transition" style="position: absolute; top: 1rem; left: 1rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                        </svg>
-                        <span>Back</span>
-                    </button>
+                <button onclick="hidePanel()" class="back-button-fixed">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Back</span>
+                </button>
 
                 @auth
                 <div id="profileContent" class="mt-8">
@@ -1117,16 +1496,7 @@
                                 </div>
                             </button>
 
-                            <!-- Notifications -->
-                            <button onclick="showNotificationPreferences()" class="flex items-center p-4 rounded-lg hover:bg-gray-50 transition group text-left w-full">
-                                <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 group-hover:bg-purple-200">
-                                    <i class="fas fa-bell"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-semibold text-gray-800">Notifications</h3>
-                                    <p class="text-sm text-gray-600">Manage your notification preferences</p>
-                                </div>
-                            </button>
+                            
                         </nav>
                     </div>
 
@@ -1245,27 +1615,6 @@
                     </div>
                 </div>
                 @endauth
-            </div>
-        </div>
-    </div>
-
-    <!-- Rooms Panel -->
-    <div class="slide-panel rooms-panel" id="roomsPanel">
-        <div class="slide-content">
-            <div class="slide-content-inner" id="roomsContent">
-                <!-- Back Button -->
-                    <button onclick="hidePanel()" class="back-button" style="position: absolute; top: 1rem; left: 1rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                        </svg>
-                        <span>Back</span>
-                    </button>
-                    
-                <!-- Rooms content will be loaded here -->
-                <div class="text-center py-4">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-                    <p class="mt-2 text-gray-600">Loading rooms...</p>
-                </div>
             </div>
         </div>
     </div>
@@ -1966,17 +2315,53 @@
                                 </button>
                             </div>
                             <form id="passwordForm" class="space-y-6">
-                                <div>
+                                <div class="relative">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                                    <input type="password" name="current_password" id="current_password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    <div class="relative">
+                                        <input type="password" name="current_password" id="current_password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        <button type="button" onclick="togglePasswordVisibility('current_password')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div>
+                                <div class="relative">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                                    <input type="password" name="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    <div class="relative">
+                                        <input type="password" name="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        <button type="button" onclick="togglePasswordVisibility('password')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div id="password-requirements" class="absolute left-0 right-0 mt-2 p-4 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden">
+                                        <div class="text-sm text-gray-600">Password must meet:</div>
+                                        <ul class="mt-2 space-y-1">
+                                            <li class="requirement flex items-center gap-2 text-sm text-gray-600" data-requirement="length">
+                                                <span class="check w-4 h-4 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500">✕</span>
+                                                Minimum 8 characters
+                                            </li>
+                                            <li class="requirement flex items-center gap-2 text-sm text-gray-600" data-requirement="uppercase">
+                                                <span class="check w-4 h-4 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500">✕</span>
+                                                Contains uppercase letter
+                                            </li>
+                                            <li class="requirement flex items-center gap-2 text-sm text-gray-600" data-requirement="lowercase">
+                                                <span class="check w-4 h-4 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500">✕</span>
+                                                Contains lowercase letter
+                                            </li>
+                                            <li class="requirement flex items-center gap-2 text-sm text-gray-600" data-requirement="number">
+                                                <span class="check w-4 h-4 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500">✕</span>
+                                                Contains number
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
-                                <div>
+                                <div class="relative">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-                                    <input type="password" name="password_confirmation" id="password_confirmation" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    <div class="relative">
+                                        <input type="password" name="password_confirmation" id="password_confirmation" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        <button type="button" onclick="togglePasswordVisibility('password_confirmation')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="flex justify-end space-x-3 pt-4">
                                     <button type="button" onclick="document.getElementById('${modalId}').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">Cancel</button>
@@ -1986,9 +2371,96 @@
                         </div>
                     `;
                     document.body.appendChild(modal);
+
+                    // Add password validation
+                    const passwordInput = document.getElementById('password');
+                    const requirements = document.getElementById('password-requirements');
+                    const requirementItems = document.querySelectorAll('.requirement');
+
+                    // Show requirements on focus
+                    passwordInput.addEventListener('focus', function() {
+                        requirements.classList.remove('hidden');
+                        requirements.style.opacity = '0';
+                        requirements.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            requirements.style.opacity = '1';
+                            requirements.style.transform = 'translateY(0)';
+                        }, 10);
+                    });
+
+                    // Hide requirements when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!requirements.contains(e.target) && e.target !== passwordInput) {
+                            requirements.style.opacity = '0';
+                            requirements.style.transform = 'translateY(-10px)';
+                            setTimeout(() => {
+                                requirements.classList.add('hidden');
+                            }, 200);
+                        }
+                    });
+
+                    // Add transition styles
+                    requirements.style.transition = 'all 0.2s ease-in-out';
+
+                    passwordInput.addEventListener('input', function() {
+                        const password = this.value;
+                        
+                        // Check length
+                        const hasLength = password.length >= 8;
+                        updateRequirement('length', hasLength);
+
+                        // Check uppercase
+                        const hasUppercase = /[A-Z]/.test(password);
+                        updateRequirement('uppercase', hasUppercase);
+
+                        // Check lowercase
+                        const hasLowercase = /[a-z]/.test(password);
+                        updateRequirement('lowercase', hasLowercase);
+
+                        // Check number
+                        const hasNumber = /[0-9]/.test(password);
+                        updateRequirement('number', hasNumber);
+                    });
+
+                    function updateRequirement(type, isValid) {
+                        const requirement = document.querySelector(`[data-requirement="${type}"]`);
+                        const check = requirement.querySelector('.check');
+                        if (isValid) {
+                            requirement.classList.remove('text-gray-600');
+                            requirement.classList.add('text-green-600');
+                            check.classList.remove('bg-red-100', 'text-red-500');
+                            check.classList.add('bg-green-100', 'text-green-500');
+                            check.textContent = '✓';
+                        } else {
+                            requirement.classList.remove('text-green-600');
+                            requirement.classList.add('text-gray-600');
+                            check.classList.remove('bg-green-100', 'text-green-500');
+                            check.classList.add('bg-red-100', 'text-red-500');
+                            check.textContent = '✕';
+                        }
+                    }
+
                     document.getElementById('passwordForm').onsubmit = async function(event) {
                         event.preventDefault();
                         const formData = new FormData(this);
+                        const password = formData.get('password');
+
+                        // Validate password requirements
+                        const hasLength = password.length >= 8;
+                        const hasUppercase = /[A-Z]/.test(password);
+                        const hasLowercase = /[a-z]/.test(password);
+                        const hasNumber = /[0-9]/.test(password);
+
+                        if (!hasLength || !hasUppercase || !hasLowercase || !hasNumber) {
+                            requirements.classList.remove('hidden');
+                            showBrutalistSwalAlert({
+                                type: 'error',
+                                title: 'Invalid Password',
+                                message: 'Please ensure your password meets all requirements'
+                            });
+                            return;
+                        }
+
                         formData.append('_token', '{{ csrf_token() }}');
                         try {
                             const response = await fetch('{{ route("profile.password.update") }}', {
@@ -2927,6 +3399,8 @@
                 case 'expired':
                 case 'cancelled':
                     return 'bg-red-100 text-red-800';
+                case 'deposit':
+                    return 'bg-blue-100 text-blue-800';
                 default:
                     return 'bg-gray-100 text-gray-800';
             }
@@ -2983,10 +3457,59 @@
                 });
             }
         }
+
+        window.openRoomsPanel = function() {
+            hidePanel('rooms');
+            const roomsPanel = document.getElementById('roomsPanel');
+            if (roomsPanel) {
+                roomsPanel.style.display = 'block';
+                setTimeout(() => {
+                    roomsPanel.classList.add('show');
+                }, 50);
+                
+                // Load rooms content if needed
+                const roomsContent = document.getElementById('roomsContent');
+                if (roomsContent) {
+                    fetch('/rooms/list')
+                        .then(response => response.text())
+                        .then(html => {
+                            roomsContent.innerHTML = html;
+                        })
+                        .catch(error => {
+                            console.error('Error loading rooms:', error);
+                            roomsContent.innerHTML = '<p class="text-red-500">Error loading rooms. Please try again.</p>';
+                        });
+                }
+            }
+        };
     </script>
     <!-- Add Pusher script -->
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
     @stack('scripts')
+    <script>
+        // Profile Dropdown Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileButton = document.querySelector('.profile-dropdown-button');
+            const profileMenu = document.querySelector('.profile-dropdown-menu');
+            const chevronIcon = profileButton.querySelector('.fa-chevron-down');
+
+            if (profileButton && profileMenu) {
+                profileButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileMenu.classList.toggle('show');
+                    profileButton.classList.toggle('active');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!profileButton.contains(e.target)) {
+                        profileMenu.classList.remove('show');
+                        profileButton.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

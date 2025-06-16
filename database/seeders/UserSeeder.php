@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin Resepsionis',
             'email' => 'admin@penginapancahaya.com',
             'password' => Hash::make('admin123'),
-            'role' => 'receptionist',
+            'role' => 'admin',
             'phone' => '081234567890',
             'address' => 'Jl. Danau Toba No. 123, Samosir',
         ]);

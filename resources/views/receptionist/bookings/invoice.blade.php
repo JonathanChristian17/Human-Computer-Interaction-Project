@@ -127,16 +127,8 @@
             <div class="total">
                 <table style="width: 300px; margin-left: auto;">
                     <tr>
-                        <td><strong>Subtotal:</strong></td>
-                        <td>Rp{{ number_format($booking->total_price, 0, ',', '.') }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Tax (10%):</strong></td>
-                        <td>Rp{{ number_format($booking->total_price * 0.1, 0, ',', '.') }}</td>
-                    </tr>
-                    <tr>
                         <td><strong>Total:</strong></td>
-                        <td>Rp{{ number_format($booking->total_price * 1.1, 0, ',', '.') }}</td>
+                        <td>Rp{{ number_format($booking->total_price, 0, ',', '.') }}</td>
                     </tr>
                 </table>
             </div>

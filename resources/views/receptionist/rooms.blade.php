@@ -19,12 +19,12 @@
                     <h3 class="text-lg font-medium text-white text-center mb-1">Cari Kamar</h3>
                     <form action="{{ route('receptionist.rooms') }}" method="GET" class="flex flex-col md:flex-row gap-2 items-end">
                         <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-400 mb-0.5">Cari</label>
+                            <label class="block text-sm font-medium text-gray-400 mb-0.5 ml-2">Cari</label>
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Nomor Kamar" 
                                 class="form-input bg-[#2D2D2D] border border-[#bbb] rounded-xl text-white placeholder-[#bbb] focus:ring-amber-500 focus:border-amber-500 py-2 px-3 text-base">
                         </div>
                         <div class="md:w-64">
-                            <label class="block text-sm font-medium text-gray-400 mb-0.5">Status</label>
+                            <label class="block text-sm font-medium text-gray-400 mb-0.5 ml-2">Status</label>
                             <select name="status" class="form-input bg-[#2D2D2D] border border-[#bbb] rounded-xl text-white placeholder-[#bbb] focus:ring-amber-500 focus:border-amber-500 py-2 px-3 text-base">
                                 <option value="">Semua Status</option>
                                 <option value="available" {{ request('status') === 'available' ? 'selected' : '' }}>Tersedia</option>

@@ -20,12 +20,14 @@ class ReportController extends Controller
     {
         $date = $request->input('date', Carbon::today()->format('Y-m-d'));
         
+        // Get total revenue and bookings first
+        $totalRevenue = Booking::whereDate('created_at', $date)->sum('total_price');
+        $totalBookings = Booking::whereDate('created_at', $date)->count();
+        
+        // Then get paginated data
         $bookings = Booking::whereDate('created_at', $date)
             ->with(['user', 'rooms', 'receptionist'])
-            ->get();
-            
-        $totalRevenue = $bookings->sum('total_price');
-        $totalBookings = $bookings->count();
+            ->paginate(10);
         
         return view('admin.reports.daily', compact('bookings', 'date', 'totalRevenue', 'totalBookings'));
     }
@@ -36,18 +38,19 @@ class ReportController extends Controller
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $endDate = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
         
+        // Get total revenue and bookings first
+        $totalRevenue = Booking::whereBetween('created_at', [$startDate, $endDate])->sum('total_price');
+        $totalBookings = Booking::whereBetween('created_at', [$startDate, $endDate])->count();
+        
+        // Then get paginated data
         $bookings = Booking::whereBetween('created_at', [$startDate, $endDate])
             ->with(['user', 'rooms', 'receptionist'])
-            ->get();
-            
-        $totalRevenue = $bookings->sum('total_price');
-        $totalBookings = $bookings->count();
+            ->paginate(10);
         
         // Daily breakdown for the month
         $dailyStats = collect();
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-            $dailyBookings = $bookings->where('created_at', '>=', $date->copy()->startOfDay())
-                                    ->where('created_at', '<=', $date->copy()->endOfDay());
+            $dailyBookings = Booking::whereDate('created_at', $date->format('Y-m-d'))->get();
             
             $dailyStats->push([
                 'date' => $date->format('Y-m-d'),
@@ -65,12 +68,14 @@ class ReportController extends Controller
         $startDate = Carbon::createFromDate($year, 1, 1)->startOfYear();
         $endDate = Carbon::createFromDate($year, 12, 31)->endOfYear();
         
+        // Get total revenue and bookings first
+        $totalRevenue = Booking::whereBetween('created_at', [$startDate, $endDate])->sum('total_price');
+        $totalBookings = Booking::whereBetween('created_at', [$startDate, $endDate])->count();
+        
+        // Then get paginated data
         $bookings = Booking::whereBetween('created_at', [$startDate, $endDate])
             ->with(['user', 'rooms', 'receptionist'])
-            ->get();
-            
-        $totalRevenue = $bookings->sum('total_price');
-        $totalBookings = $bookings->count();
+            ->paginate(10);
         
         // Monthly breakdown for the year
         $monthlyStats = collect();
@@ -78,8 +83,7 @@ class ReportController extends Controller
             $monthStart = Carbon::createFromDate($year, $month, 1)->startOfMonth();
             $monthEnd = $monthStart->copy()->endOfMonth();
             
-            $monthlyBookings = $bookings->where('created_at', '>=', $monthStart)
-                                      ->where('created_at', '<=', $monthEnd);
+            $monthlyBookings = Booking::whereBetween('created_at', [$monthStart, $monthEnd])->get();
             
             $monthlyStats->push([
                 'month' => $monthStart->format('F'),

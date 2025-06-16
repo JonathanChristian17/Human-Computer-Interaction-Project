@@ -1,13 +1,16 @@
 @extends('layouts.auth')
-@section('title', 'Daftar')
+@section('title', 'Register')
 @section('content')
-    <!-- Logo dan Title -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Logo and Title -->
     <a href="/" class="absolute top-6 left-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
         <img src="{{ asset('favicon.ico') }}" alt="Cahaya Resort Logo" class="w-10 h-10">
         <h1 class="text-xl font-bold text-white">Cahaya Resort</h1>
     </a>
 
-    <h2 class="mb-5">Daftar</h2>
+    <h2 class="mb-5">Register</h2>
     @if($errors->any())
         <div id="floating-alert" class="fixed top-6 right-6 z-50 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in">
             <ul class="list-disc pl-5">
@@ -22,46 +25,57 @@
             {{ session('status') }}
         </div>
     @endif
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" id="registerForm">
         @csrf
         <div class="nebula-input">
             <input id="name" name="name" type="text" class="input" required autocomplete="name" value="{{ old('name') }}" />
-            <label class="user-label">Nama Lengkap</label>
+            <label class="user-label">Full Name</label>
         </div>
         <div class="nebula-input">
-            <input id="email" name="email" type="email" class="input" required autocomplete="email" value="{{ old('email') }}" />
+            <input id="email" name="email" type="email" class="input" required autocomplete="email" value="{{ old('email') }}" oninput="validateEmail(this)" />
             <label class="user-label">Email</label>
+            <div id="email-error" class="text-red-500 text-sm mt-1 hidden"></div>
         </div>
         <div class="nebula-input">
-            <input id="phone" name="phone" type="tel" class="input" required autocomplete="tel" value="{{ old('phone') }}" />
-            <label class="user-label">Nomor Telepon</label>
+            <input id="phone" name="phone" type="tel" class="input" required autocomplete="tel" value="{{ old('phone') }}" oninput="validatePhoneNumber(this)" onkeypress="return isNumberKey(event)" maxlength="15" />
+            <label class="user-label">Phone Number</label>
+            <div id="phone-error" class="text-red-500 text-sm mt-1 hidden"></div>
         </div>
         <div class="nebula-input relative">
             <input id="password" name="password" type="password" class="input" required autocomplete="new-password" />
             <label class="user-label">Password</label>
+            <span class="password-toggle" onclick="togglePassword('password')">
+                <i class="fas fa-eye"></i>
+            </span>
             <div id="password-requirements" class="password-requirements hidden">
-                <h4 class="text-sm font-semibold mb-2">Password harus memenuhi:</h4>
+                <h4 class="text-sm font-semibold mb-2">Password must meet:</h4>
                 <ul class="text-sm space-y-1">
                     <li class="requirement" data-requirement="length">
-                        <span class="check"></span> Minimal 8 karakter
+                        <span class="check"></span> Minimum 8 characters
                     </li>
                     <li class="requirement" data-requirement="uppercase">
-                        <span class="check"></span> Memiliki huruf besar
+                        <span class="check"></span> Contains uppercase letter
                     </li>
                     <li class="requirement" data-requirement="lowercase">
-                        <span class="check"></span> Memiliki huruf kecil
+                        <span class="check"></span> Contains lowercase letter
                     </li>
                     <li class="requirement" data-requirement="number">
-                        <span class="check"></span> Memiliki angka
+                        <span class="check"></span> Contains number
                     </li>
                 </ul>
             </div>
         </div>
         <div class="nebula-input">
             <input id="password-confirm" name="password_confirmation" type="password" class="input" required autocomplete="new-password" />
-            <label class="user-label">Konfirmasi Password</label>
+            <label class="user-label">Confirm Password</label>
+            <span class="password-toggle" onclick="togglePassword('password-confirm')">
+                <i class="fas fa-eye"></i>
+            </span>
         </div>
-        <button type="submit" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">Daftar</button>
+        <button type="submit" id="registerButton" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">
+            <span>Register</span>
+            <div class="loading-spinner ml-3 hidden"></div>
+        </button>
         <button type="button" onclick="window.location.href='{{ route('google.login') }}'" class="button mt-2">
             <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262" class="svg">
                 <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027" class="blue"></path>
@@ -69,11 +83,11 @@
                 <path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782" class="yellow"></path>
                 <path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251" class="red"></path>
             </svg>
-            <span class="text">Daftar dengan Google</span>
+            <span class="text">Register with Google</span>
         </button>
         <div class="text-center mt-4">
-            <span class="text-gray-300">Sudah punya akun?</span>
-            <a href="{{ route('login') }}" class="lost-password ml-1">Masuk</a>
+            <span class="text-gray-300">Already have an account?</span>
+            <a href="{{ route('login') }}" class="lost-password ml-1">Login</a>
         </div>
     </form>
 
@@ -168,6 +182,49 @@
         .password-toggle:hover {
             color: #FFD600;
         }
+        
+        /* Add phone error styling */
+        #phone-error {
+            color: #ff4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            position: absolute;
+            bottom: -1.5rem;
+        }
+        
+        .input-error {
+            border-color: #ff4444 !important;
+        }
+        
+        /* Add email error styling */
+        #email-error {
+            color: #ff4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            position: absolute;
+            bottom: -1.5rem;
+        }
+
+        /* Add loading spinner styles */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
     </style>
 
     <script>
@@ -175,6 +232,14 @@
             const passwordInput = document.getElementById('password');
             const requirements = document.getElementById('password-requirements');
             const requirementItems = document.querySelectorAll('.requirement');
+            const phoneInput = document.getElementById('phone');
+            const phoneError = document.getElementById('phone-error');
+            const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('email-error');
+            const form = document.getElementById('registerForm');
+            const button = document.getElementById('registerButton');
+            const spinner = button.querySelector('.loading-spinner');
+            const buttonText = button.querySelector('span');
 
             function togglePassword(inputId) {
                 const input = document.getElementById(inputId);
@@ -235,11 +300,147 @@
                 }
             }
 
+            // Phone number validation functions
+            function isNumberKey(evt) {
+                var charCode = (evt.which) ? evt.which : evt.keyCode;
+                if (charCode > 31 && (charCode < 48 || charCode > 57))
+                    return false;
+                return true;
+            }
+
+            function validatePhoneNumber(input) {
+                // Remove any non-numeric characters
+                input.value = input.value.replace(/[^0-9]/g, '');
+                
+                // Get the error display element
+                const errorElement = document.getElementById('phone-error');
+                
+                // Validate length
+                if (input.value.length < 10 || input.value.length > 15) {
+                    errorElement.textContent = 'Phone number must be between 10 and 15 digits';
+                    errorElement.classList.remove('hidden');
+                    input.classList.add('input-error');
+                    return false;
+                }
+                
+                // If all validations pass
+                errorElement.classList.add('hidden');
+                input.classList.remove('input-error');
+                return true;
+            }
+
+            // Email validation function
+            function validateEmail(input) {
+                const email = input.value;
+                const errorElement = document.getElementById('email-error');
+                
+                // Regular expression for email validation
+                const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                
+                // Check if empty
+                if (!email) {
+                    showEmailError('Email is required');
+                    return false;
+                }
+                
+                // Check basic format
+                if (!email.includes('@')) {
+                    showEmailError('Email must contain @');
+                    return false;
+                }
+                
+                // Split email into local and domain parts
+                const [localPart, domainPart] = email.split('@');
+                
+                // Validate local part (before @)
+                if (!localPart) {
+                    showEmailError('Username before @ is required');
+                    return false;
+                }
+                
+                // Check for invalid characters in local part
+                if (!/^[a-zA-Z0-9][a-zA-Z0-9._%+-]*$/.test(localPart)) {
+                    showEmailError('Username can only contain letters, numbers, and . _ + -');
+                    return false;
+                }
+                
+                // Validate domain part (after @)
+                if (!domainPart) {
+                    showEmailError('Domain after @ is required');
+                    return false;
+                }
+                
+                // Check domain format
+                if (!/^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$/.test(domainPart)) {
+                    showEmailError('Invalid domain format');
+                    return false;
+                }
+                
+                // Check for consecutive special characters
+                if (/[._%+-]{2,}/.test(localPart)) {
+                    showEmailError('Cannot have consecutive special characters');
+                    return false;
+                }
+                
+                // If all validations pass
+                errorElement.classList.add('hidden');
+                input.classList.remove('input-error');
+                return true;
+            }
+            
+            function showEmailError(message) {
+                const errorElement = document.getElementById('email-error');
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+                emailInput.classList.add('input-error');
+            }
+
+            // Modify form submission handler
+            form.addEventListener('submit', function(e) {
+                const isPhoneValid = validatePhoneNumber(phoneInput);
+                const isEmailValid = validateEmail(emailInput);
+                
+                if (!isPhoneValid || !isEmailValid) {
+                    e.preventDefault(); // Prevent form submission if validation fails
+                    return;
+                }
+
+                // Show loading state
+                button.disabled = true;
+                spinner.classList.remove('hidden');
+                buttonText.textContent = 'Registering...';
+            });
+
+            // Make validation functions globally available
+            window.validateEmail = validateEmail;
+            window.isNumberKey = isNumberKey;
+            window.validatePhoneNumber = validatePhoneNumber;
+
             // Floating alert auto-hide
             setTimeout(() => {
                 const alert = document.getElementById('floating-alert');
                 if(alert) alert.style.display = 'none';
             }, 4000);
         });
+
+        // Add custom alert function if not already present
+        function showCustomAlert(message, type = 'error') {
+            const alertBox = document.createElement('div');
+            alertBox.className = `custom-alert ${type}`;
+            alertBox.innerHTML = `
+                <div class="alert-icon">
+                    <span style="color:${type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#22c55e'}">
+                        ${type === 'error' ? '✕' : type === 'warning' ? '!' : '✓'}
+                    </span>
+                </div>
+                <div class="alert-message">${message}</div>
+            `;
+            document.body.appendChild(alertBox);
+
+            setTimeout(() => {
+                alertBox.style.animation = 'fadeOutUp 0.5s';
+                setTimeout(() => alertBox.remove(), 500);
+            }, 3000);
+        }
     </script>
 @endsection

@@ -18,7 +18,7 @@ class PasswordResetController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors(['email' => 'Email tidak ditemukan.']);
+            return back()->withErrors(['email' => 'Email not found.']);
         }
 
         // Generate 6-digit code
@@ -35,12 +35,12 @@ class PasswordResetController extends Controller
         // Send email
         Mail::send('emails.reset-password', ['code' => $code], function($message) use ($request) {
             $message->to($request->email);
-            $message->subject('Kode Reset Password');
+            $message->subject('Password Reset Code');
         });
 
         return redirect()->route('password.code')->with([
             'email' => $request->email,
-            'status' => 'Kami telah mengirim kode verifikasi ke email Anda.'
+            'status' => 'We have sent a verification code to your email.'
         ]);
     }
 
@@ -64,7 +64,7 @@ class PasswordResetController extends Controller
             ->first();
 
         if (!$reset) {
-            return back()->withErrors(['code' => 'Kode verifikasi tidak valid atau sudah kadaluarsa.']);
+            return back()->withErrors(['code' => 'Verification code is invalid or has expired.']);
         }
 
         $user = User::where('email', $request->email)->first();
@@ -73,6 +73,6 @@ class PasswordResetController extends Controller
 
         DB::table('password_reset_codes')->where('email', $request->email)->delete();
 
-        return redirect()->route('login')->with('status', 'Password berhasil direset!');
+        return redirect()->route('login')->with('status', 'Password has been successfully reset!');
     }
 } 

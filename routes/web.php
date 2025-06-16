@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,9 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
 Route::get('/kamar', [RoomController::class, 'index'])->name('kamar.index');
+
+// Add gallery route
+Route::get('/gallery', [GaleriController::class, 'index'])->name('gallery');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/riwayat-pemesanan', [BookingController::class, 'riwayat'])->name('bookings.riwayat');
@@ -45,6 +49,38 @@ Route::middleware(['auth'])->group(function () {
     // Transaction routes
     Route::get('/transactions/status/{orderId}', [BookingController::class, 'getTransactionStatus'])->name('transactions.status');
     Route::get('/payment/finish-ajax', [BookingController::class, 'finishAjax'])->name('payment.finish-ajax');
+
+    // Email Verification Routes
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect('/')->with('status', 'Your email has been verified!');
+    })->middleware(['signed'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return back()->with('status', 'Verification link sent!');
+    })->middleware(['throttle:6,1'])->name('verification.send');
+
+    // Room selection and booking routes
+    Route::get('/bookings/create/room/{room}', [BookingController::class, 'createWithRoom'])->name('bookings.create.room');
+    Route::post('/bookings/check-availability', [BookingController::class, 'checkAvailability'])->name('bookings.check-availability');
+});
+
+// Add email verification middleware to booking routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Booking Routes
+    Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
+    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    
+    // Payment Routes
+    Route::get('/bookings/{booking}/payment', [PaymentController::class, 'show'])->name('bookings.payment');
+    Route::post('/bookings/finalize', [BookingController::class, 'finalizeBooking'])->name('bookings.finalize');
+    Route::post('/bookings/process-payment', [PaymentController::class, 'process'])->name('bookings.process-payment');
 });
 
 /*
@@ -95,15 +131,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
     Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
 
-    // Booking Routes
-    Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
-    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
-    
-    // Payment Routes (must be after booking routes)
-    Route::get('/bookings/{booking}/payment', [PaymentController::class, 'show'])->name('bookings.payment');
-    Route::post('/bookings/finalize', [BookingController::class, 'finalizeBooking'])->name('bookings.finalize');
-    Route::post('/bookings/process-payment', [PaymentController::class, 'process'])->name('bookings.process-payment');
+    // Email Verification Routes
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect('/')->with('status', 'Your email has been verified!');
+    })->middleware(['signed'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return back()->with('status', 'Verification link sent!');
+    })->middleware(['throttle:6,1'])->name('verification.send');
+
+    // Existing routes...
+    Route::get('/riwayat-pemesanan', [BookingController::class, 'riwayat'])->name('bookings.riwayat');
+    // ... rest of the existing routes ...
 });
 
 /*

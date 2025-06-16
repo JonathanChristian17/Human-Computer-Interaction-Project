@@ -389,15 +389,130 @@
             margin-bottom: 20px;
             font-size: 0.9em;
         }
+        /* Brutalist Alert Styles */
+        .brutalist-swal-alert {
+            width: 340px;
+            border: 4px solid #000;
+            background: #fff;
+            padding: 1.5rem;
+            box-shadow: 10px 10px 0 #000;
+            font-family: 'Arial', sans-serif;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            animation: fadeIn .2s;
+            border-radius: 12px;
+        }
+        .brutalist-swal-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1rem;
+        }
+        .brutalist-swal-icon {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+        .brutalist-swal-icon.success { background: #22c55e; }
+        .brutalist-swal-icon.danger  { background: #ef4444; }
+        .brutalist-swal-icon.warning { background: #facc15; }
+        .brutalist-swal-icon.success svg { fill: #fff; }
+        .brutalist-swal-icon.danger svg  { fill: #fff; }
+        .brutalist-swal-icon.warning svg { fill: #000; }
+        .brutalist-swal-title {
+            font-weight: 900;
+            color: #000;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+        }
+        .brutalist-swal-message {
+            margin-top: 1rem;
+            color: #000;
+            font-size: 1rem;
+            line-height: 1.4;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1rem;
+            font-weight: 600;
+        }
+        .brutalist-swal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.18);
+            z-index: 99998;
+        }
     </style>
+    <script>
+        function showBrutalistSwalAlert({ type = 'success', title = '', message = '', timer = null }) {
+            document.querySelectorAll('.brutalist-swal-alert, .brutalist-swal-overlay').forEach(e => e.remove());
+            const overlay = document.createElement('div');
+            overlay.className = 'brutalist-swal-overlay';
+            document.body.appendChild(overlay);
+            
+            let iconSvg = '';
+            if (type === 'success') {
+                iconSvg = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"></path></svg>`;
+            } else if (type === 'danger') {
+                iconSvg = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13l-1.41 1.41L12 13.41l-3.59 3.59L7 15l3.59-3.59L7 7.83 8.41 6.41 12 10.59l3.59-3.59L17 7.83l-3.59 3.59L17 15z"></path></svg>`;
+            } else {
+                iconSvg = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>`;
+            }
+            
+            const alert = document.createElement('div');
+            alert.className = 'brutalist-swal-alert';
+            alert.innerHTML = `
+                <div class="brutalist-swal-header">
+                    <div class="brutalist-swal-icon ${type}">${iconSvg}</div>
+                    <div class="brutalist-swal-title">${title}</div>
+                </div>
+                <div class="brutalist-swal-message">${message}</div>
+            `;
+            document.body.appendChild(alert);
+
+            if (timer) {
+                setTimeout(() => {
+                    alert.remove();
+                    overlay.remove();
+                }, timer);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                showBrutalistSwalAlert({
+                    type: 'success',
+                    title: 'Success',
+                    message: '{{ session("success") }}',
+                    timer: 3000
+                });
+            @endif
+
+            @if(session('error'))
+                showBrutalistSwalAlert({
+                    type: 'danger',
+                    title: 'Error',
+                    message: '{{ session("error") }}',
+                    timer: 3000
+                });
+            @endif
+        });
+    </script>
 </head>
-<body>
+<body class="font-sans antialiased">
     <div class="overlay"></div>
     <div class="container">
         <!-- Left: Welcome Section -->
         <div class="welcome-section">
-            <h1>Selamat<br>Datang</h1>
-            <p>Silakan masuk untuk mengakses akun Anda dan menikmati layanan kami.</p>
+            <h1>Welcome<br>To Cahaya Resort</h1>
+            <p>Please log in to access your account and enjoy our services.</p>
         </div>
         <!-- Right: Auth Content -->
         <div class="login-section">
@@ -407,7 +522,7 @@
     @if(session('welcome'))
     <div id="welcome-popup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div class="bg-white rounded-lg p-6 max-w-sm text-center shadow-lg">
-            <h2 class="text-xl font-semibold mb-4">Selamat datang!</h2>
+            <h2 class="text-xl font-semibold mb-4">Welcome!</h2>
             <p>{{ session('welcome') }}</p>
             <button onclick="document.getElementById('welcome-popup').style.display='none'"
                     class="mt-4 px-4 py-2 bg-orange-400 text-white rounded hover:bg-orange-500">

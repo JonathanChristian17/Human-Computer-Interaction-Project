@@ -173,11 +173,46 @@
             return this.selectedRooms.some(r => r.id === roomId);
         },
         checkAuthAndShowBooking(roomIds) {
-            // Fungsi ini akan memanggil window.showBooking(roomIds) jika sudah login,
-            // atau menampilkan SweetAlert jika belum login. Jangan gunakan interpolasi Blade di sini.
-            if (window.isAuthenticated) {
-                window.showBooking(roomIds);
-            } else {
+            @auth
+                @if(auth()->user()->hasVerifiedEmail())
+                    showBooking(roomIds);
+                @else
+                    showBrutalistSwalAlert({
+                        title: 'Email Verification Required',
+                        message: 'Please verify your email address to book rooms. Check your inbox for the verification link.',
+                        type: 'warning',
+                        confirmText: 'Resend Verification Email',
+                        cancelText: 'Cancel',
+                        onConfirm: function() {
+                            // Send verification email
+                            fetch('{{ route("verification.send") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                credentials: 'same-origin'
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                showBrutalistSwalAlert({
+                                    title: 'Verification Email Sent',
+                                    message: 'A new verification link has been sent to your email address.',
+                                    type: 'success'
+                                });
+                            })
+                            .catch(error => {
+                                showBrutalistSwalAlert({
+                                    title: 'Error',
+                                    message: 'Failed to send verification email. Please try again later.',
+                                    type: 'error'
+                                });
+                            });
+                        }
+                    });
+                @endif
+            @else
                 showBrutalistSwalAlert({
                     title: 'Login Required',
                     message: 'Please login first to complete your booking',
@@ -185,10 +220,10 @@
                     confirmText: 'Login Now',
                     cancelText: 'Cancel',
                     onConfirm: function() {
-                        window.location.href = '/login';
+                        window.location.href = '{{ route("login") }}';
                     }
                 });
-            }
+            @endauth
         },
         init() {
             // Load selected rooms from localStorage on page load
@@ -256,7 +291,7 @@
         </div>
 
         <!-- Booking content -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-0">
             <h2 class="text-2xl font-bold mb-8">Reservation Cahaya Resort</h2>
 
             <!-- Room listings and Booking Details -->
@@ -340,7 +375,44 @@
 // Add authentication check function
 window.checkAuthAndShowBooking = function(roomIds) {
     @auth
-        showBooking(roomIds);
+        @if(auth()->user()->hasVerifiedEmail())
+            showBooking(roomIds);
+        @else
+            showBrutalistSwalAlert({
+                title: 'Email Verification Required',
+                message: 'Please verify your email address to book rooms. Check your inbox for the verification link.',
+                type: 'warning',
+                confirmText: 'Resend Verification Email',
+                cancelText: 'Cancel',
+                onConfirm: function() {
+                    // Send verification email
+                    fetch('{{ route("verification.send") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        showBrutalistSwalAlert({
+                            title: 'Verification Email Sent',
+                            message: 'A new verification link has been sent to your email address.',
+                            type: 'success'
+                        });
+                    })
+                    .catch(error => {
+                        showBrutalistSwalAlert({
+                            title: 'Error',
+                            message: 'Failed to send verification email. Please try again later.',
+                            type: 'error'
+                        });
+                    });
+                }
+            });
+        @endif
     @else
         showBrutalistSwalAlert({
             title: 'Login Required',

@@ -11,8 +11,10 @@ class TransactionController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Booking::with(['rooms', 'user', 'transaction'])
-            ->whereHas('transaction')
+        $query = Booking::with(['rooms', 'user', 'transactions' => function($query) {
+                $query->latest();
+            }])
+            ->whereHas('transactions')
             ->latest();
 
         // Search functionality
@@ -22,7 +24,7 @@ class TransactionController extends Controller
                 $q->where('full_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhereHas('transaction', function($q) use ($search) {
+                  ->orWhereHas('transactions', function($q) use ($search) {
                       $q->where('order_id', 'like', "%{$search}%")
                         ->orWhere('transaction_id', 'like', "%{$search}%");
                   });
@@ -42,7 +44,7 @@ class TransactionController extends Controller
             ];
 
             if (isset($statusMap[$status])) {
-                $query->whereHas('transaction', function($q) use ($statusMap, $status) {
+                $query->whereHas('transactions', function($q) use ($statusMap, $status) {
                     if (isset($statusMap[$status]['transaction_status'])) {
                         if (is_array($statusMap[$status]['transaction_status'])) {
                             $q->whereIn('transaction_status', $statusMap[$status]['transaction_status']);

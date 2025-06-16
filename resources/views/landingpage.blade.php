@@ -14,10 +14,34 @@ use Illuminate\Support\Str;
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     body {
         font-family: 'Poppins', sans-serif;
+    }
+
+    /* Email Verification Notice */
+    .verification-notice {
+        animation: slideUp 0.5s ease-out;
+        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Add margin to the bottom of the page to prevent content from being hidden behind the notice */
+    .has-verification-notice {
+        margin-bottom: 4rem;
     }
 
     /* Calendar Modal */
@@ -424,10 +448,168 @@ use Illuminate\Support\Str;
         width: 100%;
       }
     }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .modal-close {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #6b7280;
+        transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+        color: #1a1a1a;
+    }
+
+    .modal-body {
+        color: #4b5563;
+        line-height: 1.6;
+    }
+
+    /* Bottom Sheet Panel Styles */
+    .panel {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 90vh;
+        background: white;
+        z-index: 50;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+    }
+
+    .panel.show {
+        transform: translateY(0);
+    }
+
+    .panel-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1;
+    }
+
+    .panel-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .panel-close {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .panel-close:hover {
+        background-color: #f3f4f6;
+    }
+
+    .panel-content {
+        padding: 1rem;
+    }
+
+    /* Loading Animation */
+    .loading-spinner {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid #f3f4f6;
+        border-radius: 50%;
+        border-top-color: #FFA040;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        gap: 1rem;
+    }
 </style>
 @endsection
 
 @section('content')
+    @auth
+        @if(!auth()->user()->hasVerifiedEmail())
+            <div class="fixed bottom-0 left-0 right-0 z-50 bg-yellow-500 text-white py-4 verification-notice">
+                <div class="container mx-auto px-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Please verify your email address to book rooms. Check your inbox for the verification link.</span>
+                    </div>
+                    <form method="POST" action="{{ route('verification.send') }}" class="flex-shrink-0">
+                        @csrf
+                        <button type="submit" class="text-sm underline hover:no-underline hover:text-white/80 transition-colors">
+                            Resend verification email
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <script>
+                document.body.classList.add('has-verification-notice');
+            </script>
+        @endif
+    @endauth
+
     <!-- Hero Section -->
     <section class="relative h-auto pb-32 sm:pb-40 md:pb-48 lg:h-screen lg:pb-0">
         <!-- Hero Background Image -->
@@ -560,20 +742,44 @@ use Illuminate\Support\Str;
                         <!-- Original items -->
                         @foreach($rooms as $index => $room)
                         <div class="flex-none w-[280px] mx-2 sm:w-[300px] sm:mx-3" data-index="{{ $index }}">
-                            <div class="overflow-hidden transition-all duration-500 transform bg-white shadow-lg rounded-xl">
+                            <div class="overflow-hidden transition-all duration-500 transform bg-white shadow-lg rounded-xl cursor-pointer hover:shadow-xl relative group"
+                                 onclick="@if($room->status === 'available')selectRoom({
+                                    id: {{ $room->id }},
+                                    name: '{{ $room->name }}',
+                                    price: {{ $room->price_per_night }},
+                                    image: '{{ $room->image }}',
+                                    capacity: {{ $room->capacity }},
+                                    type: '{{ $room->type }}'
+                                })@else showCustomAlert('This room is currently not available for booking.', 'warning')@endif">
                                 <div class="relative">
-                                    <img src="{{ asset('storage/images/' . $room->image) }}" alt="{{ $room->name }}" class="object-cover w-full h-40 sm:h-48">
+                                    <img src="{{ asset('storage/images/' . $room->image) }}" alt="{{ $room->name }}" 
+                                         class="object-cover w-full h-40 sm:h-48 transition-all duration-300 {{ $room->status !== 'available' ? 'grayscale group-hover:grayscale-0' : '' }}">
+                                    @if($room->status !== 'available')
+                                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+                                        <span class="px-3 py-1 text-sm font-semibold text-white bg-red-500/80 rounded-full backdrop-blur-sm">
+                                            Not Available
+                                        </span>
+                                    </div>
+                                    @endif
                                 </div>
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-2">
-                                        <h3 class="text-base font-semibold sm:text-lg">{{ $room->name }}</h3>
-                                        <p class="text-sm font-medium text-orange-500 sm:text-base">Rp. {{ number_format($room->price_per_night, 0, ',', '.') }}</p>
+                                        <h3 class="text-base font-semibold sm:text-lg {{ $room->status !== 'available' ? 'text-gray-600' : '' }}">
+                                            {{ $room->name }}
+                                        </h3>
+                                        <p class="text-sm font-medium {{ $room->status === 'available' ? 'text-orange-500' : 'text-gray-500' }} sm:text-base">
+                                            Rp. {{ number_format($room->price_per_night, 0, ',', '.') }}
+                                        </p>
                                     </div>
                                     <div class="flex items-center gap-2 text-xs text-gray-500 sm:text-sm">
                                         <i class="fas fa-map-marker-alt"></i>
                                         <span>Pangururan</span>
                                         <span class="text-gray-300">•</span>
                                         <span>{{ $room->capacity }} Guest</span>
+                                        <span class="text-gray-300">•</span>
+                                        <span class="px-2 py-0.5 rounded-full text-xs {{ $room->status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ ucfirst($room->status) }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -848,8 +1054,8 @@ use Illuminate\Support\Str;
             <h2 class="mb-8 text-xl font-semibold tracking-widest text-center text-white uppercase md:text-2xl lg:text-3xl xl:text-4xl" style="font-family:'Poppins',sans-serif; letter-spacing:0.15em;">
             "UNWIND BY THE WATER. A LAKESIDE ESCAPE CRAFTED FOR TIMELESS MOMENTS."
             </h2>
-            <button class="px-8 py-3 mt-2 text-sm font-semibold tracking-widest text-gray-700 uppercase transition rounded-md bg-gray-300/70 md:px-10 md:text-base lg:text-lg hover:bg-gray-400/80" style="font-family:'Poppins',sans-serif;">
-                CHECK RATE
+            <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="px-8 py-3 mt-2 text-sm font-semibold tracking-widest text-gray-700 uppercase transition rounded-md bg-gray-300/70 md:px-10 md:text-base lg:text-lg hover:bg-gray-400/80" style="font-family:'Poppins',sans-serif;">
+                BACK TO TOP
             </button>
         </div>
     </section>
@@ -864,7 +1070,7 @@ use Illuminate\Support\Str;
                 <div class="text-center md:text-left">
                     <h3 class="mb-4 text-lg font-medium md:text-xl" style="font-family:'Poppins',sans-serif;">Ready to get started?</h3>
                     <div class="flex items-center justify-center mt-8 md:justify-start">
-                        <button type="button" class="w-full md:w-auto px-8 py-3 bg-[#D2A06E] text-white rounded-lg font-semibold text-lg flex items-center justify-center" style="font-family:'Poppins',sans-serif;">
+                        <button type="button" onclick="openRoomsPanel()" class="w-full md:w-auto px-8 py-3 bg-[#D2A06E] text-white rounded-lg font-semibold text-lg flex items-center justify-center" style="font-family:'Poppins',sans-serif;">
                             Get Started
                         </button>
                     </div>
@@ -900,13 +1106,13 @@ use Illuminate\Support\Str;
             </div>
             <div class="flex flex-col items-center justify-between pt-6 border-t border-gray-700 md:flex-row md:pt-8">
                 <div class="flex flex-col items-center w-full gap-4 mb-6 md:flex-row md:w-auto md:mb-0">
-                    <span class="text-xs md:text-sm">Terms & Conditions</span>
-                    <span class="text-xs md:text-sm">Privacy Policy</span>
+                    <span class="text-xs md:text-sm cursor-pointer" onclick="openModal('termsModal')">Terms & Conditions</span>
+                    <span class="text-xs md:text-sm cursor-pointer" onclick="openModal('privacyModal')">Privacy Policy</span>
                 </div>
                 <div class="flex items-center gap-6">
-                    <a href="#" class="text-xl md:text-2xl"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="text-xl md:text-2xl"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-xl md:text-2xl"><i class="fab fa-instagram"></i></a>
+                    <a href="javascript:void(0)" onclick="confirmSocialMediaRedirect('https://www.facebook.com', 'Facebook')" class="text-xl md:text-2xl"><i class="fab fa-facebook"></i></a>
+                    <a href="javascript:void(0)" onclick="confirmSocialMediaRedirect('https://x.com', 'X (Twitter)')" class="text-xl md:text-2xl"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="javascript:void(0)" onclick="confirmSocialMediaRedirect('https://www.instagram.com', 'Instagram')" class="text-xl md:text-2xl"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </div>
@@ -928,6 +1134,94 @@ use Illuminate\Support\Str;
     <div id="customAlert" class="custom-alert" style="display:none;">
       <div class="alert-icon" id="alertIcon"></div>
       <div class="alert-message" id="alertMessage"></div>
+    </div>
+
+    <!-- Terms & Conditions Modal -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Terms & Conditions</h2>
+                <span class="modal-close" onclick="closeModal('termsModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h3 class="text-lg font-semibold mb-4">1. Acceptance of Terms</h3>
+                <p class="mb-4">By accessing and using Cahaya Resort's services, you agree to be bound by these Terms & Conditions.</p>
+                
+                <h3 class="text-lg font-semibold mb-4">2. Booking and Cancellation</h3>
+                <p class="mb-4">- Reservations are subject to availability and confirmation<br>
+                - Cancellations must be made 24 hours before check-in<br>
+                - Late cancellations may incur charges</p>
+                
+                <h3 class="text-lg font-semibold mb-4">3. Check-in/Check-out</h3>
+                <p class="mb-4">- Check-in time: 2:00 PM<br>
+                - Check-out time: 12:00 PM<br>
+                - Late check-out subject to availability</p>
+                
+                <h3 class="text-lg font-semibold mb-4">4. Payment</h3>
+                <p class="mb-4">- Full payment required at check-in<br>
+                - We accept major credit cards and cash<br>
+                - Additional charges for extra services</p>
+                
+                <h3 class="text-lg font-semibold mb-4">5. Property Rules</h3>
+                <p>- No smoking in rooms<br>
+                - Quiet hours: 10:00 PM - 6:00 AM<br>
+                - Pets not allowed</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Privacy Policy</h2>
+                <span class="modal-close" onclick="closeModal('privacyModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h3 class="text-lg font-semibold mb-4">1. Information We Collect</h3>
+                <p class="mb-4">We collect personal information including name, contact details, payment information, and stay preferences to provide our services.</p>
+                
+                <h3 class="text-lg font-semibold mb-4">2. How We Use Your Information</h3>
+                <p class="mb-4">- Process your reservations<br>
+                - Communicate about your stay<br>
+                - Improve our services<br>
+                - Send promotional offers (with consent)</p>
+                
+                <h3 class="text-lg font-semibold mb-4">3. Information Security</h3>
+                <p class="mb-4">We implement appropriate security measures to protect your personal information from unauthorized access or disclosure.</p>
+                
+                <h3 class="text-lg font-semibold mb-4">4. Third-Party Sharing</h3>
+                <p class="mb-4">We may share information with trusted partners for business purposes, always in compliance with privacy laws.</p>
+                
+                <h3 class="text-lg font-semibold mb-4">5. Your Rights</h3>
+                <p>You have the right to:<br>
+                - Access your personal data<br>
+                - Request corrections<br>
+                - Withdraw consent<br>
+                - Request data deletion</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet Panel -->
+    <div class="panel-overlay" id="panelOverlay"></div>
+    <div class="panel" id="roomsPanel">
+        <div class="panel-header">
+            <button class="flex items-center gap-2 panel-back" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back</span>
+            </button>
+            <h2 class="panel-title">Rooms</h2>
+            <button class="panel-close" onclick="closePanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content" id="roomsContent">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600">Loading rooms...</p>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -1083,6 +1377,9 @@ document.addEventListener('DOMContentLoaded', function() {
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Store search parameters globally
+            window.lastSearchParams = new URLSearchParams();
+            
             // Get the dates (optional now)
             const checkIn = window.selectedStartDate;
             const checkOut = window.selectedEndDate;
@@ -1114,74 +1411,118 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show loading state in rooms panel
             const roomsPanel = document.getElementById('roomsPanel');
             const roomsContent = document.getElementById('roomsContent');
+            
             if (roomsPanel && roomsContent) {
+                // Show panel
+                roomsPanel.style.display = 'block';
                 roomsContent.innerHTML = `
                     <div class="py-4 text-center">
                         <div class="w-8 h-8 mx-auto border-b-2 border-orange-500 rounded-full animate-spin"></div>
                         <p class="mt-2 text-gray-600">Loading rooms...</p>
                     </div>
                 `;
+                
+                // Force reflow and add show class
+                roomsPanel.offsetHeight;
                 roomsPanel.classList.add('show');
             }
 
             // Build query parameters
-            const params = new URLSearchParams();
             if (checkIn && checkOut) {
-                params.set('check_in', formatDateForSubmit(checkIn));
-                params.set('check_out', formatDateForSubmit(checkOut));
+                window.lastSearchParams.set('check_in', formatDateForSubmit(checkIn));
+                window.lastSearchParams.set('check_out', formatDateForSubmit(checkOut));
             }
             if (selectedRoomType && selectedRoomType.value) {
-                params.set('room_type', selectedRoomType.value);
+                window.lastSearchParams.set('room_type', selectedRoomType.value);
             }
 
             // Update URL without page reload
             const url = new URL(window.location);
-            Array.from(params.entries()).forEach(([key, value]) => {
+            Array.from(window.lastSearchParams.entries()).forEach(([key, value]) => {
                 url.searchParams.set(key, value);
             });
             window.history.pushState({}, '', url);
 
             // Fetch filtered rooms
-            fetch(`/kamar?${params.toString()}`)
-                .then(response => response.text())
-                .then(html => {
-                    // Extract the rooms container content
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const mainContent = doc.querySelector('.min-h-screen');
-                    
-                    if (mainContent) {
-                        roomsContent.innerHTML = mainContent.innerHTML;
-                        
-                        // Update navigation state
-                        const navContainer = document.querySelector('[x-data]');
-                        if (navContainer && navContainer.__x) {
-                            navContainer.__x.$data.activeTab = 'rooms';
-                            localStorage.setItem('activeTab', 'rooms');
-                        }
-
-                        // Force update UI for navigation
-                        document.querySelectorAll('.nav-item').forEach(item => {
-                            const text = item.textContent.trim();
-                            if (text === 'Rooms') {
-                                item.classList.add('active');
-                            } else {
-                                item.classList.remove('active');
-                            }
-                        });
-
-                        // Bind pagination events
-                        bindPanelPagination();
-                    } else {
-                        roomsContent.innerHTML = html;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+            fetchRoomsContent(window.lastSearchParams.toString());
         });
     }
 });
+
+// Update fetchRoomsContent function
+function fetchRoomsContent(queryString = '') {
+    const content = document.getElementById('roomsContent');
+    content.innerHTML = `
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p class="text-gray-600">Loading rooms...</p>
+        </div>
+    `;
+
+    fetch(`/kamar?${queryString}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const mainContent = doc.querySelector('.min-h-screen');
+            
+            if (mainContent) {
+                content.innerHTML = mainContent.innerHTML;
+                
+                // Update navigation state
+                const navContainer = document.querySelector('[x-data]');
+                if (navContainer && navContainer.__x) {
+                    navContainer.__x.$data.activeTab = 'rooms';
+                    localStorage.setItem('activeTab', 'rooms');
+                }
+
+                // Force update UI for navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const text = item.textContent.trim();
+                    if (text === 'Rooms') {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+
+                // Bind pagination events
+                bindPanelEvents();
+            } else {
+                throw new Error('Could not find main content');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            content.innerHTML = `
+                <div class="p-4 text-center">
+                    <div class="text-red-600 mb-2">Failed to load rooms.</div>
+                    <button onclick="retryLastSearch()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                        Try Again
+                    </button>
+                </div>
+            `;
+        });
+}
+
+// Add retryLastSearch function
+function retryLastSearch() {
+    if (window.lastSearchParams) {
+        fetchRoomsContent(window.lastSearchParams.toString());
+    } else {
+        fetchRoomsContent();
+    }
+}
+
+// Update retryLoadRooms function
+function retryLoadRooms() {
+    retryLastSearch();
+}
 
 window.handleDateClick = function(info) {
     const clickedDate = info.date;
@@ -1364,5 +1705,211 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+</script>
+<script>
+// Add these new functions
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function openRoomsPanel() {
+    const panel = document.getElementById('roomsPanel');
+    const overlay = document.getElementById('panelOverlay');
+    const content = document.getElementById('roomsContent');
+
+    if (!panel || !content) {
+        console.error('Required elements not found');
+        return;
+    }
+
+    // Show overlay
+    if (overlay) {
+        overlay.style.display = 'block';
+        overlay.style.opacity = '1';
+    }
+
+    // Show panel
+    panel.style.display = 'block';
+    
+    // Force reflow
+    panel.offsetHeight;
+    
+    // Add show class
+    panel.classList.add('show');
+    
+    // Show loading state
+    content.innerHTML = `
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p class="text-gray-600">Loading rooms...</p>
+        </div>
+    `;
+
+    // Fetch rooms content
+    fetch('/kamar')
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const mainContent = doc.querySelector('.min-h-screen');
+            
+            if (mainContent) {
+                content.innerHTML = mainContent.innerHTML;
+                bindPanelEvents();
+            } else {
+                throw new Error('Could not find main content');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            content.innerHTML = `
+                <div class="p-4 text-center">
+                    <div class="text-red-600 mb-2">Failed to load rooms.</div>
+                    <button onclick="retryLoadRooms()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                        Try Again
+                    </button>
+                </div>
+            `;
+        });
+}
+
+function closePanel() {
+    const panel = document.getElementById('roomsPanel');
+    const overlay = document.getElementById('panelOverlay');
+    
+    // Remove show class from panel
+    panel.classList.remove('show');
+    
+    // Fade out overlay
+    if (overlay) {
+        overlay.style.opacity = '0';
+    }
+    
+    // Wait for transition to finish
+    setTimeout(() => {
+        panel.style.display = 'none';
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    }, 300);
+}
+
+function goBack() {
+    closePanel();
+}
+
+function bindPanelEvents() {
+    // Add event listeners for pagination, filters, etc.
+    const paginationLinks = document.querySelectorAll('.pagination a');
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = new URL(link.href);
+            fetchRoomsContent(url.search);
+        });
+    });
+}
+
+// Close panel when clicking overlay
+document.getElementById('panelOverlay')?.addEventListener('click', closePanel);
+</script>
+<script>
+function selectRoom(room) {
+    if (!room) return;
+    
+    // Open the rooms panel
+    const panel = document.getElementById('roomsPanel');
+    const content = document.getElementById('roomsContent');
+    
+    if (!panel || !content) {
+        console.error('Required elements not found');
+        return;
+    }
+    
+    // Show loading state
+    panel.style.display = 'block';
+    panel.offsetHeight; // Force reflow
+    panel.classList.add('show');
+    
+    content.innerHTML = `
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p class="text-gray-600">Loading room details...</p>
+        </div>
+    `;
+
+    // Get check-in and check-out dates if selected
+    const checkIn = document.getElementById('landing_check_in').value;
+    const checkOut = document.getElementById('landing_check_out').value;
+    
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (checkIn) params.set('check_in', checkIn);
+    if (checkOut) params.set('check_out', checkOut);
+    params.set('selected_room', room.id);
+    
+    // Fetch rooms with the selected room highlighted
+    fetch(`/kamar?${params.toString()}`)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const mainContent = doc.querySelector('.min-h-screen');
+            
+            if (mainContent) {
+                content.innerHTML = mainContent.innerHTML;
+                
+                // Add the selected room to booking if available
+                if (typeof addRoom === 'function') {
+                    addRoom(room);
+                }
+                
+                bindPanelEvents();
+            } else {
+                throw new Error('Could not find main content');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            content.innerHTML = `
+                <div class="p-4 text-center">
+                    <div class="text-red-600 mb-2">Failed to load room details.</div>
+                    <button onclick="retryLoadRooms()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                        Try Again
+                    </button>
+                </div>
+            `;
+        });
+}
+</script>
+<script>
+function confirmSocialMediaRedirect(url, platform) {
+    Swal.fire({
+        title: 'Open ' + platform + '?',
+        text: "You will be redirected to a new page",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#FFA040',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, open it!',
+        cancelButtonText: 'No, cancel',
+        background: '#fff',
+        customClass: {
+            popup: 'rounded-xl',
+            title: 'font-poppins font-semibold',
+            text: 'font-poppins'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.open(url, '_blank');
+        }
+    });
+}
 </script>
 @endpush

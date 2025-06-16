@@ -84,9 +84,9 @@ class Booking extends Model
         return $this->hasMany(Revenue::class);
     }
 
-    public function transaction()
+    public function transactions()
     {
-        return $this->hasOne(Transaction::class);
+        return $this->hasMany(Transaction::class);
     }
 
     public function isPending()

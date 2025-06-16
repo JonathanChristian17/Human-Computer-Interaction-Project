@@ -14,7 +14,7 @@
                              viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
-                        <h3 class="text-xl font-semibold text-white">Selamat Datang</h3>
+                        <h3 class="text-xl font-semibold text-white">Welcome</h3>
                     </div>
                     <p class="text-gray-300">Halo, <span class="font-medium text-amber-400" data-user-name>{{ Auth::user()->name }}</span>! Anda telah berhasil login.</p>
                 </div>
