@@ -1,5 +1,5 @@
 @extends('layouts.auth')
-@section('title', 'Konfirmasi Password')
+@section('title', 'Confirm Password')
 @section('content')
     <!-- Logo dan Title -->
     <a href="/" class="absolute top-6 left-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -7,7 +7,7 @@
         <h1 class="text-xl font-bold text-white">Cahaya Resort</h1>
     </a>
 
-    <h2>Konfirmasi Password</h2>
+    <h2>Confirm Password</h2>
     <div class="mb-4 text-sm text-gray-200">
         {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
     </div>
@@ -31,7 +31,7 @@
             <input id="password" name="password" type="password" class="input" required autocomplete="current-password" />
             <label class="user-label">Password</label>
         </div>
-        <button type="submit" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">Konfirmasi</button>
+        <button type="submit" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">Confirm</button>
     </form>
     <style>
         @keyframes fade-in {

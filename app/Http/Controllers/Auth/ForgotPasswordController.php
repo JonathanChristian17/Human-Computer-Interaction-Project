@@ -46,14 +46,14 @@ class ForgotPasswordController extends Controller
         session(['reset_email' => $request->email]);
         
         return redirect()->route('password.verify')
-            ->with('status', 'Kode verifikasi telah dikirim ke email Anda.');
+            ->with('status', 'A verification code has been sent to your email.');
     }
 
     public function showVerifyForm()
     {
         if (!session('reset_email')) {
             return redirect()->route('password.request')
-                ->with('error', 'Silakan masukkan email Anda terlebih dahulu.');
+                ->with('error', 'Please enter your email first.');
         }
         
         return view('auth.verify-code');
@@ -71,7 +71,7 @@ class ForgotPasswordController extends Controller
             ->first();
 
         if (!$resetCode || $resetCode->isExpired()) {
-            return back()->withErrors(['code' => 'Kode verifikasi tidak valid atau sudah kadaluarsa.']);
+            return back()->withErrors(['code' => 'Verification code is invalid or has expired.']);
         }
 
         // Generate token for password reset
@@ -79,14 +79,14 @@ class ForgotPasswordController extends Controller
         session(['reset_token' => $token]);
 
         return redirect()->route('password.reset.form')
-            ->with('status', 'Kode verifikasi valid. Silakan masukkan password baru Anda.');
+            ->with('status', 'Verification code is valid. Please enter your new password.');
     }
 
     public function showResetForm()
     {
         if (!session('reset_email') || !session('reset_token')) {
             return redirect()->route('password.request')
-                ->with('error', 'Silakan mulai proses reset password dari awal.');
+                ->with('error', 'Please start the password reset process from the beginning.');
         }
 
         return view('auth.reset-password');
@@ -110,6 +110,6 @@ class ForgotPasswordController extends Controller
         session()->forget(['reset_email', 'reset_token']);
 
         return redirect()->route('login')
-            ->with('status', 'Password berhasil diubah! Silakan login dengan password baru Anda.');
+            ->with('status', 'Password successfully changed! Please login with your new password.');
     }
 }

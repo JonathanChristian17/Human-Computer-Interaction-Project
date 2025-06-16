@@ -14,7 +14,8 @@
 
     /* Panel styles */
     .slide-panel {
-        @apply fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300;
+        @apply fixed inset-0 flex items-end justify-center z-40 opacity-0 pointer-events-none;
+        transition: opacity 0.3s ease-out;
     }
 
     .slide-panel.show {
@@ -22,8 +23,9 @@
     }
 
     .slide-content {
-        @apply w-full bg-white rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out;
+        @apply w-full bg-white rounded-t-3xl transform translate-y-full;
         height: 90vh;
+        transition: transform 0.3s ease-out;
     }
 
     .slide-panel.show .slide-content {
@@ -31,16 +33,7 @@
     }
 
     .slide-content-inner {
-        @apply p-6 h-full overflow-y-auto;
-    }
-
-    /* Back button */
-    .back-button {
-        @apply flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200;
-    }
-
-    .back-button svg {
-        @apply w-5 h-5;
+        @apply p-6 h-full overflow-y-auto relative;
     }
 
     /* Form styles */

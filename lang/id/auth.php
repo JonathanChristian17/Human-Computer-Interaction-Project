@@ -12,7 +12,7 @@ return [
     |
     */
 
-    'failed' => 'Email atau kata sandi yang Anda masukkan salah.',
-    'password' => 'Kata sandi yang dimasukkan salah.',
-    'throttle' => 'Terlalu banyak percobaan login. Silakan coba lagi dalam :seconds detik.',
+    'failed' => 'The email or password you entered is incorrect.',
+    'password' => 'The password is incorrect.',
+    'throttle' => 'Too many login attempts. Please try again in :seconds.',
 ]; 

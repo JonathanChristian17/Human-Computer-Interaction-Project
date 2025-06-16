@@ -631,4 +631,121 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
+    public function createWithRoom(Room $room)
+    {
+        // Check if user is verified
+        if (!auth()->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice')
+                ->with('warning', 'Please verify your email address before booking a room.')
+                ->with('showAlert', true);
+        }
+
+        $selectedRooms = [$room];
+        $allBookedDates = [];
+        $unionBookedDates = [];
+
+        // Get booked dates for this room
+        $bookings = DB::table('booking_room')
+            ->join('bookings', 'booking_room.booking_id', '=', 'bookings.id')
+            ->join('transactions', 'bookings.id', '=', 'transactions.booking_id')
+            ->where('booking_room.room_id', $room->id)
+            ->where(function($query) {
+                $query->where(function($q) {
+                    $q->whereNotIn('bookings.status', ['cancelled'])
+                      ->whereNotIn('bookings.payment_status', ['cancelled'])
+                      ->where(function($q) {
+                          $q->where('transactions.payment_status', '!=', 'expire')
+                            ->orWhere(function($q) {
+                                $q->where('transactions.payment_status', 'pending')
+                                  ->where('transactions.created_at', '>=', now()->subHour());
+                            });
+                      });
+                });
+            })
+            ->where(function($query) {
+                $query->where('bookings.check_out_date', '>=', now()->format('Y-m-d'))
+                    ->orWhere('bookings.check_in_date', '>=', now()->format('Y-m-d'));
+            })
+            ->select(
+                'bookings.check_in_date',
+                'bookings.check_out_date'
+            )
+            ->get();
+
+        foreach ($bookings as $booking) {
+            $startDate = new \DateTime($booking->check_in_date);
+            $endDate = new \DateTime($booking->check_out_date);
+            $period = new \DatePeriod(
+                $startDate,
+                new \DateInterval('P1D'),
+                $endDate
+            );
+
+            foreach ($period as $date) {
+                $dateStr = $date->format('Y-m-d');
+                if (!isset($allBookedDates[$room->id])) {
+                    $allBookedDates[$room->id] = [];
+                }
+                $allBookedDates[$room->id][$dateStr] = true;
+                
+                if (!isset($unionBookedDates[$dateStr])) {
+                    $unionBookedDates[$dateStr] = [];
+                }
+                $unionBookedDates[$dateStr][] = $room->id;
+            }
+        }
+
+        // Calculate initial totals
+        $nights = 1;
+        $subtotal = $room->price_per_night * $nights;
+        $tax = 0;
+        $deposit = 0;
+        $total = $subtotal;
+
+        return view('bookings.create', compact(
+            'selectedRooms',
+            'allBookedDates',
+            'unionBookedDates',
+            'subtotal',
+            'tax',
+            'deposit',
+            'total'
+        ));
+    }
+
+    public function checkAvailability(Request $request)
+    {
+        $request->validate([
+            'room_ids' => 'required|array',
+            'room_ids.*' => 'exists:rooms,id',
+            'check_in_date' => 'required|date|after_or_equal:today',
+            'check_out_date' => 'required|date|after:check_in_date'
+        ]);
+
+        $roomIds = $request->room_ids;
+        $checkIn = $request->check_in_date;
+        $checkOut = $request->check_out_date;
+
+        $unavailableRooms = [];
+
+        foreach ($roomIds as $roomId) {
+            $room = Room::find($roomId);
+            if (!$room->isAvailableForDates($checkIn, $checkOut)) {
+                $unavailableRooms[] = $room->name;
+            }
+        }
+
+        if (!empty($unavailableRooms)) {
+            return response()->json([
+                'available' => false,
+                'message' => 'The following rooms are not available for the selected dates: ' . implode(', ', $unavailableRooms)
+            ]);
+        }
+
+        return response()->json([
+            'available' => true,
+            'message' => 'All selected rooms are available for the selected dates.'
+        ]);
+    }
 }

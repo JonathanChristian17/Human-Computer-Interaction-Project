@@ -35,8 +35,8 @@ class AuthenticatedSessionController extends Controller
         if ($user) {
             // Add welcome notification with user's name
             $welcomeMessage = $request->boolean('remember') 
-                ? 'Selamat datang kembali, ' . $user->name . '! Anda akan tetap masuk.'
-                : 'Selamat datang kembali, ' . $user->name . '!';
+                ? 'Welcome back, ' . $user->name . '! You will stay logged in.'
+                : 'Welcome back, ' . $user->name . '!';
             
             session()->flash('success', $welcomeMessage);
 
@@ -49,7 +49,7 @@ class AuthenticatedSessionController extends Controller
             }
         } else {
             // Fallback message if user is not available
-            session()->flash('success', 'Selamat datang kembali!');
+            session()->flash('success', 'Welcome back!');
         }
 
         return redirect()->intended(route('landing'))
@@ -70,6 +70,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/')
-            ->with('success', 'Sampai jumpa kembali, ' . $name . '! Anda telah berhasil keluar.');
+            ->with('success', 'Goodbye, ' . $name . '! You have successfully logged out.');
     }
 } 

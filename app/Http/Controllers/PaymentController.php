@@ -303,173 +303,58 @@ class PaymentController extends Controller
 
     public function finish(Request $request)
     {
-        try {
-            $orderId = $request->query('order_id');
-            Log::info('Payment finish callback received', ['order_id' => $orderId]);
+        $orderId = $request->order_id;
+        $transaction = Transaction::where('order_id', $orderId)->first();
 
-            $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
-            $booking = $transaction->booking;
-
-            if (!$booking) {
-                throw new \Exception('Booking not found');
-            }
-
-            // Get transaction status from Midtrans
-            $midtransStatus = \Midtrans\Transaction::status($orderId);
-            
-            Log::info('Midtrans status retrieved', [
-                'order_id' => $orderId,
-                'status' => $midtransStatus
+        if (!$transaction) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction not found'
             ]);
-
-            // Update transaction status based on Midtrans response
-            switch ($midtransStatus->transaction_status) {
-                case 'capture':
-                    if ($midtransStatus->fraud_status == 'challenge') {
-                        $transaction->payment_status = 'pending';
-                        $transaction->transaction_status = 'challenge';
-                        $booking->payment_status = 'pending';
-                        $booking->status = 'pending';
-                    } else if ($midtransStatus->fraud_status == 'accept') {
-                        $transaction->payment_status = 'paid';
-                        $transaction->transaction_status = 'success';
-                        $booking->payment_status = 'paid';
-                        $booking->status = 'confirmed';
-                    }
-                    break;
-                case 'settlement':
-                    $transaction->payment_status = 'paid';
-                    $transaction->transaction_status = 'settlement';
-                    $booking->payment_status = 'paid';
-                    $booking->status = 'confirmed';
-                    break;
-                case 'pending':
-                    $transaction->payment_status = 'pending';
-                    $transaction->transaction_status = 'pending';
-                    $booking->payment_status = 'pending';
-                    $booking->status = 'pending';
-                    break;
-                case 'deny':
-                case 'cancel':
-                case 'expire':
-                    $transaction->payment_status = 'cancelled';
-                    $transaction->transaction_status = $midtransStatus->transaction_status;
-                    $booking->payment_status = 'cancelled';
-                    $booking->status = 'cancelled';
-                    break;
-            }
-
-            // Save the changes
-            $transaction->save();
-            $booking->save();
-
-            if ($transaction->payment_status === 'paid') {
-                return redirect()->route('landing', ['panel' => 'transactions'])
-                    ->with('success', 'Pembayaran berhasil! Pesanan Anda telah dikonfirmasi.');
-            } else if ($transaction->payment_status === 'pending') {
-                return redirect()->route('landing', ['panel' => 'transactions'])
-                    ->with('info', 'Pembayaran sedang diproses. Silakan selesaikan pembayaran sesuai instruksi.');
-            } else {
-                return redirect()->route('landing', ['panel' => 'transactions'])
-                    ->with('error', 'Pembayaran dibatalkan atau ditolak.');
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Error in payment finish: ' . $e->getMessage());
-            return redirect()->route('landing', ['panel' => 'transactions'])
-                ->with('error', 'Terjadi kesalahan dalam memproses pembayaran. Silakan hubungi admin.');
         }
+
+        try {
+            $status = $this->getMidtransStatus($orderId);
+
+            if ($status === 'settlement' || $status === 'capture') {
+                $transaction->update([
+                    'status' => 'paid',
+                    'payment_status' => 'success'
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment completed successfully!'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment is still pending or failed'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error checking payment status: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function unfinish(Request $request)
+    {
+        return redirect()->route('landing')
+            ->with('error', 'Payment is incomplete. Please complete your payment.');
     }
 
     public function error(Request $request)
     {
-        Log::error('Payment error callback received', $request->all());
-
-        try {
-            $orderId = $request->order_id;
-            
-            // Find transaction
-            $transaction = Transaction::where('order_id', $orderId)->first();
-            if ($transaction) {
-                DB::beginTransaction();
-                try {
-                    // Update transaction status
-                    $transaction->payment_status = 'failed';
-                    $transaction->transaction_status = 'error';
-                    $transaction->save();
-
-                    // Update booking status if exists
-                    $booking = Booking::find($transaction->booking_id);
-                    if ($booking) {
-                        $booking->payment_status = 'failed';
-                        $booking->status = 'cancelled';
-                        $booking->save();
-
-                        DB::commit();
-                        return redirect()->route('landing', ['panel' => 'transactions'])
-                            ->with('error', 'Pembayaran gagal. Silakan coba lagi.');
-                    }
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    Log::error('Failed to update error status: ' . $e->getMessage());
-                    throw $e;
-                }
-            }
-
-            return redirect()->route('landing', ['panel' => 'transactions'])
-                ->with('error', 'Pembayaran gagal. Silakan coba lagi.');
-
-        } catch (\Exception $e) {
-            Log::error('Error in payment error handler: ' . $e->getMessage());
-            return redirect()->route('landing', ['panel' => 'transactions'])
-                ->with('error', 'Terjadi kesalahan dalam memproses pembayaran. Silakan coba lagi.');
-        }
+        return redirect()->route('landing')
+            ->with('error', 'Payment failed. Please try again or contact support.');
     }
 
     public function cancel(Request $request)
     {
-        Log::info('Payment cancel callback received', $request->all());
-
-        try {
-            $orderId = $request->order_id;
-            
-            // Find transaction
-            $transaction = Transaction::where('order_id', $orderId)->first();
-            if ($transaction) {
-                DB::beginTransaction();
-                try {
-                    // Update transaction status
-                    $transaction->payment_status = 'cancelled';
-                    $transaction->transaction_status = 'cancel';
-                    $transaction->save();
-
-                    // Update booking status if exists
-                    $booking = Booking::find($transaction->booking_id);
-                    if ($booking) {
-                        $booking->payment_status = 'cancelled';
-                        $booking->status = 'cancelled';
-                        $booking->save();
-
-                        DB::commit();
-                        return redirect()->route('landing', ['panel' => 'transactions'])
-                            ->with('warning', 'Pembayaran dibatalkan.');
-                    }
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    Log::error('Failed to update cancel status: ' . $e->getMessage());
-                    throw $e;
-                }
-            }
-
-            return redirect()->route('landing', ['panel' => 'transactions'])
-                ->with('warning', 'Pembayaran dibatalkan.');
-
-        } catch (\Exception $e) {
-            Log::error('Error in payment cancel handler: ' . $e->getMessage());
-            return redirect()->route('landing', ['panel' => 'transactions'])
-                ->with('error', 'Terjadi kesalahan dalam membatalkan pembayaran.');
-        }
+        return redirect()->route('landing')
+            ->with('error', 'Payment has been cancelled.');
     }
 } 

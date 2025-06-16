@@ -101,7 +101,8 @@ class RoomController extends Controller
             'price_per_night' => 'required|string|min:1',
             'capacity' => 'required|integer|min:1',
             'description' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'status' => 'required|in:available,maintenance'
         ]);
 
         $oldRoom = $room->replicate();
@@ -135,7 +136,8 @@ class RoomController extends Controller
             'type' => $validated['type'],
             'description' => $validated['description'],
             'price_per_night' => $price,
-            'capacity' => $validated['capacity']
+            'capacity' => $validated['capacity'],
+            'status' => $validated['status']
         ];
 
         if (isset($validated['image'])) {

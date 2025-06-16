@@ -66,6 +66,9 @@ use Carbon\Carbon;
                             </thead>
                             <tbody class="divide-y divide-[#FFA040]">
                                 @forelse($bookings as $booking)
+                                    @php
+                                        $transaction = $booking->transactions->sortByDesc('created_at')->first();
+                                    @endphp
                                     <tr class="hover:bg-[#FFA040]/10 transition-colors duration-200">
                                         <td class="px-6 py-4 whitespace-nowrap text-white">
                                             <div class="text-sm text-white">{{ $booking->full_name }}</div>
@@ -79,40 +82,40 @@ use Carbon\Carbon;
                                             @endforeach
                                         </td>
                                         <td class="px-6 py-4 text-white">
-                                            <div class="text-sm text-white">Rp {{ number_format($booking->transaction->gross_amount ?? $booking->total_price, 0, ',', '.') }}</div>
-                                            <div class="text-sm text-gray-400">Order #{{ $booking->transaction->order_id }}</div>
-                                            <div class="text-sm text-gray-400">Trans ID: {{ $booking->transaction->transaction_id }}</div>
-                                            @if($booking->transaction && $booking->transaction->payment_type)
+                                            <div class="text-sm text-white">Rp {{ number_format($transaction->gross_amount ?? $booking->total_price, 0, ',', '.') }}</div>
+                                            <div class="text-sm text-gray-400">Order #{{ $transaction->order_id }}</div>
+                                            <div class="text-sm text-gray-400">Trans ID: {{ $transaction->transaction_id }}</div>
+                                            @if($transaction && $transaction->payment_type)
                                                 <div class="mt-1 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/50">
-                                                    {{ $booking->transaction->payment_type === 'bank_transfer' ? 'BCA Virtual Account' : ucfirst($booking->transaction->payment_type) }}
-                                                    @if($booking->transaction->payment_code)
-                                                        {{ $booking->transaction->payment_code }}
+                                                    {{ $transaction->payment_type === 'bank_transfer' ? 'BCA Virtual Account' : ucfirst($transaction->payment_type) }}
+                                                    @if($transaction->payment_code)
+                                                        {{ $transaction->payment_code }}
                                                     @endif
                                                 </div>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($booking->transaction)
+                                            @if($transaction)
                                                 @php
-                                                    $deadline = $booking->transaction->payment_deadline;
+                                                    $deadline = $transaction->payment_deadline;
                                                     $now = now();
                                                     $remainingSeconds = $deadline ? $now->diffInSeconds($deadline, false) : 0;
                                                     $remainingMinutes = floor($remainingSeconds / 60);
                                                     $remainingSecondsDisplay = $remainingSeconds % 60;
                                                     
-                                                    $status = match($booking->transaction->transaction_status) {
+                                                    $status = match($transaction->transaction_status) {
                                                         'settlement', 'capture' => 'paid',
                                                         'pending' => ($deadline && $remainingSeconds <= 0) ? 'expired' : 'pending',
                                                         'expire' => 'expired',
                                                         'cancel', 'deny' => 'cancelled',
-                                                        default => $booking->transaction->transaction_status
+                                                        default => $transaction->transaction_status
                                                     };
                                                 @endphp
                                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-lg
                                                     {{ $status === 'paid' ? 'bg-green-500/10 text-green-400 border border-green-500/50' : '' }}
                                                     {{ $status === 'pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/50' : '' }}
                                                     {{ $status === 'expired' ? 'bg-red-500/10 text-red-400 border border-red-500/50' : '' }}
-                                                    {{ $status === 'cancelled' ? 'bg-gray-500/10 text-gray-400 border border-gray-500/50' : '' }}">
+                                                    {{ $status === 'cancelled' ? 'bg-gray-500/10 text-red-400 border border-red-500/50' : '' }}">
                                                     {{ ucfirst($status) }}
                                                 </span>
                                                 @if($status === 'pending' && $deadline)
@@ -123,7 +126,7 @@ use Carbon\Carbon;
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                            {{ $booking->transaction ? ($booking->transaction->transaction_time ?? $booking->transaction->created_at->format('d M Y H:i')) : '-' }}
+                                            {{ $transaction ? ($transaction->transaction_time ?? $transaction->created_at->format('d M Y H:i')) : '-' }}
                                         </td>
                                     </tr>
                                 @empty
@@ -198,29 +201,18 @@ use Carbon\Carbon;
     margin: 0 2px;
     min-width: 36px;
     min-height: 36px;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 500;
-    transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+    transition: all 0.2s;
 }
-.pagination nav a:hover,
-.pagination nav a:focus {
+.pagination nav a:hover {
     background: #FFA040 !important;
     color: #232323 !important;
-    border-color: #FFA040 !important;
 }
-.pagination nav .active span,
-.pagination nav li.active span {
+.pagination nav .active span {
     background: #FFA040 !important;
     color: #232323 !important;
-    border-color: #FFA040 !important;
-}
-.pagination nav .disabled span,
-.pagination nav li.disabled span {
-    background: #232323 !important;
-    color: #888 !important;
-    border-color: #444 !important;
-    cursor: not-allowed !important;
 }
 </style> 

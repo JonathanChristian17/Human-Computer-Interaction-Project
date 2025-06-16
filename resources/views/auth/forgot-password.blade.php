@@ -1,5 +1,5 @@
 @extends('layouts.auth')
-@section('title', 'Lupa Password')
+@section('title', 'Forgot Password')
 @section('content')
     <!-- Logo dan Title -->
     <a href="/" class="absolute top-6 left-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -7,8 +7,8 @@
         <h1 class="text-xl font-bold text-white">Cahaya Resort</h1>
     </a>
 
-    <h2>Lupa Password?</h2>
-    <p class="mb-4">Masukkan email Anda untuk menerima kode verifikasi</p>
+    <h2>Forgot Password?</h2>
+    <p class="mb-4">Enter your email to receive a verification code</p>
     @if($errors->any())
         <div id="floating-alert" class="fixed top-6 right-6 z-50 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in">
             <ul class="list-disc pl-5">
@@ -29,9 +29,9 @@
             <input id="email" name="email" type="email" class="input" required autocomplete="email" value="{{ old('email') }}" />
             <label class="user-label">Email</label>
         </div>
-        <button type="submit" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">Kirim Kode Verifikasi</button>
+        <button type="submit" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">Send Verification Code</button>
         <div class="text-center mt-4">
-            <a href="{{ route('login') }}" class="lost-password">Kembali ke halaman login</a>
+            <a href="{{ route('login') }}" class="lost-password">Back to login page</a>
         </div>
     </form>
     <style>

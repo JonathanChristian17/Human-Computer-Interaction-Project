@@ -176,17 +176,17 @@ class TransactionController extends Controller
                 throw new \Exception('This transaction cannot be cancelled.');
             }
 
-            // Update transaction status
+            // Update transaction status using constants
             $transaction->update([
-                'transaction_status' => 'cancel',
-                'payment_status' => 'cancelled'
+                'transaction_status' => Transaction::STATUS_CANCEL,
+                'payment_status' => Transaction::PAYMENT_CANCELLED
             ]);
 
-            // Update booking status
+            // Update booking status using constants
             $booking = $transaction->booking;
             $booking->update([
-                'status' => 'cancelled',
-                'payment_status' => 'cancelled'
+                'status' => Booking::STATUS_CANCELLED,
+                'payment_status' => Booking::PAYMENT_CANCELLED
             ]);
 
             // Release the room reservation if any

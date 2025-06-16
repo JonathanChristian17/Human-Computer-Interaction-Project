@@ -1,5 +1,5 @@
 @extends('layouts.auth')
-@section('title', 'Verifikasi Kode')
+@section('title', 'Verify Code')
 @section('content')
     <!-- Logo dan Title -->
     <a href="/" class="absolute top-6 left-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -7,8 +7,8 @@
         <h1 class="text-xl font-bold text-white">Cahaya Resort</h1>
     </a>
 
-    <h2>Verifikasi Kode</h2>
-    <p class="mb-4">Masukkan kode verifikasi yang telah kami kirim ke email Anda</p>
+    <h2>Verify Code</h2>
+    <p class="mb-4">Enter the verification code we sent to your email</p>
     @if($errors->any())
         <div id="floating-alert" class="fixed top-6 right-6 z-50 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in">
             <ul class="list-disc pl-5">
@@ -28,11 +28,11 @@
         <input type="hidden" name="email" value="{{ session('reset_email') }}">
         <div class="nebula-input">
             <input id="code" name="code" type="text" class="input" required maxlength="6" placeholder="000000" />
-            <label class="user-label">Kode Verifikasi</label>
+            <label class="user-label">Verification Code</label>
         </div>
-        <button type="submit" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">Verifikasi Kode</button>
+        <button type="submit" class="mt-4 w-full py-3 text-white font-semibold rounded-lg transition-colors duration-200" style="background-color: #FFA040; font-family:'Poppins',sans-serif;" onmouseover="this.style.backgroundColor='#ff8c1a'" onmouseout="this.style.backgroundColor='#FFA040'">Verify Code</button>
         <div class="text-center mt-4">
-            <a href="{{ route('login') }}" class="lost-password">Kembali ke halaman login</a>
+            <a href="{{ route('login') }}" class="lost-password">Back to login page</a>
         </div>
     </form>
     <style>

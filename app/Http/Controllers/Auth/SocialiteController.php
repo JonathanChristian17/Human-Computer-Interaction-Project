@@ -27,32 +27,32 @@ class SocialiteController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
             
-            // Log data yang diterima dari Google
+            // Log received data from Google
             Log::info('Google User Data:', [
                 'id' => $googleUser->id,
                 'email' => $googleUser->email,
                 'name' => $googleUser->name
             ]);
 
-            // Cari user berdasarkan google_id atau email
+            // Find user by google_id or email
             $user = User::where('google_id', $googleUser->id)
                        ->orWhere('email', $googleUser->email)
                        ->first();
 
             if (!$user) {
-                // Buat user baru
+                // Create new user
                 $user = User::create([
                     'name' => $googleUser->name,
                     'email' => $googleUser->email,
                     'google_id' => $googleUser->id,
                     'password' => bcrypt(Str::random(16)),
                     'email_verified_at' => now(),
-                    'role' => 'customer' // Tambahkan role default
+                    'role' => 'customer' // Add default role
                 ]);
 
                 Log::info('New User Created:', ['user_id' => $user->id]);
-            } else if (!$user->google_id) {
-                // Update google_id untuk user yang sudah ada
+            
+                // Update google_id for existing user
                 $user->update([
                     'google_id' => $googleUser->id,
                     'email_verified_at' => now()
@@ -66,8 +66,24 @@ class SocialiteController extends Controller
 
             if (Auth::check()) {
                 Log::info('User successfully logged in:', ['user_id' => Auth::id()]);
-                return redirect()->intended('/dashboard')
-                               ->with('status', 'Berhasil login dengan Google!');
+                
+                // Add welcome message similar to direct login
+                $welcomeMessage = 'Welcome back, ' . $user->name . '!';
+                
+                if ($user->role === 'admin') {
+                    return redirect()->intended(route('admin.dashboard'))
+                        ->with('success', $welcomeMessage);
+                }
+
+                if ($user->role === 'receptionist') {
+                    return redirect()->intended(route('receptionist.dashboard'))
+                        ->with('success', $welcomeMessage);
+                }
+
+                // For regular users, redirect to landing page
+                return redirect()->route('landing')
+                    ->with('success', $welcomeMessage)
+                    ->with('login_success', true);
             } else {
                 Log::error('Failed to login user after social authentication');
                 throw new Exception('Failed to login user');
@@ -80,7 +96,7 @@ class SocialiteController extends Controller
             ]);
 
             return redirect()->route('login')
-                           ->with('error', 'Terjadi kesalahan saat login dengan Google. Silakan coba lagi. Error: ' . $e->getMessage());
+                ->with('error', 'An error occurred while logging in with Google. Please try again.');
         }
     }
 } 

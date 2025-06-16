@@ -1,10 +1,10 @@
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-[#FFA040] leading-tight">
+            <h2 class="font-semibold text-xl text-[#FFA500] leading-tight">
                 {{ __('Add New User') }}
             </h2>
-            <a href="{{ route('admin.users.index') }}" class="px-4 py-2 bg-[#1D1D1D] text-white rounded-lg hover:bg-[#2D2D2D] transition-colors duration-200 border border-[#FFA040] flex items-center">
+            <a href="{{ route('admin.users.index') }}" class="px-4 py-2 bg-[#2A2A2A] text-[#E0E0E0] rounded-lg hover:bg-[#333333] transition-colors duration-200 border border-[#333333] flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -15,11 +15,11 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#252525] overflow-hidden shadow-sm sm:rounded-lg border border-[#FFA040]">
+            <div class="bg-[#1F1F1F] overflow-hidden shadow-sm sm:rounded-lg border border-[#333333]">
                 <div class="p-6">
                     @if ($errors->any())
                         <div class="mb-4">
-                            <ul class="list-disc list-inside text-sm text-red-600">
+                            <ul class="list-disc list-inside text-sm text-red-400">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -31,12 +31,12 @@
 
                         <!-- Name -->
                         <div>
-                            <label for="name" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                            <label for="name" class="block text-sm font-semibold text-[#E0E0E0] mb-2 flex items-center">
                                 {{ __('Name') }}
-                                <span class="text-red-500 ml-1">*</span>
+                                <span class="text-red-400 ml-1">*</span>
                             </label>
                             <input id="name" 
-                                class="w-full px-5 py-3 bg-[#1D1D1D] border border-[#FFA040] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFA040] focus:border-transparent transition shadow-sm" 
+                                class="w-full px-5 py-3 bg-[#2A2A2A] border border-[#333333] rounded-lg text-[#E0E0E0] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:border-transparent transition shadow-sm" 
                                 type="text" 
                                 name="name" 
                                 value="{{ old('name') }}"
@@ -48,12 +48,12 @@
 
                         <!-- Email -->
                         <div class="mt-6">
-                            <label for="email" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                            <label for="email" class="block text-sm font-semibold text-[#E0E0E0] mb-2 flex items-center">
                                 {{ __('Email') }}
-                                <span class="text-red-500 ml-1">*</span>
+                                <span class="text-red-400 ml-1">*</span>
                             </label>
                             <input id="email" 
-                                class="w-full px-5 py-3 bg-[#1D1D1D] border border-[#FFA040] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFA040] focus:border-transparent transition shadow-sm" 
+                                class="w-full px-5 py-3 bg-[#2A2A2A] border border-[#333333] rounded-lg text-[#E0E0E0] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:border-transparent transition shadow-sm" 
                                 type="email" 
                                 name="email" 
                                 value="{{ old('email') }}"
@@ -64,12 +64,12 @@
 
                         <!-- Password -->
                         <div class="mt-6 relative">
-                            <label for="password" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                            <label for="password" class="block text-sm font-semibold text-[#E0E0E0] mb-2 flex items-center">
                                 {{ __('Password') }}
-                                <span class="text-red-500 ml-1">*</span>
+                                <span class="text-red-400 ml-1">*</span>
                             </label>
                             <input id="password" 
-                                class="w-full px-5 py-3 bg-[#1D1D1D] border border-[#FFA040] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFA040] focus:border-transparent transition shadow-sm"
+                                class="w-full px-5 py-3 bg-[#2A2A2A] border border-[#333333] rounded-lg text-[#E0E0E0] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:border-transparent transition shadow-sm"
                                 type="password"
                                 name="password"
                                 placeholder="Enter password"
@@ -79,8 +79,8 @@
                                 oninput="checkPasswordRequirements()" />
                             <x-input-error :messages="$errors->get('password')" class="mt-2" />
                             <div id="password-requirements"
-                                 class="hidden absolute left-0 top-full mt-2 w-full z-20 bg-[#232323] border border-[#FFA040] rounded-lg p-4 text-sm text-white shadow-lg">
-                                <div class="mb-2 font-semibold text-[#FFA040]">Password harus mengandung:</div>
+                                 class="hidden absolute left-0 top-full mt-2 w-full z-20 bg-[#2A2A2A] border border-[#333333] rounded-lg p-4 text-sm text-[#E0E0E0] shadow-lg">
+                                <div class="mb-2 font-semibold text-[#FFA500]">Password harus mengandung:</div>
                                 <ul>
                                     <li id="pw-length" class="flex items-center mb-1"><span class="mr-2">&#10060;</span> Minimal 8 karakter</li>
                                     <li id="pw-uppercase" class="flex items-center mb-1"><span class="mr-2">&#10060;</span> Huruf kapital</li>
@@ -92,12 +92,12 @@
 
                         <!-- Confirm Password -->
                         <div class="mt-6">
-                            <label for="password_confirmation" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                            <label for="password_confirmation" class="block text-sm font-semibold text-[#E0E0E0] mb-2 flex items-center">
                                 {{ __('Confirm Password') }}
-                                <span class="text-red-500 ml-1">*</span>
+                                <span class="text-red-400 ml-1">*</span>
                             </label>
                             <input id="password_confirmation" 
-                                class="w-full px-5 py-3 bg-[#1D1D1D] border border-[#FFA040] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFA040] focus:border-transparent transition shadow-sm"
+                                class="w-full px-5 py-3 bg-[#2A2A2A] border border-[#333333] rounded-lg text-[#E0E0E0] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:border-transparent transition shadow-sm"
                                 type="password"
                                 name="password_confirmation"
                                 placeholder="Confirm password"
@@ -107,12 +107,12 @@
 
                         <!-- Phone -->
                         <div class="mt-6">
-                            <label for="phone" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                            <label for="phone" class="block text-sm font-semibold text-[#E0E0E0] mb-2 flex items-center">
                                 {{ __('Phone') }}
-                                <span class="text-red-500 ml-1">*</span>
+                                <span class="text-red-400 ml-1">*</span>
                             </label>
                             <input id="phone" 
-                                class="w-full px-5 py-3 bg-[#1D1D1D] border border-[#FFA040] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFA040] focus:border-transparent transition shadow-sm"
+                                class="w-full px-5 py-3 bg-[#2A2A2A] border border-[#333333] rounded-lg text-[#E0E0E0] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:border-transparent transition shadow-sm"
                                 type="text"
                                 name="phone"
                                 value="{{ old('phone') }}"
@@ -123,12 +123,12 @@
 
                         <!-- Address -->
                         <div class="mt-6">
-                            <label for="address" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                            <label for="address" class="block text-sm font-semibold text-[#E0E0E0] mb-2 flex items-center">
                                 {{ __('Address') }}
-                                <span class="text-red-500 ml-1">*</span>
+                                <span class="text-red-400 ml-1">*</span>
                             </label>
                             <input id="address" 
-                                class="w-full px-5 py-3 bg-[#1D1D1D] border border-[#FFA040] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFA040] focus:border-transparent transition shadow-sm"
+                                class="w-full px-5 py-3 bg-[#2A2A2A] border border-[#333333] rounded-lg text-[#E0E0E0] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:border-transparent transition shadow-sm"
                                 type="text"
                                 name="address"
                                 value="{{ old('address') }}"
@@ -139,14 +139,14 @@
 
                         <!-- Role -->
                         <div class="mt-6">
-                            <label for="role" class="block text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                            <label for="role" class="block text-sm font-semibold text-[#E0E0E0] mb-2 flex items-center">
                                 {{ __('Role') }}
-                                <span class="text-red-500 ml-1">*</span>
+                                <span class="text-red-400 ml-1">*</span>
                             </label>
                             <select id="role" 
                                 name="role" 
                                 required
-                                class="w-full px-5 py-3 bg-[#1D1D1D] border border-[#FFA040] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFA040] focus:border-transparent transition shadow-sm">
+                                class="w-full px-5 py-3 bg-[#2A2A2A] border border-[#333333] rounded-lg text-[#E0E0E0] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:border-transparent transition shadow-sm">
                                 <option value="">Select role</option>
                                 <option value="customer">Customer</option>
                                 <option value="receptionist">Receptionist</option>
@@ -155,13 +155,16 @@
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />
                         </div>
 
-                        <div class="flex items-center justify-end mt-8 pt-4 border-t border-[#FFA040]">
-                            <x-secondary-button type="button" onclick="window.location.href='{{ route('admin.users.index') }}'" class="mr-3">
+                        <div class="flex items-center justify-end mt-8 pt-4 border-t border-[#333333]">
+                            <button type="button" 
+                                onclick="window.location.href='{{ route('admin.users.index') }}'" 
+                                class="px-4 py-2 bg-[#2A2A2A] text-[#E0E0E0] rounded-lg hover:bg-[#333333] transition-colors duration-200 border border-[#333333] mr-3">
                                 {{ __('Cancel') }}
-                            </x-secondary-button>
-                            <x-primary-button>
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-[#FFA500] text-white rounded-lg hover:bg-[#ff8c1a] transition-colors duration-200">
                                 {{ __('Create User') }}
-                            </x-primary-button>
+                            </button>
                         </div>
                     </form>
                 </div>

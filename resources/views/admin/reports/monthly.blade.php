@@ -80,10 +80,14 @@
                                     <td class="py-2 px-4 border border-[#FFA040]">{{ $booking->check_out_date }}</td>
                                     <td class="py-2 px-4 border border-[#FFA040]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</td>
                                     <td class="py-2 px-4 border border-[#FFA040]">
-                                        <span class="px-2 py-1 rounded text-sm font-semibold"
-                                            @if($booking->status === 'confirmed') style="background-color: #16a34a; color: #fff;" @endif
-                                            @if($booking->status === 'pending') style="background-color: #FFA040; color: #000;" @endif
-                                            @if($booking->status === 'cancelled') style="background-color: #dc2626; color: #fff;" @endif>
+                                        <span class="px-3 py-1 rounded-full text-sm font-semibold"
+                                            @if($booking->status === 'confirmed') style="background-color: #16a34a; color: #fff;"
+                                            @elseif($booking->status === 'pending') style="background-color: #FFA040; color: #000;"
+                                            @elseif($booking->status === 'cancelled' || $booking->status === 'expired') style="background-color: #dc2626; color: #fff;"
+                                            @elseif($booking->status === 'checked_in' || $booking->status === 'check_in') style="background-color: #2563eb; color: #fff;"
+                                            @elseif($booking->status === 'checked_out' || $booking->status === 'check_out') style="background-color: #9E9E9E; color: #fff;"
+                                            @elseif($booking->status === 'deposit') style="background-color: #9333ea; color: #fff;"
+                                            @endif>
                                             {{ ucfirst($booking->status) }}
                                         </span>
                                     </td>
@@ -98,6 +102,52 @@
                             @endforelse
                         </tbody>
                     </table>
+                    <!-- Pagination -->
+                    @if($bookings->hasPages())
+                        <div class="mt-4 px-4">
+                            <div class="flex items-center justify-between">
+                                <!-- Previous Page -->
+                                @if($bookings->onFirstPage())
+                                    <span class="px-4 py-2 text-white bg-[#1D1D1D] border border-[#FFA040] rounded-md opacity-50 cursor-not-allowed">
+                                        Previous
+                                    </span>
+                                @else
+                                    <a href="{{ $bookings->previousPageUrl() }}" 
+                                       class="px-4 py-2 text-white bg-[#1D1D1D] border border-[#FFA040] rounded-md hover:bg-[#FFA040] hover:text-black transition-colors duration-200">
+                                        Previous
+                                    </a>
+                                @endif
+
+                                <!-- Page Numbers -->
+                                <div class="flex items-center">
+                                    @foreach($bookings->getUrlRange(max($bookings->currentPage() - 2, 1), min($bookings->currentPage() + 2, $bookings->lastPage())) as $page => $url)
+                                        @if($page == $bookings->currentPage())
+                                            <span class="mx-1 px-4 py-2 text-black bg-[#FFA040] rounded-md">
+                                                {{ $page }}
+                                            </span>
+                                        @else
+                                            <a href="{{ $url }}" 
+                                               class="mx-1 px-4 py-2 text-white bg-[#1D1D1D] border border-[#FFA040] rounded-md hover:bg-[#FFA040] hover:text-black transition-colors duration-200">
+                                                {{ $page }}
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+
+                                <!-- Next Page -->
+                                @if($bookings->hasMorePages())
+                                    <a href="{{ $bookings->nextPageUrl() }}" 
+                                       class="px-4 py-2 text-white bg-[#1D1D1D] border border-[#FFA040] rounded-md hover:bg-[#FFA040] hover:text-black transition-colors duration-200">
+                                        Next
+                                    </a>
+                                @else
+                                    <span class="px-4 py-2 text-white bg-[#1D1D1D] border border-[#FFA040] rounded-md opacity-50 cursor-not-allowed">
+                                        Next
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 

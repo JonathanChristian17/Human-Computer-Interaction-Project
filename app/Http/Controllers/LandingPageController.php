@@ -15,8 +15,7 @@ class LandingPageController extends Controller
             ->pluck('type')
             ->toArray();
 
-        $rooms = Room::where('status', 'available')
-                    ->select('id', 'name', 'price_per_night', 'capacity', 'image')
+        $rooms = Room::select('id', 'name', 'price_per_night', 'capacity', 'image', 'type', 'status')
                     ->get()
                     ->map(function($room) {
                         // Jika image kosong atau null, gunakan default image
